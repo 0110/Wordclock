@@ -154,20 +154,26 @@ function normalOperation()
         
         tmr.alarm(2, 500, 0 ,function()
             syncTimeFromInternet()
+            displayTime()
         end)
         tmr.alarm(3, 2000, 0 ,function()
-		if (startTelnetServer ~= nil) then
-			startTelnetServer()
-		else
-			print("NO Telent found")
-		end
+    		if (startTelnetServer ~= nil) then
+    			startTelnetServer()
+    		else
+    			print("NO Telent found")
+    		end
         end)
-        displayTime()
         -- Start the time Thread
         tmr.alarm(1, 10000, 1 ,function()
              displayTime()
              collectgarbage()
          end)
+         
+        -- sync the time every 5 minutes
+        tmr.alarm(4, 300000, 1 ,function()
+            syncTimeFromInternet()
+            displayTime()
+        end)
         
       end
       -- when no wifi available, open an accesspoint and ask the user
