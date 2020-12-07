@@ -42,6 +42,7 @@ function syncTimeFromInternet()
      end
    )
 end
+
 briPercent = 50
 function displayTime()
      local sec, usec = rtctime.get()
@@ -146,7 +147,7 @@ function normalOperation()
         print('IP: ',wifi.sta.getip())
         -- Here the WLAN is found, and something is done
         print("Solving dependencies")
-        local dependModules = { "timecore" , "wordclock", "telnet" }
+        local dependModules = { "timecore" , "wordclock", "telnet", "mqtt" }
         for _,mod in pairs(dependModules) do
             print("Loading " .. mod)
             mydofile(mod)
@@ -154,7 +155,6 @@ function normalOperation()
         
         tmr.alarm(2, 500, 0 ,function()
             syncTimeFromInternet()
-            displayTime()
         end)
         tmr.alarm(3, 2000, 0 ,function()
     		if (startTelnetServer ~= nil) then
