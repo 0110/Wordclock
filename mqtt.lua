@@ -34,14 +34,17 @@ function startMqtt()
     end)
 end
 
-if (mqttServer ~= nil and mqttPrefix ~= nil) then
-    startMqtt()
-    print "Started MQTT client"
-    oldBrightness=0
-    tmr.alarm(5, 10000, 1 ,function()
-        if (oldBrightness ~= briPercent) then
-         m:publish(mqttPrefix .. "/brightness", tostring(briPercent), 0, 0)
-        end
-        oldBrightness = briPercent
-    end)
+function startMqttClient()
+    if (mqttServer ~= nil and mqttPrefix ~= nil) then
+        startMqtt()
+        print "Started MQTT client"
+        oldBrightness=0
+        tmr.alarm(5, 10000, 1 ,function()
+            if (oldBrightness ~= briPercent) then
+             m:publish(mqttPrefix .. "/brightness", tostring(briPercent), 0, 0)
+             m:publish(mqttPrefix .. "/heap", tostring(node.heap()), 0, 0)
+            end
+            oldBrightness = briPercent
+        end)
+    end
 end

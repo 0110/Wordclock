@@ -31,16 +31,20 @@ end
 
 
 function syncTimeFromInternet()
---ptbtime1.ptb.de
+  if (syncRunning == nil) then
+    syncRunning=true
     sntp.sync(sntpserverhostname,
      function(sec,usec,server)
       print('sync', sec, usec, server)
       displayTime()
+      syncRunning=nil
      end,
      function()
        print('failed!')
+       syncRunning=nil
      end
    )
+  end
 end
 
 briPercent = 50
@@ -155,25 +159,34 @@ function normalOperation()
             print("Loading " .. mod)
             mydofile(mod)
         end
-        
-        tmr.alarm(2, 500, 0 ,function()
-            syncTimeFromInternet()
-        end)
-        tmr.alarm(3, 2000, 0 ,function()
-    		if (startTelnetServer ~= nil) then
-    			startTelnetServer()
-    		else
-    			print("NO Telent found")
-    		end
-        end)
-        -- Start the time Thread
+
+        setupCounter=5
         tmr.alarm(1, 5000, 1 ,function()
-             displayTime()
-             collectgarbage()
-         end)
+            if (setupCounter > 4) then
+                syncTimeFromInternet()
+                setupCounter=setupCounter-1
+            elseif (setupCounter > 3) then
+                if (startTelnetServer ~= nil) then
+                    startTelnetServer()
+                else
+                    print("NO Telent found")
+                end
+                setupCounter=setupCounter-1
+            elseif (setupCounter > 2) then
+                if (startMqttClient ~= nil) then
+                    startMqttClient()
+                else
+                    print("NO Mqtt found")
+                end
+                setupCounter=setupCounter-1
+            else
+                displayTime()
+            end
+            collectgarbage()
+        end)
          
         -- sync the time every 5 minutes
-        tmr.alarm(4, 300000, 1 ,function()
+        tmr.alarm(2, 300000, 1 ,function()
             syncTimeFromInternet()
             displayTime()
         end)
@@ -198,7 +211,7 @@ ws2812.init() -- WS2812 LEDs initialized on GPIO2
 if ( file.open("config.lua") ) then
     --- Normal operation
     wifi.setmode(wifi.STATION)
-    dofile("config.lua")
+    mydofile("config")
     normalOperation()
 else
     -- Logic for inital setup
@@ -217,6 +230,7 @@ tmr.alarm(4, 500, 1 ,function()
         ws2812.write(ledBuf)
         if (btnCounter >= 110) then
             file.remove("config.lua")
+            file.remove("config.lc")
             node.restart()
         end
      end
