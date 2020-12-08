@@ -9,16 +9,13 @@ function startMqtt()
         if (data == "ON") then
           briPercent=100
           m:publish(mqttPrefix .. "/clock", "ON", 0, 0)
-          displayTime()
         elseif (data == "OFF") then
           briPercent=0
           m:publish(mqttPrefix .. "/clock", "OFF", 0, 0)
-          displayTime()
         else
           if (tonumber(data) >= 0 and tonumber(data) <= 100) then
             briPercent=tonumber(data)
             m:publish(mqttPrefix .. "/clock", tostring(data), 0, 0)
-            displayTime()
           end
         end
       end
