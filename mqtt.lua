@@ -9,13 +9,16 @@ function startMqtt()
         if (data == "ON") then
           briPercent=100
           m:publish(mqttPrefix .. "/clock", "ON", 0, 0)
+          displayTime()
         elseif (data == "OFF") then
           briPercent=0
           m:publish(mqttPrefix .. "/clock", "OFF", 0, 0)
+          displayTime()
         else
           if (tonumber(data) >= 0 and tonumber(data) <= 100) then
             briPercent=tonumber(data)
             m:publish(mqttPrefix .. "/clock", tostring(data), 0, 0)
+            displayTime()
           end
         end
       end
@@ -37,8 +40,11 @@ end
 if (mqttServer ~= nil and mqttPrefix ~= nil) then
     startMqtt()
     print "Started MQTT client"
-
-    tmr.alarm(5, 30000, 1 ,function()
+    oldBrightness=0
+    tmr.alarm(5, 10000, 1 ,function()
+        if (oldBrightness <> briPercent) then
          m:publish(mqttPrefix .. "/brightness", tostring(briPercent), 0, 0)
+        end
+        oldBrightness = briPercent
     end)
 end

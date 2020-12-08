@@ -54,6 +54,9 @@ function displayTime()
      local words = display_timestat(time.hour, time.minute)
      if ((dim ~= nil) and (dim == "on")) then
         words.briPercent=briPercent
+        if (words.briPercent ~= nil and words.briPercent < 3) then
+          words.briPercent=3
+        end
      else
         words.briPercent=nil
      end
@@ -164,7 +167,7 @@ function normalOperation()
     		end
         end)
         -- Start the time Thread
-        tmr.alarm(1, 10000, 1 ,function()
+        tmr.alarm(1, 5000, 1 ,function()
              displayTime()
              collectgarbage()
          end)
