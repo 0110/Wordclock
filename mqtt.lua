@@ -42,7 +42,7 @@ if (mqttServer ~= nil and mqttPrefix ~= nil) then
     print "Started MQTT client"
     oldBrightness=0
     tmr.alarm(5, 10000, 1 ,function()
-        if (oldBrightness <> briPercent) then
+        if (oldBrightness ~= briPercent) then
          m:publish(mqttPrefix .. "/brightness", tostring(briPercent), 0, 0)
         end
         oldBrightness = briPercent
