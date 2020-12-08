@@ -188,6 +188,10 @@ function normalOperation()
     
 end
 
+function stopWordclock()
+    for i=0,5,1 do tmr.stop(i) end
+end
+
 -------------------main program -----------------------------
 ws2812.init() -- WS2812 LEDs initialized on GPIO2
 
