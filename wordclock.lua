@@ -64,7 +64,7 @@ function display_timestat(hours, minutes, longmode)
     ret.before=1
    elseif (minutes==9) then
     -- Hande if three quater or quater before is displayed
-    if (threequater ~= nil) then
+    if ((threequater ~= nil) and (threequater==true or threequater=="on")) then
         ret.threequater=1
     else
         ret.quater = 1

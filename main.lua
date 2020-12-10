@@ -72,9 +72,9 @@ function displayTime()
             invertRows=true
         end 
         displayword.generateLEDs(words, color, color1, color2, color3, color4, invertRows)
-	if (displayword.data.drawnCharacters ~= nil) then
+	    if (displayword.data.drawnCharacters ~= nil) then
           ledBuf = displayword.generateLEDs(words, color, color1, color2, color3, color4, invertRows, displayword.data.drawnCharacters)
-	end
+	    end
      end
      displayword = nil
      if (ledBuf ~= nil) then

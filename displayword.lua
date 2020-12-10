@@ -3,20 +3,20 @@ local M
 do
 local updateColor = function (data)
     if (data.amountOfChars > 0) then   
-	local div = tonumber(data.drawnCharacters/data.amountOfChars)
-	if (div < 1) then
-	    return data.colorFg
-	elseif (div < 2) then 
-	    return data.colorMin1
-	elseif (div < 3) then 
-	    return data.colorMin2
-	elseif (div < 4) then 
-	    return data.colorMin3
-	elseif (div < 5) then 
-	    return data.colorMin4
-	else
-	    return data.colorFg
-	end
+    	local div = tonumber(data.drawnCharacters/data.amountOfChars)
+    	if (div < 1) then
+    	    return data.colorFg
+    	elseif (div < 2) then 
+    	    return data.colorMin1
+    	elseif (div < 3) then 
+    	    return data.colorMin2
+    	elseif (div < 4) then 
+    	    return data.colorMin3
+    	elseif (div < 5) then 
+    	    return data.colorMin4
+    	else
+    	    return data.colorFg
+    	end
     else
 	    return data.colorFg
     end
