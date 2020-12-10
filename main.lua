@@ -186,7 +186,7 @@ function normalOperation()
         end)
          
         -- sync the time every 5 minutes
-        tmr.alarm(2, 300000, 1 ,function()
+        tmr.alarm(2, 300003, 1 ,function()
             syncTimeFromInternet()
             displayTime()
         end)
