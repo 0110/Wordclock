@@ -305,12 +305,77 @@ if (words.fiveMin== 1) then
   collectgarbage()
   return buf
 end
+
+-- Count amount of characters to display
+local countChars = function(words)
+    local characters = 0
+    for key,value in pairs(words) do 
+        if (value > 0) then
+          if (key == "it") then
+            characters = characters + 2
+          elseif (key == "is") then
+            characters = characters + 3
+          elseif (key == "fiveMin") then
+            characters = characters + 4
+          elseif (key == "tenMin") then
+            characters = characters + 4
+          elseif (key == "after") then
+            characters = characters + 4
+          elseif (key == "before") then
+            characters = characters + 3
+          elseif (key == "threeHour") then
+            characters = characters + 4
+          elseif (key == "quater") then
+            characters = characters + 7
+          elseif (key == "threequater") then
+            characters = characters + 11
+          elseif (key == "half") then
+            characters = characters + 4
+          elseif (key == "one") then
+            characters = characters + 3
+          elseif (key == "oneLong") then
+            characters = characters + 4
+          elseif (key == "two") then
+            characters = characters + 4
+          elseif (key == "three") then
+            characters = characters + 4
+          elseif (key == "four") then
+            characters = characters + 4
+          elseif (key == "five") then
+            characters = characters + 4
+          elseif (key == "six") then
+            characters = characters + 4
+          elseif (key == "seven") then
+            characters = characters + 6
+          elseif (key == "eight") then
+            characters = characters + 4
+          elseif (key == "nine") then
+            characters = characters + 4
+          elseif (key == "ten") then
+            characters = characters + 4
+          elseif (key == "eleven") then
+            characters = characters + 3
+          elseif (key == "twelve") then
+            characters = characters + 5
+          elseif (key == "twenty") then
+            characters = characters + 7
+          elseif (key == "clock") then
+            characters = characters + 3
+          elseif (key == "sr_nc") then
+            characters = characters + 3
+          end
+        end
+     end
+    return characters
+end
+
 M = {
     generateLEDs = generateLEDs,
     round        = round,
     drawLEDs     = drawLEDs,
     updateColor  = updateColor,
     data         = data,
+    countChars   = countChars
 }
 end
 displayword = M

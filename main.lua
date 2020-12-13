@@ -70,16 +70,14 @@ function displayTime()
         local invertRows=false
 	    if ((inv46 ~= nil) and (inv46 == "on")) then
             invertRows=true
-        end 
-        displayword.generateLEDs(words, color, color1, color2, color3, color4, invertRows)
-	    if (displayword.data.drawnCharacters ~= nil) then
-          ledBuf = displayword.generateLEDs(words, color, color1, color2, color3, color4, invertRows, displayword.data.drawnCharacters)
-	    end
+        end
+        local characters = displayword.countChars(words)
+        ledBuf = displayword.generateLEDs(words, color, color1, color2, color3, color4, invertRows, characters)
      end
      displayword = nil
      if (ledBuf ~= nil) then
      	  ws2812.write(ledBuf)
-	  else
+	 else
           if ((colorBg ~= nil) and (color ~= nil)) then
     		  ws2812.write(colorBg:rep(107) .. color:rep(3))
           else
