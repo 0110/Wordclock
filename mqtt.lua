@@ -1,3 +1,7 @@
+-- Global variable
+t=nil
+mqttConnected = false
+
 -- MQTT extension
 function startMqtt()
     m = mqtt.Client("wordclock", 120)
@@ -34,18 +38,50 @@ function startMqtt()
     end)
 end
 
+function readTemp()
+  if (t ~= nil) then
+    addrs=t.addrs()
+    -- Total DS18B20 numbers
+    sensors=table.getn(addrs)
+    local temp1=0
+    if (sensors >= 1) then
+        temp1=t.read(addrs[1])
+    end
+    return temp1
+  else
+    return nil
+  end
+end
+
 function startMqttClient()
     if (mqttServer ~= nil and mqttPrefix ~= nil) then
         startMqtt()
         print "Started MQTT client"
+        if (file.open("ds18b20.lc")) then
+          t=require("ds18b20")
+          t.setup(2) -- GPIO4
+          readTemp() -- read once, to setup chip
+          print "Setup temperature"
+        end
+        
         oldBrightness=0
+        oldTemp=0
         tmr.alarm(5, 5001, 1 ,function()
-            if (oldBrightness ~= briPercent) then
-             m:publish(mqttPrefix .. "/brightness", tostring(briPercent), 0, 0)
-            else
-             m:publish(mqttPrefix .. "/heap", tostring(node.heap()), 0, 0)
+            if (mqttConnected) then
+                local temp = nil
+                if (t ~= nil) then
+                    temp=readTemp()
+                end
+                if (oldBrightness ~= briPercent) then
+                 m:publish(mqttPrefix .. "/brightness", tostring(briPercent), 0, 0)
+                elseif (temp ~= nil and temp ~= oldTemp) then
+                 oldTemp = temp
+                 m:publish(mqttPrefix .. "/temp", tostring(temp), 0, 0)
+                else
+                 m:publish(mqttPrefix .. "/heap", tostring(node.heap()), 0, 0)
+                end
+                oldBrightness = briPercent
             end
-            oldBrightness = briPercent
         end)
     end
 end
