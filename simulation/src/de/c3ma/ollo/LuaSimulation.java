@@ -11,5 +11,7 @@ public interface LuaSimulation {
 
     public void rebootTriggered();
 
-    public void setSimulationTime(long timeInMillis);    
+    public void setSimulationTime(long timeInMillis);
+
+	public void setADC(int value);
 }

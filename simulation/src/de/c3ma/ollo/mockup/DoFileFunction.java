@@ -26,8 +26,6 @@ public class DoFileFunction extends OneArgFunction {
     public LuaValue call(LuaValue luaFilename) {
         String filename = luaFilename.checkjstring();
         
-        System.out.println("[Nodemcu] dofile " + filename);
-        
         File f = new File(workingDir.getAbsolutePath() + File.separator + filename);
         
         if (f.exists()) {

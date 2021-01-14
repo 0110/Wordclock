@@ -45,18 +45,9 @@ Please note that all settings are mandatory<br /><br />
 <table id="table-6">
 <tr><th><b>WIFI-SSID</b></th><td><input id="ssid" name="ssid" value="$SSID"></td><td>SSID of the wireless network</td></tr>
 <tr><th>WIFI-Password</th><td><input id="password" name="password"></td><td>Password of the wireless network</td></tr>
-<tr><th>SNTP Server</th><td><input id="sntpserver" name="sntpserver" value="$SNTPSERVER"></td><td>Server to sync the time with. Only one ntp server is allowed.</td></tr>
+<tr><th>SNTP Server</th><td><input id="sntpserver" name="sntpserver" value="$SNTPSERVER"></td><td>Server to sync the time with. Only one ntp server is allowed.</td></tr> 
 <tr><th>Offset to UTC time</th><td><input id="timezoneoffset" name="timezoneoffset" value="$TIMEOFFSET"></td><td>Define the offset to UTC time in hours. For example +1 hour for Germany</td></tr>
 <tr><th>Foreground Color</th><td><input type="color" name="fcolor" value="$HEXCOLORFG"></td><td>LED Color for all minutes, divisible by five</td></tr>
-<tr><th>Background Color</th><td><input type="color" name="bcolor" value="$HEXCOLORBG"></td><td>Background LED Color</td></tr>
-<tr><th>1. Minute Color</th><td><input type="color" name="colorMin1" value="$HEXCOLOR1"></td><td>First minute after</td></tr>
-<tr><th>2. Minute Color</th><td><input type="color" name="colorMin2" value="$HEXCOLOR2"></td><td>Second minute after</td></tr>
-<tr><th>3. Minute Color</th><td><input type="color" name="colorMin3" value="$HEXCOLOR3"></td><td>Third minute after</td></tr>
-<tr><th>4. Minute Color</th><td><input type="color" name="colorMin4" value="$HEXCOLOR4"></td><td>Fourth minute after</td></tr>
-
-<tr><th>Three quater</th><td><input type="checkbox" name="threequater" $THREEQUATER></td><td>Dreiviertel Joa/nei</td></tr>
-<tr><th>Invert lines 4-6</th><td><input type="checkbox" name="inv46" $THREEQUATER></td><td>invert</td></tr>
-
 <tr><td colspan="3"><div align="center"><input type="submit" value="Save Configuration" onclick="this.value='Submitting ..';this.disabled='disabled'; this.form.submit();"></div></td></tr>
 <tr><td colspan="3"><div align="center"><input type="submit" name="action" value="Reboot"></div></td></tr>
 </table>

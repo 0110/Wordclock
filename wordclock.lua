@@ -64,7 +64,7 @@ function display_timestat(hours, minutes, longmode)
     ret.before=1
    elseif (minutes==9) then
     -- Hande if three quater or quater before is displayed
-    if (threequater ~= nil) then
+    if ((threequater ~= nil) and (threequater==true or threequater=="on")) then
         ret.threequater=1
     else
         ret.quater = 1
@@ -135,103 +135,4 @@ function display_timestat(hours, minutes, longmode)
  end
  collectgarbage()
  return ret
-end
-
--- @fn display_countcharacters_de
--- Count the amount of characters, used to describe the current time in words
--- @param words the same structure, as generated with the function @see display_timestat
--- @return the amount of characters, used to describe the time or <code>0</code> on errors
-function display_countcharacters_de(words)
-   local amount=0
-   if (words.it == 1) then
-    amount = amount + 2
-   end
-   if (words.is == 1) then
-    amount = amount + 3
-   end
-   if (words.fiveMin == 1) then
-    amount = amount + 4
-   end
-   if (words.tenMin == 1) then
-    amount = amount + 4
-   end
-   if (words.twenty == 1) then
-    amount = amount + 7
-   end
-   if (words.threequater == 1) then
-    amount = amount + 11
-   end
-   if (words.quater == 1) then
-    amount = amount + 7
-   end
-   if (words.before == 1) then
-    amount = amount + 3
-   end
-   if (words.after == 1) then
-    amount = amount + 4
-   end
-   if (words.half == 1) then
-    amount = amount + 4
-   end
-   if (words.twelve == 1) then
-    amount = amount + 5
-   end
-   if (words.seven == 1) then
-    amount = amount + 6
-   end
-   if (words.one == 1) then
-    amount = amount + 3
-   end
-   if (words.oneLong == 1) then
-    amount = amount + 4
-   end
-   if (words.two == 1) then
-    amount = amount + 4
-   end
-   if (words.three == 1) then
-    amount = amount + 4
-   end
-   if (words.five == 1) then
-    amount = amount + 4
-   end
-   if (words.four == 1) then
-    amount = amount + 4
-   end
-   if (words.nine == 1) then
-    amount = amount + 4
-   end
-   if (words.eleven == 1) then
-    amount = amount + 3
-   end
-   if (words.eight == 1) then
-    amount = amount + 4
-   end
-   if (words.ten == 1) then
-    amount = amount + 4
-   end
-   if (words.clock == 1) then
-    amount = amount + 3
-   end
-   if (words.six == 1) then
-    amount = amount + 5
-   end
-
-   return amount 
-end
-
--- @fn display_countcharacters_de
--- Count the amount of words, used to describe the current time in words!
--- (min1 to min4 are ignored)
--- @param words the same structure, as generated with the function @see display_timestat
--- @return the amount of words, used to describe the time or <code>0</code> on errors
-function display_countwords_de(words)
- local amount = 0
- for k,v in pairs(words) do
-   if (v ~= nil and v == 1) then
-    if (k ~= "min1" and k ~= "min2" and k ~= "min3" and k ~= "min4") then
-        amount = amount + 1
-    end
-   end
- end
- return amount
 end

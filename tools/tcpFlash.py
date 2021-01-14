@@ -49,7 +49,7 @@ def main(nodeip, luafile, volatile=None):
     else:
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect((nodeip, 80))
+            s.connect((nodeip, 23))
 	    time.sleep(0.050)
             s.sendall("\n")
             # Receive the hello Message of answer of the ESP
@@ -94,7 +94,7 @@ def main(nodeip, luafile, volatile=None):
 			print "add a space at the end"
 
                     if (volatile is None):
-                        if (not sendCmd(s, "w([[" + l + "]]);")):
+                        if (not sendCmd(s, "w([==[" + l + "]==]);")):
                             print "Cannot write line " + str(i)
                             s.close()
                             sys.exit(4)

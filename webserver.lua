@@ -122,6 +122,8 @@ function fillDynamicMap()
     replaceMap["$HEXCOLOR3"]=hexColor3
     replaceMap["$HEXCOLOR4"]=hexColor4
     replaceMap["$HEXCOLORBG"]=hexColorBg
+    replaceMap["$INV46"]=((inv46 ~= nil and inv46 == "on") and "checked" or "")
+    replaceMap["$AUTODIM"]=((dim ~= nil and dim == "on") and "checked" or "")
     return replaceMap   
 end
 
@@ -139,8 +141,6 @@ function stopWordclock()
     getUTCtime = nil
     getTime = nil
     display_timestat = nil
-    display_countcharacters_de = nil
-    display_countwords_de = nil
     collectgarbage()
 end
 
@@ -207,7 +207,7 @@ function startWebServer()
         sec, _ = rtctime.get()
         file.open(configFile.. ".new", "w+")
           file.write("-- Config\n" .. "station_cfg={}\nstation_cfg.ssid=\"" .. _POST.ssid .. "\"\nstation_cfg.pwd=\"" .. _POST.password .. "\"\nstation_cfg.save=false\nwifi.sta.config(station_cfg)\n")
-          file.write("sntpserverhostname=\"" .. _POST.sntpserver .. "\"\n" .. "timezoneoffset=\"" .. _POST.timezoneoffset .. "\"\n".. "inv46=\"" .. tostring(_POST.inv46) .. "\"\n")
+          file.write("sntpserverhostname=\"" .. _POST.sntpserver .. "\"\n" .. "timezoneoffset=\"" .. _POST.timezoneoffset .. "\"\n".. "inv46=\"" .. tostring(_POST.inv46) .. "\"\n" .. "dim=\"" .. tostring(_POST.dim) .. "\"\n")
         
         if ( _POST.fcolor ~= nil) then
             -- color=string.char(_POST.green, _POST.red, _POST.blue)  

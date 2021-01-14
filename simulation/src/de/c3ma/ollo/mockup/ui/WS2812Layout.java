@@ -21,7 +21,10 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
 import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -41,6 +44,13 @@ public class WS2812Layout extends JFrame {
 	 * 
 	 */
 	private static final long serialVersionUID = -6815557232118826140L;
+
+	/**
+	 * Parameter for the ADC brightness control
+	 */
+	private static final int ADC_INIT = 512;
+	private static final int ADC_MIN = 0;
+	private static final int ADC_MAX = 1024;
 
 	private ArrayList<String> mLines = new ArrayList<String>();
 	private int mColumn = 0;
@@ -106,6 +116,18 @@ public class WS2812Layout extends JFrame {
 		}
 		contentPane.add(ledPanel, BorderLayout.CENTER);
 				
+		JSlider adc = new JSlider(JSlider.VERTICAL,
+                ADC_MIN, ADC_MAX, ADC_INIT);
+		adc.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				nodemcuSimu.setADC(adc.getValue());
+			}
+		});
+		
+		contentPane.add(adc, BorderLayout.EAST);
+		
 		JPanel bottomPanel = new JPanel();
 				
 		final JTextField dateTime = new JTextField("yyyy-mm-dd HH:MM:SS");

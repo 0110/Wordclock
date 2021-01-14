@@ -11,6 +11,7 @@ import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.jse.JsePlatform;
 
 import de.c3ma.ollo.mockup.DoFileFunction;
+import de.c3ma.ollo.mockup.ESP8266Adc;
 import de.c3ma.ollo.mockup.ESP8266File;
 import de.c3ma.ollo.mockup.ESP8266Net;
 import de.c3ma.ollo.mockup.ESP8266Node;
@@ -36,6 +37,7 @@ public class WS2812Simulation implements LuaSimulation {
 	private ESP8266Node espNode = new ESP8266Node(this);
 	private DoFileFunction doFile = new DoFileFunction(globals);
 	private ESP8266Ws2812 ws2812 = new ESP8266Ws2812();
+	private ESP8266Adc adc = new ESP8266Adc();
 	private String scriptName;
 
 	public WS2812Simulation(File sourceFolder) {
@@ -44,6 +46,7 @@ public class WS2812Simulation implements LuaSimulation {
 		globals.load(espTmr);
 		globals.load(espFile);
 		globals.load(espNode);
+		globals.load(adc);
 		globals.load(new ESP8266Wifi());
 		globals.load(new ESP8266Net());
 		globals.load(new ESP8266Time());
@@ -93,9 +96,16 @@ public class WS2812Simulation implements LuaSimulation {
 							if (args.length >= 3) {
 								File additionalFile = new File(args[2]);
 								if (additionalFile.exists() && (simu.doFile != null)) {
-
-									Files.copy(additionalFile.toPath(), new File(simu.doFile.getWorkingDirectory()
-											+ File.separator + additionalFile.getName()).toPath());
+									File targetFile = new File(simu.doFile.getWorkingDirectory()
+											+ File.separator + additionalFile.getName());
+									if (targetFile.exists()) {
+										if (targetFile.delete()) {
+											System.out.println("Removed original " + targetFile.getName() + "");
+										} else {
+											System.err.println("Cannot removed original " + targetFile.getName() + "");
+										}
+									}
+									Files.copy(additionalFile.toPath(), targetFile.toPath());
 									System.out.println("Integrate " + additionalFile.getName() + " into simulation");
 								} else {
 									System.err.println("Script " + args[2] + " cannot be found");
@@ -150,9 +160,8 @@ public class WS2812Simulation implements LuaSimulation {
 				callScript(this.scriptName);
 			}
 		} catch (InterruptedException e) {
-
+			
 		}
-
 	}
 
 	private void callScript(String filename) {
@@ -170,4 +179,9 @@ public class WS2812Simulation implements LuaSimulation {
     public void setSimulationTime(long timeInMillis) {
         ESP8266Time.setOverwrittenTime(timeInMillis);
     }
+
+	@Override
+	public void setADC(int value) {
+		adc.setADC(value);
+	}
 }

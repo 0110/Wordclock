@@ -1,3 +1,4 @@
 wlancfg.lua
+config.lua
 *.swp
 unit/testTimesMarchOctoberWithAllSeconds.lua
