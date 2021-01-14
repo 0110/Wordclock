@@ -54,7 +54,7 @@ end
 local data={}
 
 -- Module displaying of the words
-local generateLEDs = function(words, colorFg, colorMin1, colorMin2, colorMin3, colorMin4, invertRows, amountOfChars)
+local generateLEDs = function(words, colorBg, colorFg, colorMin1, colorMin2, colorMin3, colorMin4, invertRows, amountOfChars)
  -- Set the local variables needed for the colored progress bar
  if (words == nil) then
    return nil
@@ -103,8 +103,13 @@ local generateLEDs = function(words, colorFg, colorMin1, colorMin2, colorMin3, c
  end
  data.drawnCharacters=0
  local charsPerLine=11
+ 
  -- Space / background has no color by default
  local space=string.char(0,0,0)
+
+ if (colorBg ~= nil) then
+  space = colorBg
+ end
 
  -- Set the foreground color as the default color
  local buf=data.colorFg
