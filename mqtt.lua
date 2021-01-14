@@ -46,7 +46,7 @@ function registerMqtt()
     end)
 end
 
-function registerMqttClient()
+function startMqttClient()
     if (mqttServer ~= nil and mqttPrefix ~= nil) then
         registerMqtt()
         print "Started MQTT client"
