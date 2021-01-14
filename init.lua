@@ -36,8 +36,10 @@ end
 function mydofile(mod)
     if (file.open(mod ..  ".lua")) then
       dofile( mod .. ".lua")
-    else
+    elseif (file.open(mod ..  ".lc")) then
       dofile(mod .. ".lc")
+    else
+      print("Error: " .. mod)
     end
 end    
 
