@@ -1,9 +1,9 @@
 -- Global variable
-t=nil
+m=nil
 mqttConnected = false
 
 -- MQTT extension
-function startMqtt()
+function registerMqtt()
     m = mqtt.Client("wordclock", 120)
     -- on publish message receive event
     m:on("message", function(client, topic, data)
@@ -30,17 +30,20 @@ function startMqtt()
       mqttConnected = true
       -- subscribe topic with qos = 0
       client:subscribe(mqttPrefix .. "/command", 0)
-      -- publish a message with data = hello, QoS = 0, retain = 0
-      client:publish(mqttPrefix .. "/ip", tostring(wifi.sta.getip()), 0, 0)
+      tmr.alarm(3, 500, 0, function() 
+	      -- publish a message with data = hello, QoS = 0, retain = 0
+	      client:publish(mqttPrefix .. "/ip", tostring(wifi.sta.getip()), 0, 0)
+      end)
     end,
     function(client, reason)
       print("failed reason: " .. reason)
+      m=nil
     end)
 end
 
-function startMqttClient()
+function registerMqttClient()
     if (mqttServer ~= nil and mqttPrefix ~= nil) then
-        startMqtt()
+        registerMqtt()
         print "Started MQTT client"
         oldBrightness=0
         oldTemp=0
