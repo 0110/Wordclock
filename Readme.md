@@ -11,11 +11,10 @@ cd os/
 ./flash.sh ttyUSB0
 </pre>
 
-Reboot the ESP, with a serial terminal,
-format the filesystem with the following command and reboot it:
+Connect to the ESP via a terminal emulator like screen using a baud rate of 115200. Then format the filesystem and reboot the ESP with the following commands:
 <pre>
 file.format()
-node.reboot()
+node.restart()
 </pre>
 
 Then disconnect the serial terminal and copy the required files to the microcontroller:
