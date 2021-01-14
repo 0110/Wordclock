@@ -16,6 +16,11 @@ function registerMqtt()
         elseif (data == "OFF") then
           briPercent=0
           m:publish(mqttPrefix .. "/clock", "OFF", 0, 0)
+	elseif (data:sub(1,1) == "#" and data:len() == 7) then
+		red = tonumber(data:sub(2,3), 16)
+                green = tonumber(data:sub(4,5), 16)
+                blue = tonumber(data:sub(6,7), 16)
+                colorBg=string.char(red, green, blue)
         else
           if (tonumber(data) >= 0 and tonumber(data) <= 100) then
             briPercent=tonumber(data)
@@ -37,7 +42,7 @@ function registerMqtt()
     end,
     function(client, reason)
       print("failed reason: " .. reason)
-      m=nil
+      mqttConnected = false
     end)
 end
 
