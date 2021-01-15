@@ -2,6 +2,33 @@
 m=nil
 mqttConnected = false
 
+function handleSingleCommand(client, topic, data)
+    if (data == "ON") then
+      briPercent=100
+      m:publish(mqttPrefix .. "/clock", "ON", 0, 0)
+    elseif (data == "OFF") then
+      briPercent=0
+      m:publish(mqttPrefix .. "/clock", "OFF", 0, 0)
+    elseif (data:sub(1,1) == "#" and data:len() == 7) then
+      red = tonumber(data:sub(2,3), 16)
+      green = tonumber(data:sub(4,5), 16)
+      blue = tonumber(data:sub(6,7), 16)
+      colorBg=string.char(red, green, blue)
+      print("Updated BG: " .. tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue) )
+      if (displayTime~= nil) then
+        displayTime()
+      end
+    else
+      if (tonumber(data) >= 0 and tonumber(data) <= 100) then
+        briPercent=tonumber(data)
+        m:publish(mqttPrefix .. "/clock", tostring(data), 0, 0)
+      else
+        print "Unknown MQTT command"
+      end
+    end
+
+end
+
 -- MQTT extension
 function registerMqtt()
     m = mqtt.Client("wordclock", 120)
@@ -10,29 +37,7 @@ function registerMqtt()
       print(topic .. ":" )
       if data ~= nil then
         print(data)
-        if (data == "ON") then
-          briPercent=100
-          m:publish(mqttPrefix .. "/clock", "ON", 0, 0)
-        elseif (data == "OFF") then
-          briPercent=0
-          m:publish(mqttPrefix .. "/clock", "OFF", 0, 0)
-	    elseif (data:sub(1,1) == "#" and data:len() == 7) then
-		  red = tonumber(data:sub(2,3), 16)
-          green = tonumber(data:sub(4,5), 16)
-          blue = tonumber(data:sub(6,7), 16)
-          colorBg=string.char(red, green, blue)
-          print("Updated BG: " .. tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue) )
-          if (displayTime~= nil) then
-            displayTime()
-          end
-        else
-          if (tonumber(data) >= 0 and tonumber(data) <= 100) then
-            briPercent=tonumber(data)
-            m:publish(mqttPrefix .. "/clock", tostring(data), 0, 0)
-          else
-            print "Unknown MQTT command"
-          end
-        end
+        handleSingleCommand(client, topic, data)
       end
     end)
     
@@ -44,6 +49,7 @@ function registerMqtt()
       tmr.alarm(3, 500, 0, function() 
 	      -- publish a message with data = hello, QoS = 0, retain = 0
 	      client:publish(mqttPrefix .. "/ip", tostring(wifi.sta.getip()), 0, 0)
+          client:subscribe(mqttPrefix .. "/cmd/#", 0)
       end)
     end,
     function(client, reason)
