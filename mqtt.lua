@@ -20,7 +20,7 @@ function handleSingleCommand(client, topic, data)
       else
         red, green, blue = string.match(data, "(%d+),(%d+),(%d+)")
       end
-      colorBg=string.char(red* briPercent / 100, green * briPercent / 100, blue * briPercent / 100)
+      colorBg=string.char(green * briPercent / 100, red * briPercent / 100, blue * briPercent / 100)
       print("Updated BG: " .. tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue) )
       m:publish(mqttPrefix .. "/background", tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue), 0, 0)
       if (displayTime~= nil) then
@@ -71,8 +71,8 @@ function registerMqtt()
       tmr.alarm(3, 1000, 0, function() 
 	      -- publish a message with data = hello, QoS = 0, retain = 0
 	      client:publish(mqttPrefix .. "/ip", tostring(wifi.sta.getip()), 0, 0)
-          local red = string.byte(colorBg,1)
-          local green = string.byte(colorBg,2)
+          local red = string.byte(colorBg,2)
+          local green = string.byte(colorBg,1)
           local blue = string.byte(colorBg,3)
           client:publish(mqttPrefix .. "/background", tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue), 0, 0)
       end)
