@@ -43,3 +43,16 @@ Determine the IP address of your clock and execute the following script:
 ** 0-255,0-255,0-255        Background color is set to decimal representation of red, green an blue
 * **basetopic**/cmd/telnet
 ** ignored                  Stop MQTT server and start telnetserver at port 23
+
+## OpenHAB2
+Tested MQTT with binding-mqtt 2.5.x
+### Configuration
+```
+Thing mqtt:topic:wordclock "Wordclock" (mqtt:broker) @ "MQTT"  {
+  Channels:
+   Type dimmer : dim "Dimming" [ stateTopic="basetopic/brightness", commandTopic="basetopic/cmd/single" ]
+   Type string : cmd "Command" [ commandTopic="basetopic/cmd/single" ]
+   Type switch : active "Active" [ commandTopic="basetopic/cmd/single" ]
+   Type colorRGB : background "Background" [ stateTopic="basetopic/background", commandTopic="basetopic/cmd/single", on="28,0,0", off="0,0,0" ]
+}
+```
