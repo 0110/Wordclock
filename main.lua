@@ -175,6 +175,7 @@ function normalOperation()
                 if (startTelnetServer ~= nil) then
                     startTelnetServer()
                 else
+                    displayTime()
                     print("NO Telent found")
                 end
                 setupCounter=setupCounter-1

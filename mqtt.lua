@@ -9,7 +9,7 @@ function handleSingleCommand(client, topic, data)
     elseif (data == "OFF") then
       briPercent=0
       m:publish(mqttPrefix .. "/clock", "OFF", 0, 0)
-    elseif (data:sub(1,1) == "#" and data:len() == 7) then
+    elseif ((data:sub(1,1) == "#" and data:len() == 7) or (string.match(data, "%d+,%d+,%d+"))) then
       red = tonumber(data:sub(2,3), 16)
       green = tonumber(data:sub(4,5), 16)
       blue = tonumber(data:sub(6,7), 16)
