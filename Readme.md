@@ -35,7 +35,7 @@ Determine the IP address of your clock and execute the following script:
 * GPIO0	    factory reset (long during operation)
 
 ## MQTT Interface
-* **basetopic**/command
+* **basetopic**/cmd/single
 ** ON                       Set brightness to 100%
 ** OFF                      Set brightness to 0%
 ** 0-100                    Set brightness to given value

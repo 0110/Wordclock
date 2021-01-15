@@ -41,7 +41,7 @@ function registerMqtt()
       print(topic .. ":" )
       if data ~= nil then
         print(data)
-        if (topic == (mqttPrefix .. "/command")) then
+        if (topic == (mqttPrefix .. "/cmd/single")) then
             handleSingleCommand(client, topic, data)
         else
             -- Handle here the /cmd/# sublevel
@@ -63,11 +63,10 @@ function registerMqtt()
       print("MQTT is connected")
       mqttConnected = true
       -- subscribe topic with qos = 0
-      client:subscribe(mqttPrefix .. "/command", 0)
-      tmr.alarm(3, 500, 0, function() 
+      client:subscribe(mqttPrefix .. "/cmd/#", 0)
+      tmr.alarm(3, 1000, 0, function() 
 	      -- publish a message with data = hello, QoS = 0, retain = 0
 	      client:publish(mqttPrefix .. "/ip", tostring(wifi.sta.getip()), 0, 0)
-          client:subscribe(mqttPrefix .. "/cmd/#", 0)
       end)
     end,
     function(client, reason)
