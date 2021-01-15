@@ -10,9 +10,13 @@ function handleSingleCommand(client, topic, data)
       briPercent=0
       m:publish(mqttPrefix .. "/clock", "OFF", 0, 0)
     elseif ((data:sub(1,1) == "#" and data:len() == 7) or (string.match(data, "%d+,%d+,%d+"))) then
-      red = tonumber(data:sub(2,3), 16)
-      green = tonumber(data:sub(4,5), 16)
-      blue = tonumber(data:sub(6,7), 16)
+      if (data:sub(1,1) == "#") then
+        red = tonumber(data:sub(2,3), 16)
+        green = tonumber(data:sub(4,5), 16)
+        blue = tonumber(data:sub(6,7), 16)
+      else
+        red, green, blue = string.match(data, "(%d+),(%d+),(%d+)")
+      end
       colorBg=string.char(green, red, blue)
       print("Updated BG: " .. tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue) )
       if (displayTime~= nil) then
@@ -37,7 +41,21 @@ function registerMqtt()
       print(topic .. ":" )
       if data ~= nil then
         print(data)
-        handleSingleCommand(client, topic, data)
+        if (topic == (mqttPrefix .. "/command")) then
+            handleSingleCommand(client, topic, data)
+        else
+            -- Handle here the /cmd/# sublevel
+            if (string.match(topic, "telnet$")) then
+                client:publish(mqttPrefix .. "/telnet", tostring(wifi.sta.getip()), 0, 0)
+                print("Stop Mqtt")
+                m=nil
+                mqttConnected = false
+                stopWordclock()
+                collectgarbage()
+                mydofile("telnet")
+                startTelnetServer()
+            end
+        end
       end
     end)
     
