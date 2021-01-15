@@ -17,7 +17,7 @@ function handleSingleCommand(client, topic, data)
       else
         red, green, blue = string.match(data, "(%d+),(%d+),(%d+)")
       end
-      colorBg=string.char(green, red, blue)
+      colorBg=string.char(green* briPercent / 100, red * briPercent / 100, blue * briPercent / 100)
       print("Updated BG: " .. tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue) )
       if (displayTime~= nil) then
         displayTime()
