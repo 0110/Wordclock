@@ -5,13 +5,19 @@ LUATOOL=./tools/luatool.py
 DEVICE=$1
 BAUD=115200
 
+# check environment
+if [ ! -f $LUATOOL ]; then
+ echo "$LUATOOL not found"
+ echo "is the command prompt at the same level as the tools folder ?"
+ exit 1
+fi
+
 # check the serial connection
 
 if [ ! -c $DEVICE ]; then
  echo "$DEVICE does not exist"
  exit 1
 fi
-
 
 if [ $# -eq 0 ]; then
     echo ""
