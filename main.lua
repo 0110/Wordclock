@@ -72,7 +72,7 @@ function displayTime()
             invertRows=true
         end
         local characters = displayword.countChars(words)
-	ledBuf = displayword.generateLEDs(words, colorBg, color, color1, color2, color3, color4, invertRows, characters)
+        ledBuf = displayword.generateLEDs(words, colorBg, color, color1, color2, color3, color4, invertRows, characters)
      end
      displayword = nil
      if (ledBuf ~= nil) then
@@ -152,7 +152,7 @@ function normalOperation()
         print('IP: ',wifi.sta.getip())
         -- Here the WLAN is found, and something is done
         print("Solving dependencies")
-        local dependModules = { "timecore" , "wordclock", "telnet", "mqtt" }
+        local dependModules = { "timecore" , "wordclock", "mqtt" }
         for _,mod in pairs(dependModules) do
             print("Loading " .. mod)
             mydofile(mod)
@@ -164,17 +164,18 @@ function normalOperation()
                 syncTimeFromInternet()
                 setupCounter=setupCounter-1
             elseif (setupCounter > 3) then
-                if (startTelnetServer ~= nil) then
-                    startTelnetServer()
-                else
-                    print("NO Telent found")
-                end
-                setupCounter=setupCounter-1
-            elseif (setupCounter > 2) then
                 if (startMqttClient ~= nil) then
                     startMqttClient()
                 else
                     print("NO Mqtt found")
+                    mydofile("telnet")
+                end
+                setupCounter=setupCounter-1
+            elseif (setupCounter > 2) then
+                if (startTelnetServer ~= nil) then
+                    startTelnetServer()
+                else
+                    print("NO Telent found")
                 end
                 setupCounter=setupCounter-1
             else
