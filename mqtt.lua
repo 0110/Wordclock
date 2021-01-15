@@ -13,7 +13,7 @@ function handleSingleCommand(client, topic, data)
       red = tonumber(data:sub(2,3), 16)
       green = tonumber(data:sub(4,5), 16)
       blue = tonumber(data:sub(6,7), 16)
-      colorBg=string.char(red, green, blue)
+      colorBg=string.char(green, red, blue)
       print("Updated BG: " .. tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue) )
       if (displayTime~= nil) then
         displayTime()
