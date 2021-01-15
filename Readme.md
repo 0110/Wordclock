@@ -36,13 +36,13 @@ Determine the IP address of your clock and execute the following script:
 
 ## MQTT Interface
 * **basetopic**/cmd/single
-** ON                       Set brightness to 100%
-** OFF                      Set brightness to 0%
-** 0-100                    Set brightness to given value
-** #rrggbb                  Bacground color is set to hex representation of red, green and blue
-** 0-255,0-255,0-255        Background color is set to decimal representation of red, green an blue
+ * ON                       Set brightness to 100%
+ * OFF                      Set brightness to 0%
+ * 0-100                    Set brightness to given value
+ * #rrggbb                  Bacground color is set to hex representation of red, green and blue
+ * 0-255,0-255,0-255        Background color is set to decimal representation of red, green an blue
 * **basetopic**/cmd/telnet
-** ignored                  Stop MQTT server and start telnetserver at port 23
+ * ignored                  Stop MQTT server and start telnetserver at port 23
 
 ## OpenHAB2
 Tested MQTT with binding-mqtt 2.5.x
