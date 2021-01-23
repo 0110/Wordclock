@@ -177,7 +177,6 @@ function normalOperation()
                     startTelnetServer()
                 else
                     displayTime()
-                    print("NO Telent found")
                 end
                 setupCounter=setupCounter-1
             else

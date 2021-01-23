@@ -79,7 +79,9 @@ function registerMqtt()
                 stopWordclock()
                 collectgarbage()
                 mydofile("telnet")
-                startTelnetServer()
+                if (startTelnetServer ~= nil) then
+                    startTelnetServer()
+                end
             elseif (string.match(topic, "row1$")) then
                 row1bgColor = parseBgColor(data, "row1")
             end
