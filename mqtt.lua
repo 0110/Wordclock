@@ -37,6 +37,24 @@ function handleSingleCommand(client, topic, data)
 
 end
 
+function parseBgColor(data)
+  local red=nil
+  local green=nil
+  local blue=nil
+  if (data:sub(1,1) == "#") then
+    red = tonumber(data:sub(2,3), 16)
+    green = tonumber(data:sub(4,5), 16)
+    blue = tonumber(data:sub(6,7), 16)
+  else
+    red, green, blue = string.match(data, "(%d+),(%d+),(%d+)")
+  end
+  if ((red ~= nil) and (green ~= nil) and (blue ~= nil) ) then
+    return string.char(green * briPercent / 100, red * briPercent / 100, blue * briPercent / 100)
+  else
+    return nil
+  end
+end
+
 -- MQTT extension
 function registerMqtt()
     m = mqtt.Client("wordclock", 120)
@@ -58,6 +76,8 @@ function registerMqtt()
                 collectgarbage()
                 mydofile("telnet")
                 startTelnetServer()
+            elseif (string.match(topic, "row1$")) then
+                row1bgColor = parseBgColor(data)
             end
         end
       end

@@ -72,7 +72,8 @@ function displayTime()
             invertRows=true
         end
         local characters = displayword.countChars(words)
-        ledBuf = displayword.generateLEDs(words, colorBg, color, color1, color2, color3, color4, invertRows, characters)
+        ledBuf = displayword.generateLEDs(words, colorBg, color, color1, color2, color3, color4, invertRows, characters,
+				row1bgColor)
      end
      displayword = nil
      if (ledBuf ~= nil) then
