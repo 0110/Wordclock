@@ -41,6 +41,7 @@ Optinal:
 ### Status
 * **basetopic**/brightness **Current brightness in percent**
 * **basetopic**/background **Current background color**
+* **basetopic**/row1 **Current background color**
 
 ### Commands
 * **basetopic**/cmd/single
@@ -51,6 +52,8 @@ Optinal:
   * 0-255,0-255,0-255 **Background color is set to decimal representation of red, green an blue**
 * **basetopic**/cmd/telnet
   * ignored **Stop MQTT server and start telnetserver at port 23**
+* **basetopic**/cmd/row1
+  * 0-255,0-255,0-255 **Background color is set to decimal representation of red, green an blue**
 
 ## OpenHAB2
 Tested MQTT with binding-mqtt 2.5.x

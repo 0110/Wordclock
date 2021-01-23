@@ -37,7 +37,10 @@ function handleSingleCommand(client, topic, data)
 
 end
 
-function parseBgColor(data)
+-- Parse MQTT data and extract color
+-- @param data MQTT information
+-- @param row string of the row e.g. "row1" used to publish current state
+function parseBgColor(data, row)
   local red=nil
   local green=nil
   local blue=nil
@@ -49,6 +52,7 @@ function parseBgColor(data)
     red, green, blue = string.match(data, "(%d+),(%d+),(%d+)")
   end
   if ((red ~= nil) and (green ~= nil) and (blue ~= nil) ) then
+    m:publish(mqttPrefix .. "/"..row, tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue), 0, 0)
     return string.char(green * briPercent / 100, red * briPercent / 100, blue * briPercent / 100)
   else
     return nil
@@ -77,7 +81,7 @@ function registerMqtt()
                 mydofile("telnet")
                 startTelnetServer()
             elseif (string.match(topic, "row1$")) then
-                row1bgColor = parseBgColor(data)
+                row1bgColor = parseBgColor(data, "row1")
             end
         end
       end
