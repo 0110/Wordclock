@@ -51,6 +51,8 @@ tmr.alarm(1, 5000, 0, function()
         (file.open("timecore.lua")) or 
         (file.open("wordclock.lua")) or 
         (file.open("displayword.lua")) or 
+        (file.open("mqtt.lua")) or 
+        (file.open("ds18b20.lua")) or 
         (file.open("telnet.lua"))
         ) then    
         c = string.char(0,128,0)

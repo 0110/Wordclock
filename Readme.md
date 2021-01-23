@@ -36,12 +36,14 @@ Mandatory:
 * GPIO0	    factory reset (long during operation)
 Optinal:
 * ADC       VT93N2, 48k  light resistor  
+* GPIO4     DS18B20 Temperatur sensor
 
 ## MQTT Interface
 ### Status
 * **basetopic**/brightness **Current brightness in percent**
 * **basetopic**/background **Current background color**
 * **basetopic**/row1 **Current background color**
+* **basetopic**/temp **Temperatur**
 
 ### Commands
 * **basetopic**/cmd/single

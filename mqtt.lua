@@ -1,6 +1,8 @@
 -- Global variable
 m=nil
 mqttConnected = false
+-- Temp:
+t=nil
 
 function handleSingleCommand(client, topic, data)
     if (data == "ON") then
@@ -54,6 +56,21 @@ function parseBgColor(data, row)
   if ((red ~= nil) and (green ~= nil) and (blue ~= nil) ) then
     m:publish(mqttPrefix .. "/"..row, tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue), 0, 0)
     return string.char(green * briPercent / 100, red * briPercent / 100, blue * briPercent / 100)
+  else
+    return nil
+  end
+end
+
+function readTemp()
+  if (t ~= nil) then
+    addrs=t.addrs()
+    -- Total DS18B20 numbers
+    sensors=table.getn(addrs)
+    local temp1=0
+    if (sensors >= 1) then
+        temp1=t.read(addrs[0])
+    end
+    return temp1
   else
     return nil
   end
@@ -113,6 +130,12 @@ function startMqttClient()
     if (mqttServer ~= nil and mqttPrefix ~= nil) then
         registerMqtt()
         print "Started MQTT client"
+        if (file.open("ds18b20.lc")) then
+          t=require("ds18b20")
+          t.setup(2) -- GPIO4
+          readTemp() -- read once, to setup chip
+          print "Setup temperature"
+        end
         oldBrightness=0
         oldTemp=0
         tmr.alarm(5, 5001, 1 ,function()
@@ -120,9 +143,13 @@ function startMqttClient()
                 local temp = nil
                 if (t ~= nil) then
                     temp=readTemp()
+                    print(tostring(temp) .. "°C")
                 end
                 if (oldBrightness ~= briPercent) then
                  m:publish(mqttPrefix .. "/brightness", tostring(briPercent), 0, 0)
+                elseif (temp ~= nil and temp ~= oldTemp) then
+                  oldTemp = temp
+                  m:publish(mqttPrefix .. "/temp", tostring(temp/100).."."..tostring(temp%100), 0, 0)
                 else
                  m:publish(mqttPrefix .. "/heap", tostring(node.heap()), 0, 0)
                 end
