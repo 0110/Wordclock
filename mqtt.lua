@@ -3,6 +3,7 @@ m=nil
 mqttConnected = false
 -- Temp:
 t=nil
+rowbgColor= {}
 
 function handleSingleCommand(client, topic, data)
     if (data == "ON") then
@@ -90,18 +91,26 @@ function registerMqtt()
             -- Handle here the /cmd/# sublevel
             if (string.match(topic, "telnet$")) then
                 client:publish(mqttPrefix .. "/telnet", tostring(wifi.sta.getip()), 0, 0)
-                print("Stop Mqtt")
+                ws2812.write(string.char(0,0,0):rep(114))
+                print("Stop Mqtt and Temp")
                 m=nil
+                t=nil
                 mqttConnected = false
-                stopWordclock()
+                for i=0,6,1 do tmr.stop(i) end
                 collectgarbage()
                 mydofile("telnet")
                 if (startTelnetServer ~= nil) then
                     startTelnetServer()
                 end
-            elseif (string.match(topic, "row1$")) then
-                row1bgColor = parseBgColor(data, "row1")
-            end
+            else
+             for i=1,10,1 do
+              if (string.match(topic, "row".. tostring(i) .."$")) then
+                rowbgColor[i] = parseBgColor(data, "row" .. tostring(i))
+                print("Updated row" .. tostring(i) )
+                return
+              end
+             end
+           end 
         end
       end
     end)

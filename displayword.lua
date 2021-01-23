@@ -54,7 +54,7 @@ end
 local data={}
 
 -- Module displaying of the words
-local generateLEDs = function(words, colorBg, colorFg, colorMin1, colorMin2, colorMin3, colorMin4, invertRows, amountOfChars, row1bgColor)
+local generateLEDs = function(words, colorBg, colorFg, colorMin1, colorMin2, colorMin3, colorMin4, invertRows, amountOfChars)
  -- Set the local variables needed for the colored progress bar
  if (words == nil) then
    return nil
@@ -118,8 +118,8 @@ local generateLEDs = function(words, colorBg, colorFg, colorMin1, colorMin2, col
  local buf=data.colorFg
  local line=space
  -- line 1----------------------------------------------
- if (row1bgColor ~= nil) then
-    space = row1bgColor
+ if (rowbgColor[1] ~= nil) then
+    space = rowbgColor[1]
  end
  if (words.it==1) then
     buf=drawLEDs(data,2) -- ES
@@ -141,8 +141,8 @@ if (words.fiveMin== 1) then
     buf= buf .. space:rep(4)
  end
  -- line 2-- even row (so inverted) --------------------
-  if (row2bgColor ~= nil) then
-    space = row2bgColor
+  if (rowbgColor[2] ~= nil) then
+    space = rowbgColor[2]
   else
     space = colorBg
   end
@@ -162,6 +162,11 @@ if (words.fiveMin== 1) then
  end
 
  -- line3----------------------------------------------
+  if (rowbgColor[3] ~= nil) then
+    space = rowbgColor[3]
+  else
+    space = colorBg
+  end
  if (words.threequater == 1) then
     line= drawLEDs(data,11) -- Dreiviertel
   elseif (words.quater == 1) then
@@ -173,6 +178,11 @@ if (words.fiveMin== 1) then
  -- fill, the buffer
  buf = buf .. line
  --line 4-------- even row (so inverted) -------------
+  if (rowbgColor[4] ~= nil) then
+    space = rowbgColor[4]
+  else
+    space = colorBg
+  end
  if (words.after == 1) then
     line= space:rep(2) -- TG
     line= line .. drawLEDs(data,4) -- NACH
@@ -193,6 +203,11 @@ if (words.fiveMin== 1) then
      end
  end
  ------------------------------------------------
+  if (rowbgColor[5] ~= nil) then
+    space = rowbgColor[5]
+  else
+    space = colorBg
+  end
  if (words.half == 1) then
     line= drawLEDs(data,4) -- HALB
     line= line .. space:rep(1) -- X
@@ -213,6 +228,11 @@ if (words.fiveMin== 1) then
     buf=buf .. line
  end
  ------------even row (so inverted) ---------------------
+  if (rowbgColor[6] ~= nil) then
+    space = rowbgColor[6]
+  else
+    space = colorBg
+  end
  if (words.seven == 1) then
     line= space:rep(5)
     line= line .. drawLEDs(data,6) -- SIEBEN
@@ -238,6 +258,11 @@ if (words.fiveMin== 1) then
      end
  end
  ------------------------------------------------
+  if (rowbgColor[7] ~= nil) then
+    space = rowbgColor[7]
+  else
+    space = colorBg
+  end
  if (words.three == 1) then
     line= space:rep(1)
     line= line .. drawLEDs(data,4) -- DREI
@@ -250,6 +275,11 @@ if (words.fiveMin== 1) then
  end
  buf = buf .. line
  ------------even row (so inverted) ---------------------
+  if (rowbgColor[8] ~= nil) then
+    space = rowbgColor[8]
+  else
+    space = colorBg
+  end
  if (words.four == 1) then
     line= space:rep(7)
     line= line .. drawLEDs(data,4) -- VIER
@@ -268,6 +298,11 @@ if (words.fiveMin== 1) then
       buf = buf .. line:sub((11-i)*3-2,(11-i)*3)
  end
  ------------------------------------------------
+  if (rowbgColor[9] ~= nil) then
+    space = rowbgColor[9]
+  else
+    space = colorBg
+  end
  if (words.eight == 1) then
     line= space:rep(1)
     line= line .. drawLEDs(data,4) -- ACHT
@@ -281,6 +316,11 @@ if (words.fiveMin== 1) then
  end
  buf = buf .. line
  ------------even row (so inverted) ---------------------
+  if (rowbgColor[10] ~= nil) then
+    space = rowbgColor[10]
+  else
+    space = colorBg
+  end
  if (words.six == 1) then
     line= space:rep(1)
     line= line .. drawLEDs(data,5) -- SECHS
