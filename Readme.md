@@ -30,11 +30,19 @@ Determine the IP address of your clock and execute the following script:
 </pre>
 
 ## Hardware Setup
+Mandatory:
 * GPIO2     LEDs
 * GPIO0	    Bootloader (at start)
 * GPIO0	    factory reset (long during operation)
+Optinal:
+* ADC       VT93N2, 48k  light resistor  
 
 ## MQTT Interface
+### Status
+* **basetopic**/brightness **Current brightness in percent**
+* **basetopic**/background **Current background color**
+
+### Commands
 * **basetopic**/cmd/single
   * ON **Set brightness to 100%**
   * OFF **Set brightness to 0%**
