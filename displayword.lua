@@ -54,7 +54,7 @@ end
 local data={}
 
 -- Module displaying of the words
-local generateLEDs = function(words, colorBg, colorFg, colorMin1, colorMin2, colorMin3, colorMin4, invertRows, amountOfChars)
+local generateLEDs = function(words, colorBg, colorFg, colorMin1, colorMin2, colorMin3, colorMin4, invertRows, amountOfChars, row1bgColor)
  -- Set the local variables needed for the colored progress bar
  if (words == nil) then
    return nil
@@ -107,14 +107,20 @@ local generateLEDs = function(words, colorBg, colorFg, colorMin1, colorMin2, col
  -- Space / background has no color by default
  local space=string.char(0,0,0)
 
+ -- Background color must always be set
  if (colorBg ~= nil) then
   space = colorBg
+ else
+  colorBg = space
  end
 
  -- Set the foreground color as the default color
  local buf=data.colorFg
  local line=space
  -- line 1----------------------------------------------
+ if (row1bgColor ~= nil) then
+    space = row1bgColor
+ end
  if (words.it==1) then
     buf=drawLEDs(data,2) -- ES
   else
@@ -135,6 +141,11 @@ if (words.fiveMin== 1) then
     buf= buf .. space:rep(4)
  end
  -- line 2-- even row (so inverted) --------------------
+  if (row2bgColor ~= nil) then
+    space = row2bgColor
+  else
+    space = colorBg
+  end
  if (words.tenMin == 1) then
     line= drawLEDs(data,4) -- ZEHN
   else
