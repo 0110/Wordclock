@@ -34,7 +34,7 @@ fi
 
 # Format filesystem first
 echo "Format the complete ESP"
-$LUATOOL -p $DEVICE -w -b $BAUD
+python3 $LUATOOL -p $DEVICE -w -b $BAUD
 if [ $? -ne 0 ]; then
     echo "STOOOOP"
     exit 1
@@ -59,7 +59,7 @@ for f in $FILES; do
         exit 1
     fi
     echo "------------- $f ------------"
-    $LUATOOL -p $DEVICE -f $f -b $BAUD -t $f 
+    python3 $LUATOOL -p $DEVICE -f $f -b $BAUD -t $f 
     if [ $? -ne 0 ]; then
         echo "STOOOOP"
         exit 1
