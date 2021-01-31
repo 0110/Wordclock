@@ -5,11 +5,13 @@ ws2812.init() -- WS2812 LEDs initialized on GPIO2
 MAXLEDS=110
 counter1=0
 ws2812.write(string.char(0,0,0):rep(114))
-tmr.alarm(2, 85, 1, function()
+local bootledtimer = tmr.create()
+bootledtimer:register(5000, tmr.ALARM_AUTO, function (t)
     counter1=counter1+1
     spaceLeds = math.max(MAXLEDS - (counter1*2), 0)
     ws2812.write(string.char(128,0,0):rep(counter1) .. string.char(0,0,0):rep(spaceLeds) .. string.char(0,0,64):rep(counter1))
 end)
+bootledtimer:start()
 
 local blacklistfile="init.lua config.lua config.lua.new webpage.html"
 function recompileAll()
@@ -44,6 +46,7 @@ end
 
 local initTimer = tmr.create()
 initTimer:register(5000, tmr.ALARM_SINGLE, function (t)
+    bootledtimer:unregister()
     if (
         (file.open("main.lua")) or 
         (file.open("timecore.lua")) or 
@@ -69,4 +72,3 @@ initTimer:register(5000, tmr.ALARM_SINGLE, function (t)
     t:unregister()
 end)
 initTimer:start()
-print("Init file end reached")

@@ -32,12 +32,14 @@ else
 fi
 
 
-# Format filesystem first
-echo "Format the complete ESP"
-python3 $LUATOOL -p $DEVICE -w -b $BAUD
-if [ $? -ne 0 ]; then
-    echo "STOOOOP"
-    exit 1
+if [ $# -eq 1 ]; then
+	# Format filesystem first
+	echo "Format the complete ESP"
+	python3 $LUATOOL -p $DEVICE -w -b $BAUD
+	if [ $? -ne 0 ]; then
+	    echo "STOOOOP"
+	    exit 1
+	fi
 fi
 
 #stty -F $DEVICE $BAUD
