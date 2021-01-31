@@ -6,7 +6,7 @@ displayword = {}
 function startSetupMode()
     -- start the webserver module 
     mydofile("webserver")
-    
+    collectgarbage()
     wifi.setmode(wifi.SOFTAP)
     cfg={}
     cfg.ssid="wordclock"
