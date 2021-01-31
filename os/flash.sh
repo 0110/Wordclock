@@ -31,5 +31,4 @@ if [ $? -ne 0 ]; then
  exit 1
 fi
 echo "Flashing the new"
-#python3 esptool.py --port $DEVICE $BAUD write_flash -fm dio 0x00000 nodemcu2.bin
 python3 esptool.py --port $DEVICE write_flash -fm dio 0x00000 0x00000.bin 0x10000 0x10000.bin 0x3fc000 esp_init_data_default.bin
