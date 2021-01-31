@@ -21,3 +21,7 @@ Firmware was compiled with the following modules:
   * LUA_USE_MODULES_WIFI
   * LUA_USE_MODULES_WS2812
 
+## Numbers
+Floating point calcuation was disabled:
+  * LUA_NUMBER_INTEGRAL
+
