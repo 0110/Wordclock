@@ -130,7 +130,6 @@ end
 function stopWordclock()
     print("Stop all Wordclock")
     -- Stop all
-    for i=0,5 do tmr.stop(i) end
     -- unload all other functions 
     -- grep function *.lua | grep -v webserver | grep -v init.lua | grep -v main.lua | cut -f 2 -d ':' | grep "^function" | sed "s/function //g" | grep -o "^[a-zA-Z0-9\_]*"
     updateColor = nil
@@ -159,18 +158,6 @@ function startWebServer()
         color=string.char(0,128,0)
     end
     ws2812.write(string.char(0,0,0):rep(56) .. color:rep(2) .. string.char(0,0,0):rep(4) .. color:rep(2) .. string.char(0,0,0):rep(48))
-    -- Start Time after 3 minute
-    tmr.alarm(5, 180000, 0 ,function()
-        dependModules = { "timecore" , "wordclock", "displayword" }
-        for _,mod in pairs(dependModules) do
-            print("Loading " .. mod)
-            mydofile(mod)
-        end
-        -- Start the time Thread again
-        tmr.alarm(1, 20000, 1 ,function()
-             displayTime()
-         end)
-    end)
     if (sendPage ~= nil) then
        print("Sending webpage.html (" .. tostring(node.heap()) .. "B free) ...")
        -- Load the sendPagewebcontent
@@ -285,18 +272,24 @@ function startWebServer()
         print("Rename config")
         if (file.rename(configFile .. ".new", configFile)) then
             print("Successfully")
-            tmr.alarm(3, 20, 0 ,function()
+	    local mytimer = tmr.create()
+	    mytimer:register(50, tmr.ALARM_SINGLE, function (t)
                 replaceMap=fillDynamicMap()
                 replaceMap["$ADDITIONAL_LINE"]="<h2><font color=\"green\">New configuration saved</font></h2>"
                 print("Send success to client")
                 sendPage(conn, "webpage.html", replaceMap)
+		t:unregister()
             end)
+	    mytimer:start()
         else
-            tmr.alarm(3, 20, 0 ,function()
+	    local mytimer = tmr.create()
+	    mytimer:register(50, tmr.ALARM_SINGLE, function (t)
                 replaceMap=fillDynamicMap()
                 replaceMap["$ADDITIONAL_LINE"]="<h2><font color=\"red\">ERROR</font></h2>"
                 sendPage(conn, "webpage.html", replaceMap)
+		t:unregister()
             end)
+	    mytimer:start()
         end
   else
       replaceMap=fillDynamicMap()

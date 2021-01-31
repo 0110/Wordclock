@@ -13,7 +13,6 @@ end)
 
 local blacklistfile="init.lua config.lua config.lua.new webpage.html"
 function recompileAll()
-    for i=0,5 do tmr.stop(i) end
     -- compile all files
     l = file.list();
     for k,_ in pairs(l) do
@@ -43,9 +42,8 @@ function mydofile(mod)
     end
 end    
 
-
-tmr.alarm(1, 5000, 0, function()
-    tmr.stop(2)
+local initTimer = tmr.create()
+initTimer:register(5000, tmr.ALARM_SINGLE, function (t)
     if (
         (file.open("main.lua")) or 
         (file.open("timecore.lua")) or 
@@ -68,5 +66,7 @@ tmr.alarm(1, 5000, 0, function()
     else
         print("No Main file found")
     end
+    t:unregister()
 end)
+initTimer:start()
 print("Init file end reached")

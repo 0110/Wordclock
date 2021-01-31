@@ -96,7 +96,9 @@ function registerMqtt()
                 m=nil
                 t=nil
                 mqttConnected = false
-                for i=0,6,1 do tmr.stop(i) end
+		if (looptimer ~= nil) then
+			looptimer:unregister()
+		end
                 collectgarbage()
                 mydofile("telnet")
                 if (startTelnetServer ~= nil) then
@@ -120,14 +122,17 @@ function registerMqtt()
       mqttConnected = true
       -- subscribe topic with qos = 0
       client:subscribe(mqttPrefix .. "/cmd/#", 0)
-      tmr.alarm(3, 1000, 0, function() 
+      local mytimer = tmr.create()
+      mytimer:register(1000, tmr.ALARM_SINGLE, function (t)
 	      -- publish a message with data = hello, QoS = 0, retain = 0
 	      client:publish(mqttPrefix .. "/ip", tostring(wifi.sta.getip()), 0, 0)
           local red = string.byte(colorBg,2)
           local green = string.byte(colorBg,1)
           local blue = string.byte(colorBg,3)
           client:publish(mqttPrefix .. "/background", tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue), 0, 0)
+	  t:unregister()
       end)
+      mytimer:start()
     end,
     function(client, reason)
       print("failed reason: " .. reason)
@@ -147,7 +152,8 @@ function startMqttClient()
         end
         oldBrightness=0
         oldTemp=0
-        tmr.alarm(5, 5001, 1 ,function()
+	local mqtttimer = tmr.create()
+	mqtttimer:register(5001, tmr.ALARM_AUTO, function (t)
             if (mqttConnected) then
                 local temp = nil
                 if (t ~= nil) then
@@ -165,5 +171,6 @@ function startMqttClient()
                 oldBrightness = briPercent
             end
         end)
+	mqtttimer:start()
     end
 end

@@ -1,10 +1,9 @@
 -- Main Module
 
+local looptimer = tmr.create()
 displayword = {}
 
 function startSetupMode()
-    tmr.stop(0)
-    tmr.stop(1)
     -- start the webserver module 
     mydofile("webserver")
     
@@ -112,7 +111,8 @@ function normalOperation()
    
     connect_counter=0
     -- Wait to be connect to the WiFi access point. 
-    tmr.alarm(0, 500, 1, function()
+    local wifitimer = tmr.create()
+    wifitimer:register(5000, tmr.ALARM_SINGLE, function (t)
       connect_counter=connect_counter+1
       if wifi.sta.status() ~= 5 then
          print(connect_counter ..  "/60 Connecting to AP...")
@@ -148,7 +148,7 @@ function normalOperation()
            ws2812.write(string.char(0,0,0):rep(114))
          end
       else
-        tmr.stop(0)
+        t:unregister()
         print('IP: ',wifi.sta.getip())
         -- Here the WLAN is found, and something is done
         print("Solving dependencies")
@@ -158,8 +158,9 @@ function normalOperation()
             mydofile(mod)
         end
 
-        setupCounter=5
-        tmr.alarm(1, 5000, 1 ,function()
+        local setupCounter=5
+	local alive=0
+	looptimer:register(5000, tmr.ALARM_AUTO, function (lt)
             if (setupCounter > 4) then
                 syncTimeFromInternet()
                 setupCounter=setupCounter-1
@@ -178,17 +179,20 @@ function normalOperation()
                     displayTime()
                 end
                 setupCounter=setupCounter-1
+	    elseif ((alive % 60) == 0) then
+        	-- sync the time every 5 minutes
+            	syncTimeFromInternet()
+            	displayTime()
+		alive = alive + 1
             else
                 displayTime()
+		alive = alive + 1
             end
             collectgarbage()
+	    -- Feed the system watchdog.
+	    tmr.wdclr()
         end)
-         
-        -- sync the time every 5 minutes
-        tmr.alarm(2, 300003, 1 ,function()
-            syncTimeFromInternet()
-            displayTime()
-        end)
+        looptimer:start() 
         
       end
       -- when no wifi available, open an accesspoint and ask the user
@@ -196,12 +200,8 @@ function normalOperation()
         startSetupMode()
       end
     end)
+    wifitimer:start()
     
-    
-end
-
-function stopWordclock()
-    for i=0,5,1 do tmr.stop(i) end
 end
 
 -------------------main program -----------------------------
@@ -218,11 +218,12 @@ else
 end
 ----------- button ---------
 gpio.mode(3, gpio.INPUT)
-btnCounter=0
--- Start the time Thread
-tmr.alarm(4, 500, 1 ,function()
+local btnCounter=0
+-- Start the time Thread handling the button
+local btntimer = tmr.create()
+btntimer:register(5000, tmr.ALARM_AUTO, function (t)
      if (gpio.read(3) == 0) then
-        tmr.stop(1) -- stop the LED thread
+	looptimer:unregister()
         print("Button pressed " .. tostring(btnCounter))
         btnCounter = btnCounter + 5
         local ledBuf= string.char(128,0,0):rep(btnCounter) .. string.char(0,0,0):rep(110 - btnCounter)
@@ -234,3 +235,4 @@ tmr.alarm(4, 500, 1 ,function()
         end
      end
 end)
+btntimer:start()
