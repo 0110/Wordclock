@@ -1,7 +1,7 @@
 --TODO:
-
 configFile="config.lua"
 
+httpSending=false
 sentBytes=0
 function sendPage(conn, nameOfFile, replaceMap)
   collectgarbage()
@@ -11,8 +11,9 @@ function sendPage(conn, nameOfFile, replaceMap)
         conn:close() 
         print("Page sent")
         collectgarbage()
+        httpSending=false
     else
-        print("Next") 
+        collectgarbage()
         sendPage(conn, nameOfFile, replaceMap)
     end
   end)
@@ -32,9 +33,6 @@ function sendPage(conn, nameOfFile, replaceMap)
     local line = file.readline()
     
     while (line ~= nil) do
-        -- increase the amount of sent bytes
-        sentBytes=sentBytes+string.len(line)
-        
         -- all placeholder begin with a $, so search for it in the current line
         if (line:find("$") ~= nil) then
             -- Replace the placeholder with the dynamic content
@@ -45,10 +43,15 @@ function sendPage(conn, nameOfFile, replaceMap)
                 end
             end
         end
+
+        
+        -- increase the amount of sent bytes
+        sentBytes=sentBytes+string.len(line)
+        
         buf = buf .. line
         
-        -- Sent after 1k data
-        if (string.len(buf) >= 700) then
+        -- Sent after 500 bytes data
+        if ( (string.len(buf) >= 500) or (node.heap() < 2000) ) then
             line=nil
             conn:send(buf)
             print("Sent part of " .. sentBytes .. "B")
@@ -62,10 +65,11 @@ function sendPage(conn, nameOfFile, replaceMap)
     --reset amount of sent bytes, as we reached the end
     sentBytes=0
     -- send the rest
-    conn:send(buf)
-    print("Sent rest")
+    if (string.len(buf) > 0) then
+        conn:send(buf)
+        print("Sent rest")
+    end
   end
-  
 end
 
 function fillDynamicMap()    
@@ -118,24 +122,61 @@ function fillDynamicMap()
     replaceMap["$HEXCOLOR3"]=hexColor3
     replaceMap["$HEXCOLOR4"]=hexColor4
     replaceMap["$HEXCOLORBG"]=hexColorBg
+    replaceMap["$INV46"]=((inv46 ~= nil and inv46 == "on") and "checked" or "")
+    replaceMap["$AUTODIM"]=((dim ~= nil and dim == "on") and "checked" or "")
     return replaceMap   
+end
+
+function stopWordclock()
+    print("Stop all Wordclock")
+    -- Stop all
+    for i=0,5 do tmr.stop(i) end
+    -- unload all other functions 
+    -- grep function *.lua | grep -v webserver | grep -v init.lua | grep -v main.lua | cut -f 2 -d ':' | grep "^function" | sed "s/function //g" | grep -o "^[a-zA-Z0-9\_]*"
+    updateColor = nil
+    drawLEDs = nil
+    round = nil
+    generateLEDs = nil
+    isSummerTime = nil
+    getUTCtime = nil
+    getTime = nil
+    display_timestat = nil
+    collectgarbage()
 end
 
 function startWebServer()
  srv=net.createServer(net.TCP)
  srv:listen(80,function(conn)
   conn:on("receive", function(conn,payload)
-   
+   if (httpSending) then
+     print("HTTP sending... be patient!")
+     return
+   end
    if (payload:find("GET /") ~= nil) then
-   --here is code for handling http request from a web-browser
-    
+    httpSending=true
+    stopWordclock()
+   if (color == nil) then
+        color=string.char(0,128,0)
+    end
+    ws2812.write(string.char(0,0,0):rep(56) .. color:rep(2) .. string.char(0,0,0):rep(4) .. color:rep(2) .. string.char(0,0,0):rep(48))
+    -- Start Time after 3 minute
+    tmr.alarm(5, 180000, 0 ,function()
+        dependModules = { "timecore" , "wordclock", "displayword" }
+        for _,mod in pairs(dependModules) do
+            print("Loading " .. mod)
+            mydofile(mod)
+        end
+        -- Start the time Thread again
+        tmr.alarm(1, 20000, 1 ,function()
+             displayTime()
+         end)
+    end)
     if (sendPage ~= nil) then
-       print("Sending webpage.html ...")
+       print("Sending webpage.html (" .. tostring(node.heap()) .. "B free) ...")
        -- Load the sendPagewebcontent
        replaceMap=fillDynamicMap()
        sendPage(conn, "webpage.html", replaceMap)
     end
-    
    else if (payload:find("POST /") ~=nil) then
     --code for handling the POST-request (updating settings)
      _, postdatastart = payload:find("\r\n\r\n")
@@ -165,7 +206,9 @@ function startWebServer()
         file.remove(configFile .. ".new")
         sec, _ = rtctime.get()
         file.open(configFile.. ".new", "w+")
-        file.write("-- Config\n" .. "wifi.sta.config(\"" .. _POST.ssid .. "\",[[" .. _POST.password .. "]])\n" .. "sntpserverhostname=\"" .. _POST.sntpserver .. "\"\n" .. "timezoneoffset=\"" .. _POST.timezoneoffset .. "\"\n")
+          file.write("-- Config\n" .. "station_cfg={}\nstation_cfg.ssid=\"" .. _POST.ssid .. "\"\nstation_cfg.pwd=\"" .. _POST.password .. "\"\nstation_cfg.save=false\nwifi.sta.config(station_cfg)\n")
+          file.write("sntpserverhostname=\"" .. _POST.sntpserver .. "\"\n" .. "timezoneoffset=\"" .. _POST.timezoneoffset .. "\"\n".. "inv46=\"" .. tostring(_POST.inv46) .. "\"\n" .. "dim=\"" .. tostring(_POST.dim) .. "\"\n")
+        
         if ( _POST.fcolor ~= nil) then
             -- color=string.char(_POST.green, _POST.red, _POST.blue)  
             print ("Got fcolor: " .. _POST.fcolor)
@@ -277,19 +320,18 @@ function startWebServer()
        node.output(nil)
        global_c=nil
      end)
-     print("Welcome to Word Clock")
-     
+     print("Welcome to Word Clock") 
     end
    end
    end)
-    
   conn:on("disconnection", function(c)
           print("Goodbye")
           node.output(nil)        -- un-register the redirect output function, output goes to serial
-          
+          collectgarbage()
           --reset amount of sent bytes, as we reached the end
           sentBytes=0
        end)
  end)
 
 end
+--FileView done.

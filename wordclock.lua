@@ -12,7 +12,7 @@ function display_timestat(hours, minutes, longmode)
  end
 
  -- generate an empty return type
- local ret = { itis=0, fiveMin=0, tenMin=0, after=0, before=0, threeHour=0, quater=0, threequater=0, half=0, s=0, 
+ local ret = { it=0, is=0, fiveMin=0, tenMin=0, after=0, before=0, threeHour=0, quater=0, threequater=0, half=0, s=0, 
                one=0, oneLong=0, two=0, three=0, four=0, five=0, six=0, seven=0, eight=0, nine=0, ten=0, eleven=0, twelve=0,
                twenty=0, 
                clock=0, sr_nc=0, min1=0, min2=0, min3=0, min4=0 }
@@ -31,7 +31,8 @@ function display_timestat(hours, minutes, longmode)
  if ((longmode==1) 
     or (minutes==0)
     or (minutes==6)) then
-        ret.itis=1        
+        ret.it=1
+        ret.is=1        
  end
 
  -- Handle minutes
@@ -63,7 +64,7 @@ function display_timestat(hours, minutes, longmode)
     ret.before=1
    elseif (minutes==9) then
     -- Hande if three quater or quater before is displayed
-    if (threequater ~= nil) then
+    if ((threequater ~= nil) and (threequater==true or threequater=="on")) then
         ret.threequater=1
     else
         ret.quater = 1
@@ -104,10 +105,10 @@ function display_timestat(hours, minutes, longmode)
  end
  
  if (hours == 1) then
-  if (ret.before == 1) then
-    ret.oneLong = 1
-  else
+  if ((ret.it == 1) and (ret.half == 0) ) then
     ret.one=1
+  else
+    ret.oneLong=1
   end
  elseif (hours == 2) then
   ret.two=1
@@ -134,83 +135,4 @@ function display_timestat(hours, minutes, longmode)
  end
  collectgarbage()
  return ret
-end
-
--- @fn display_countwords
--- Count the amount of characters, used to describe the current time in words
--- @param words the same structure, as generated with the function @see display_timestat
--- @return the amount of words, used to describe the time or <code>0</code> on errors
-function display_countwords_de(words)
-   local amount=0
-   if (words.itis == 1) then
-    amount = amount + 5
-   end
-   if (words.fiveMin == 1) then
-    amount = amount + 4
-   end
-   if (words.tenMin == 1) then
-    amount = amount + 4
-   end
-   if (words.twenty == 1) then
-    amount = amount + 7
-   end
-   if (words.threequater == 1) then
-    amount = amount + 11
-   end
-   if (words.quater == 1) then
-    amount = amount + 7
-   end
-   if (words.before == 1) then
-    amount = amount + 3
-   end
-   if (words.after == 1) then
-    amount = amount + 4
-   end
-   if (words.half == 1) then
-    amount = amount + 4
-   end
-   if (words.twelve == 1) then
-    amount = amount + 5
-   end
-   if (words.seven == 1) then
-    amount = amount + 6
-   end
-   if (words.one == 1) then
-    amount = amount + 3
-   end
-   if (words.oneLong == 1) then
-    amount = amount + 4
-   end
-   if (words.two == 1) then
-    amount = amount + 4
-   end
-   if (words.three == 1) then
-    amount = amount + 4
-   end
-   if (words.five == 1) then
-    amount = amount + 4
-   end
-   if (words.four == 1) then
-    amount = amount + 4
-   end
-   if (words.nine == 1) then
-    amount = amount + 4
-   end
-   if (words.eleven == 1) then
-    amount = amount + 3
-   end
-   if (words.eight == 1) then
-    amount = amount + 4
-   end
-   if (words.ten == 1) then
-    amount = amount + 4
-   end
-   if (words.clock == 1) then
-    amount = amount + 3
-   end
-   if (words.six == 1) then
-    amount = amount + 5
-   end
-
-   return amount 
 end

@@ -1,0 +1,17 @@
+# This file describes the layout of the WS2812 LEDs.
+# _ will only draw a rect
+# A-Z or 1-9 will draw the text or number
+# each element will be updated with its color with the known commands of the nodemcu firmware
+#
+# Here the configuration for the wordclock:
+ESKISTLFÜNF
+ZEHNZWANZIG
+DREIVIERTEL
+TGNACHVORJM
+HALBXZWÖLFP
+ZWEINSIEBEN
+KDREIRHFÜNF
+ELFNEUNVIER
+WACHTZEHNRS
+BSECHSFMUHR
+____

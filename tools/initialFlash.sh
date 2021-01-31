@@ -3,6 +3,14 @@
 LUATOOL=./tools/luatool.py
 
 DEVICE=$1
+BAUD=115200
+
+# check environment
+if [ ! -f $LUATOOL ]; then
+ echo "$LUATOOL not found"
+ echo "is the command prompt at the same level as the tools folder ?"
+ exit 1
+fi
 
 # check the serial connection
 
@@ -11,23 +19,38 @@ if [ ! -c $DEVICE ]; then
  exit 1
 fi
 
-
-if [ $# -ne 1 ]; then
+if [ $# -eq 0 ]; then
     echo ""
-    echo "e.g. usage $0 <device>"
+    echo "e.g. usage $0 <device> [<files to upoad>]"
     exit 1
 fi
 
-FILES="displayword.lua main.lua timecore.lua webpage.lua webserver.lua wordclock.lua init.lua"
+if [ $# -eq 1 ]; then
+	FILES="displayword.lua main.lua timecore.lua webpage.html webserver.lua telnet.lua wordclock.lua init.lua"
+else
+	FILES=$2
+fi
+
+
 # Format filesystem first
 echo "Format the complete ESP"
-$LUATOOL -p $DEVICE -w
+$LUATOOL -p $DEVICE -w -b $BAUD
 if [ $? -ne 0 ]; then
     echo "STOOOOP"
     exit 1
 fi
 
-echo 
+#stty -F $DEVICE $BAUD
+#echo "Reboot the ESP"
+#echo "node.restart()" >> $DEVICE
+#sleep 1
+#for i in $(seq 0 5); do
+#	echo "Stop TMR $i"
+#	echo "tmr.stop($i)" >> $DEVICE
+#	sleep 1
+#done
+
+#echo 
 echo "Start Flasing ..."
 for f in $FILES; do
     if [ ! -f $f ]; then
@@ -36,7 +59,7 @@ for f in $FILES; do
         exit 1
     fi
     echo "------------- $f ------------"
-    $LUATOOL -p $DEVICE -f $f -t $f
+    $LUATOOL -p $DEVICE -f $f -b $BAUD -t $f 
     if [ $? -ne 0 ]; then
         echo "STOOOOP"
         exit 1
@@ -44,6 +67,6 @@ for f in $FILES; do
 done
 
 echo "Reboot the ESP"
-$LUATOOL -p $DEVICE -r
+echo "node.restart()" >> $DEVICE
 
 exit 0
