@@ -15,6 +15,8 @@ bootledtimer:start()
 
 local blacklistfile="init.lua config.lua config.lua.new webpage.html"
 function recompileAll()
+    -- 3, discard Local, Upvalue and line-number debug info
+    node.stripdebug(3)
     -- compile all files
     l = file.list();
     for k,_ in pairs(l) do
@@ -77,7 +79,7 @@ initTimer:register(5000, tmr.ALARM_SINGLE, function (t)
             dofile("config.lua")
             normalOperation()
         else
-            mydofile("webserver")
+            mydofile("websrv_diet")
             -- Logic for inital setup
             startSetupMode()
         end
