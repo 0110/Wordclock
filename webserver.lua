@@ -1,8 +1,7 @@
---TODO:
-configFile="config.lua"
-
-httpSending=false
-sentBytes=0
+-- Webserver
+local configFile="config.lua"
+local httpSending=false
+local sentBytes=0
 function sendPage(conn, nameOfFile, replaceMap)
   collectgarbage()
   print("Sending " .. nameOfFile .. " " .. sentBytes .. "B already; " .. node.heap() .. "B in heap")
@@ -127,22 +126,6 @@ function fillDynamicMap()
     return replaceMap   
 end
 
-function stopWordclock()
-    print("Stop all Wordclock")
-    -- Stop all
-    -- unload all other functions 
-    -- grep function *.lua | grep -v webserver | grep -v init.lua | grep -v main.lua | cut -f 2 -d ':' | grep "^function" | sed "s/function //g" | grep -o "^[a-zA-Z0-9\_]*"
-    updateColor = nil
-    drawLEDs = nil
-    round = nil
-    generateLEDs = nil
-    isSummerTime = nil
-    getUTCtime = nil
-    getTime = nil
-    display_timestat = nil
-    collectgarbage()
-end
-
 function startWebServer()
  srv=net.createServer(net.TCP)
  srv:listen(80,function(conn)
@@ -153,7 +136,6 @@ function startWebServer()
    end
    if (payload:find("GET /") ~= nil) then
     httpSending=true
-    stopWordclock()
    if (color == nil) then
         color=string.char(0,128,0)
     end
