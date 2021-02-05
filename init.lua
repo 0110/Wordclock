@@ -10,6 +10,9 @@ bootledtimer:register(500, tmr.ALARM_AUTO, function (t)
     counter1=counter1+1
     spaceLeds = math.max(MAXLEDS - (counter1*2), 0)
     ws2812.write(string.char(128,0,0):rep(counter1) .. string.char(0,0,0):rep(spaceLeds) .. string.char(0,0,64):rep(counter1))
+    if ((counter1*2) > 114) then
+        t:unregister()
+    end
 end)
 bootledtimer:start()
 
@@ -59,6 +62,7 @@ initTimer:register(5000, tmr.ALARM_SINGLE, function (t)
         (file.open("timecore.lua")) or 
         (file.open("wordclock.lua")) or 
         (file.open("displayword.lua")) or
+        (file.open("websrv_diet.lua")) or
         (file.open("mqtt.lua")) or 
         (file.open("ds18b20.lua")) or 
         (file.open("telnet.lua"))
