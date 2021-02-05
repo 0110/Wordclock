@@ -6,7 +6,7 @@ MAXLEDS=110
 counter1=0
 ws2812.write(string.char(0,0,0):rep(114))
 local bootledtimer = tmr.create()
-bootledtimer:register(5000, tmr.ALARM_AUTO, function (t)
+bootledtimer:register(500, tmr.ALARM_AUTO, function (t)
     counter1=counter1+1
     spaceLeds = math.max(MAXLEDS - (counter1*2), 0)
     ws2812.write(string.char(128,0,0):rep(counter1) .. string.char(0,0,0):rep(spaceLeds) .. string.char(0,0,64):rep(counter1))
@@ -50,6 +50,8 @@ end
 initTimer = tmr.create()
 initTimer:register(5000, tmr.ALARM_SINGLE, function (t)
     bootledtimer:unregister()
+    t:unregister()
+    collectgarbage()
     if (
         (file.open("main.lua")) or 
         (file.open("timecore.lua")) or 
@@ -66,7 +68,7 @@ initTimer:register(5000, tmr.ALARM_SINGLE, function (t)
         print("Rebooting ...")
         -- reboot repairs everything
         node.restart()
-    elseif (file.open("main.lc")) then
+    else
         if ( file.open("config.lua") ) then
             --- Normal operation
             print("Starting main")      
@@ -79,9 +81,6 @@ initTimer:register(5000, tmr.ALARM_SINGLE, function (t)
             -- Logic for inital setup
             startSetupMode()
         end
-    else
-        print("No Main file found")
     end
-    t:unregister()
 end)
 initTimer:start()

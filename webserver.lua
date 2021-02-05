@@ -74,35 +74,16 @@ end
 function fillDynamicMap()    
     replaceMap = {}
     ssid, _ = wifi.sta.getconfig()
-
-    if (ssid == nil) then
-        ssid="Not set"
-    end
-    if (sntpserverhostname == nil) then
-        sntpserverhostname="ptbtime1.ptb.de"
-    end
-    if (timezoneoffset == nil) then
-        timezoneoffset=1
-    end
+    if (ssid == nil) then return replaceMap end
+    if (sntpserverhostname == nil) then sntpserverhostname="ptbtime1.ptb.de" end
+    if (timezoneoffset == nil) then timezoneoffset=1 end
     -- Set the default color, if nothing is set
-    if (color == nil) then
-        color=string.char(0,0,250)
-    end
-    if (color1 == nil) then
-        color1=color
-    end
-    if (color2 == nil) then
-        color2=color
-    end
-    if (color3 == nil) then
-        color3=color
-    end
-    if (color4 == nil) then
-        color4=color
-    end
-    if (colorBg == nil) then
-        colorBg=string.char(0,0,0) -- black is the default background color
-    end
+    if (color == nil) then color=string.char(0,0,250) end
+    if (color1 == nil) then color1=color end
+    if (color2 == nil) then color2=color end
+    if (color3 == nil) then color3=color end
+    if (color4 == nil) then color4=color end
+    if (colorBg == nil) then colorBg=string.char(0,0,0) end
     local hexColor = "#" .. string.format("%02x",string.byte(color,2)) .. string.format("%02x",string.byte(color,1)) .. string.format("%02x",string.byte(color,3))
     local hexColor1 = "#" .. string.format("%02x",string.byte(color1,2)) .. string.format("%02x",string.byte(color1,1)) .. string.format("%02x",string.byte(color1,3))
     local hexColor2 = "#" .. string.format("%02x",string.byte(color2,2)) .. string.format("%02x",string.byte(color2,1)) .. string.format("%02x",string.byte(color2,3))
