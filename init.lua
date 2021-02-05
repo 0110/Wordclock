@@ -27,6 +27,7 @@ function recompileAll()
             node.compile(k)
             -- remove the lua file
             file.remove(k)
+            node.restart()
         else
             print("No code: " .. k)
         end
@@ -46,14 +47,14 @@ function mydofile(mod)
     end
 end    
 
-local initTimer = tmr.create()
+initTimer = tmr.create()
 initTimer:register(5000, tmr.ALARM_SINGLE, function (t)
     bootledtimer:unregister()
     if (
         (file.open("main.lua")) or 
         (file.open("timecore.lua")) or 
         (file.open("wordclock.lua")) or 
-        (file.open("displayword.lua")) or 
+        (file.open("displayword.lua")) or
         (file.open("mqtt.lua")) or 
         (file.open("ds18b20.lua")) or 
         (file.open("telnet.lua"))
@@ -66,8 +67,18 @@ initTimer:register(5000, tmr.ALARM_SINGLE, function (t)
         -- reboot repairs everything
         node.restart()
     elseif (file.open("main.lc")) then
-        print("Starting main")      
-        dofile("main.lc")
+        if ( file.open("config.lua") ) then
+            --- Normal operation
+            print("Starting main")      
+            dofile("main.lc")
+            wifi.setmode(wifi.STATION)
+            dofile("config.lua")
+            normalOperation()
+        else
+            mydofile("webserver")
+            -- Logic for inital setup
+            startSetupMode()
+        end
     else
         print("No Main file found")
     end
