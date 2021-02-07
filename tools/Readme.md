@@ -10,4 +10,4 @@ LuaSrcDiet reduces the size of Lua 5.1+ source files by aggressively removing al
 https://raw.githubusercontent.com/jirutka/luasrcdiet/master/bin/luasrcdiet
 
 ## Example:
- bin/luasrcdiet ../webserver.lua -o ../websrv_diet.lua
+ bin/luasrcdiet ../webserver.lua -o ../webserver_diet.lua
