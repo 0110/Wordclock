@@ -249,7 +249,6 @@ t=0
 end)
 end)
 end
-function startSetupMode()
 collectgarbage()
 wifi.setmode(wifi.SOFTAP)
 cfg={}
@@ -267,4 +266,3 @@ print("Waiting in access point >wordclock< for Clients")
 print("Please visit 192.168.4.1")
 startWebServer()
 collectgarbage()
-end

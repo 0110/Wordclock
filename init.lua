@@ -2,8 +2,8 @@ uart.setup(0, 115200, 8, 0, 1, 1 )
 print("Autostart in 5 seconds...")
 
 ws2812.init() -- WS2812 LEDs initialized on GPIO2
-MAXLEDS=110
-counter1=0
+local MAXLEDS=110
+local counter1=0
 ws2812.write(string.char(0,0,0):rep(114))
 local bootledtimer = tmr.create()
 bootledtimer:register(500, tmr.ALARM_AUTO, function (t)
@@ -60,6 +60,8 @@ initTimer = tmr.create()
 initTimer:register(5000, tmr.ALARM_SINGLE, function (t)
     bootledtimer:unregister()
     t:unregister()
+    initTimer=nil
+    bootledtimer=nil
     collectgarbage()
     if (
         (file.open("main.lua")) or 
@@ -87,9 +89,8 @@ initTimer:register(5000, tmr.ALARM_SINGLE, function (t)
             dofile("config.lua")
             normalOperation()
         else
-            mydofile("webserver")
             -- Logic for inital setup
-            startSetupMode()
+            mydofile("webserver")
         end
     end
 end)
