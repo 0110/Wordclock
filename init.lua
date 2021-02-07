@@ -45,6 +45,10 @@ function mydofile(mod)
       dofile( mod .. ".lua")
     elseif (file.open(mod ..  ".lc")) then
       dofile(mod .. ".lc")
+    elseif (file.open(mod ..  "_diet.lc")) then
+      dofile(mod .. "_diet.lc")
+    elseif (file.open(mod ..  "_diet.lua")) then
+      dofile(mod .. "_diet.lua")      
     elseif (file.open(mod)) then
         dofile(mod)
     else
@@ -62,7 +66,7 @@ initTimer:register(5000, tmr.ALARM_SINGLE, function (t)
         (file.open("timecore.lua")) or 
         (file.open("wordclock.lua")) or 
         (file.open("displayword.lua")) or
-        (file.open("websrv_diet.lua")) or
+        (file.open("webserver.lua")) or
         (file.open("mqtt.lua")) or 
         (file.open("ds18b20.lua")) or 
         (file.open("telnet.lua"))
@@ -83,7 +87,7 @@ initTimer:register(5000, tmr.ALARM_SINGLE, function (t)
             dofile("config.lua")
             normalOperation()
         else
-            mydofile("websrv_diet")
+            mydofile("webserver")
             -- Logic for inital setup
             startSetupMode()
         end

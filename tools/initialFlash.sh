@@ -26,7 +26,7 @@ if [ $# -eq 0 ]; then
 fi
 
 if [ $# -eq 1 ]; then
-	FILES="displayword.lua main.lua timecore.lua webpage.html websrv_diet.lua telnet.lua wordclock.lua init.lua"
+	FILES="displayword.lua main.lua timecore.lua webpage.html webserver_diet.lua telnet.lua wordclock.lua init.lua"
 else
 	FILES=$2
 fi
