@@ -1,6 +1,9 @@
 #!/bin/bash
 
-LUATOOL=./tools/luatool.py
+TOOLDIR=tools/
+LUATOOL=${TOOLDIR}luatool.py
+
+DIET=bin/luasrcdiet
 
 DEVICE=$1
 BAUD=115200
@@ -31,6 +34,22 @@ else
 	FILES=$2
 fi
 
+echo "Generate DIET version of the files"
+OUTFILES=""
+ROOTDIR=$PWD
+cd $TOOLDIR
+for f in $FILES; do
+	if [[ "$f" == *.lua ]] && [[ "$f" != init.lua ]]; then
+		echo "Compress $f ..."
+		out=$(echo "$f" | sed 's/.lua/_diet.lua/g')
+		$DIET ../$f -o ../diet/$out
+		OUTFILES="$OUTFILES diet/$out"
+	else
+		OUTFILES="$OUTFILES $f"
+	fi
+done
+FILES=$OUTFILES
+cd $ROOTDIR
 
 if [ $# -eq 1 ]; then
 	# Format filesystem first
