@@ -16,37 +16,9 @@ bootledtimer:register(500, tmr.ALARM_AUTO, function (t)
 end)
 bootledtimer:start()
 
-local blacklistfile="init.lua config.lua config.lua.new webpage.html"
-function recompileAll()
-    -- 3, discard Local, Upvalue and line-number debug info
-    node.stripdebug(3)
-    -- compile all files
-    l = file.list();
-    for k,_ in pairs(l) do
-      if (string.find(k, ".lc", -3)) then
-        print ("Skipping " .. k)
-      elseif  (string.find(blacklistfile, k) == nil) then
-        -- Only look at lua files
-        if (string.find(k, ".lua") ~= nil) then
-            print("Compiling and deleting " .. k)
-            node.compile(k)
-            -- remove the lua file
-            file.remove(k)
-            node.restart()
-        else
-            print("No code: " .. k)
-        end
-      end
-    end
-end
-
 function mydofile(mod)
     if (file.open(mod ..  ".lua")) then
       dofile( mod .. ".lua")
-    elseif (file.open(mod ..  ".lc")) then
-      dofile(mod .. ".lc")
-    elseif (file.open(mod ..  "_diet.lc")) then
-      dofile(mod .. "_diet.lc")
     elseif (file.open(mod ..  "_diet.lua")) then
       dofile(mod .. "_diet.lua")      
     elseif (file.open(mod)) then
@@ -62,36 +34,16 @@ initTimer:register(5000, tmr.ALARM_SINGLE, function (t)
     t:unregister()
     initTimer=nil
     bootledtimer=nil
-    collectgarbage()
-    if (
-        (file.open("main.lua")) or 
-        (file.open("timecore.lua")) or 
-        (file.open("wordclock.lua")) or 
-        (file.open("displayword.lua")) or
-        (file.open("webserver.lua")) or
-        (file.open("mqtt.lua")) or 
-        (file.open("ds18b20.lua")) or 
-        (file.open("telnet.lua"))
-        ) then    
-        c = string.char(0,128,0)
-        w = string.char(0,0,0)
-        ws2812.write(w:rep(4) .. c .. w:rep(15) .. c .. w:rep(9) .. c .. w:rep(30) .. c .. w:rep(41) .. c )
-        recompileAll()
-        print("Rebooting ...")
-        -- reboot repairs everything
-        node.restart()
+    if ( file.open("config.lua") ) then
+        --- Normal operation
+        print("Starting main")      
+        mydofile("main")
+        wifi.setmode(wifi.STATION)
+        dofile("config.lua")
+        normalOperation()
     else
-        if ( file.open("config.lua") ) then
-            --- Normal operation
-            print("Starting main")      
-            dofile("main.lc")
-            wifi.setmode(wifi.STATION)
-            dofile("config.lua")
-            normalOperation()
-        else
-            -- Logic for inital setup
-            mydofile("webserver")
-        end
+        -- Logic for inital setup
+        mydofile("webserver")
     end
 end)
 initTimer:start()
