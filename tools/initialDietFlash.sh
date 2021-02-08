@@ -68,8 +68,10 @@ for f in $FILES; do
         echo "place the terminal into the folder where the lua files are present"
         exit 1
     fi
-    echo "------------- $f ------------"
-    python3 $LUATOOL -p $DEVICE -f $f -b $BAUD -t $f 
+
+    espFile=$(echo "$f" | sed 's;diet/;;g')
+    echo "------------- $espFile ------------"
+    python3 $LUATOOL -p $DEVICE -f $f -b $BAUD -t $espFile
     if [ $? -ne 0 ]; then
         echo "STOOOOP"
         exit 1
