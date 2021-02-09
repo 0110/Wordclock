@@ -18,7 +18,7 @@ fi
 # check the serial connection
 
 if [ ! -c $DEVICE ]; then
- echo "$DEVICE does not exist"
+ echo "Serial target: $DEVICE does not exist"
  exit 1
 fi
 

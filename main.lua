@@ -2,6 +2,7 @@
 
 local looptimer = tmr.create()
 displayword = {}
+rowbgColor= {}
 
 function syncTimeFromInternet()
   if (syncRunning == nil) then
@@ -37,7 +38,7 @@ function displayTime()
      else
         words.briPercent=nil
      end
-     dofile("displayword.lc")
+     mydofile("displayword")
      if (displayword ~= nil) then
         --if lines 4 to 6 are inverted due to hardware-fuckup, unfuck it here
         local invertRows=false
