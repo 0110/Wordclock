@@ -135,10 +135,11 @@ function normalOperation()
 
         local setupCounter=5
 	local alive=0
-	looptimer:register(5000, tmr.ALARM_AUTO, function (lt)
+	looptimer:register(1000, tmr.ALARM_AUTO, function (lt)
             if (setupCounter > 4) then
                 syncTimeFromInternet()
                 setupCounter=setupCounter-1
+                alive = 1
             elseif (setupCounter > 3) then
                 if (startMqttClient ~= nil) then
                     startMqttClient()
@@ -154,18 +155,17 @@ function normalOperation()
                     displayTime()
                 end
                 setupCounter=setupCounter-1
-	    elseif ((alive % 60) == 0) then
-        	-- sync the time every 5 minutes
+	        elseif ( (alive % 300) == 0) then
+        	    -- sync the time every 5 minutes
             	syncTimeFromInternet()
-            	displayTime()
-		alive = alive + 1
+		        alive = alive + 1
             else
                 displayTime()
-		alive = alive + 1
+		        alive = alive + 1
             end
             collectgarbage()
-	    -- Feed the system watchdog.
-	    tmr.wdclr()
+    	    -- Feed the system watchdog.
+    	    tmr.wdclr()
         end)
         looptimer:start() 
         
