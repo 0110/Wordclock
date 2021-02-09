@@ -158,7 +158,6 @@ function startMqttClient()
                 local temp = nil
                 if (t ~= nil) then
                     temp=readTemp()
-                    print(tostring(temp) .. "°C")
                 end
                 if (oldBrightness ~= briPercent) then
                  m:publish(mqttPrefix .. "/brightness", tostring(briPercent), 0, 0)

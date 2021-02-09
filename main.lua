@@ -10,7 +10,6 @@ function syncTimeFromInternet()
     sntp.sync(sntpserverhostname,
      function(sec,usec,server)
       print('sync', sec, usec, server)
-      displayTime()
       syncRunning=nil
      end,
      function()
@@ -23,6 +22,7 @@ end
 
 briPercent = 50
 function displayTime()
+    collectgarbage()
      local sec, usec = rtctime.get()
      -- Handle lazy programmer:
      if (timezoneoffset == nil) then
@@ -135,7 +135,7 @@ function normalOperation()
 
         local setupCounter=5
 	local alive=0
-	looptimer:register(1000, tmr.ALARM_AUTO, function (lt)
+	looptimer:register(2500, tmr.ALARM_AUTO, function (lt)
             if (setupCounter > 4) then
                 syncTimeFromInternet()
                 setupCounter=setupCounter-1
@@ -155,7 +155,7 @@ function normalOperation()
                     displayTime()
                 end
                 setupCounter=setupCounter-1
-	        elseif ( (alive % 300) == 0) then
+	        elseif ( (alive % 120) == 0) then
         	    -- sync the time every 5 minutes
             	syncTimeFromInternet()
 		        alive = alive + 1
