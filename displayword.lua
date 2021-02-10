@@ -7,13 +7,13 @@ local updateColor = function (data)
     	if (div < 1) then
     	    return data.colorFg
     	elseif (div < 2) then 
-    	    return data.colorMin1
+    	    return data.colorM1
     	elseif (div < 3) then 
-    	    return data.colorMin2
+    	    return data.colorM2
     	elseif (div < 4) then 
-    	    return data.colorMin3
+    	    return data.colorM3
     	elseif (div < 5) then 
-    	    return data.colorMin4
+    	    return data.colorM4
     	else
     	    return data.colorFg
     	end
@@ -53,8 +53,18 @@ end
 
 local data={}
 
+-- @fn generateLEDs
 -- Module displaying of the words
-local generateLEDs = function(words, colorBg, colorFg, colorMin1, colorMin2, colorMin3, colorMin4, invertRows, amountOfChars)
+-- @param words
+-- @param colorBg 	 background color
+-- @param colorFg 	 foreground color
+-- @param colorM1 	 foreground color if one minute after a displayable time is present
+-- @param colorM2 	 foreground color if two minutes after a displayable time is present
+-- @param colorM3 	 foreground color if three minutes after a displayable time is present
+-- @param colorM4 	 foreground color if four minutes after a displayable time is present
+-- @param invertRows	 wheather line 4,5 and 6 shall be inverted or not
+-- @param amountOfChars Amount of characters to be displayed
+local generateLEDs = function(words, colorBg, colorFg, colorM1, colorM2, colorM3, colorM4, invertRows, amountOfChars)
  -- Set the local variables needed for the colored progress bar
  if (words == nil) then
    return nil
@@ -64,13 +74,13 @@ local generateLEDs = function(words, colorBg, colorFg, colorMin1, colorMin2, col
  end
 
  local minutes=1
- if (words.min1 == 1) then
+ if (words.m1 == 1) then
    minutes = minutes + 1
- elseif (words.min2 == 1) then
+ elseif (words.m2 == 1) then
    minutes = minutes + 2
- elseif (words.min3 == 1) then
+ elseif (words.m3 == 1) then
    minutes = minutes + 3
- elseif (words.min4 == 1) then
+ elseif (words.m4 == 1) then
    minutes = minutes + 4
  end
  -- always set a foreground value
@@ -89,17 +99,17 @@ local generateLEDs = function(words, colorBg, colorFg, colorMin1, colorMin2, col
     words.briPercent = tonumber( ((words.briPercent * 4) +  per) / 5)
     print("Minutes : " .. tostring(minutes) .. " bright: " .. tostring(words.briPercent) .. "% current: " .. tostring(per) .. "%")
     data.colorFg   = string.char(string.byte(colorFg,1) * briPercent / 100, string.byte(colorFg,2) * briPercent / 100, string.byte(colorFg,3) * briPercent / 100) 
-    data.colorMin1 = string.char(string.byte(colorMin1,1) * briPercent / 100, string.byte(colorMin1,2) * briPercent / 100, string.byte(colorMin1,3) * briPercent / 100)
-    data.colorMin2 = string.char(string.byte(colorMin2,1) * briPercent / 100, string.byte(colorMin2,2) * briPercent / 100, string.byte(colorMin2,3) * briPercent / 100)
-    data.colorMin3 = string.char(string.byte(colorMin3,1) * briPercent / 100, string.byte(colorMin3,2) * briPercent / 100, string.byte(colorMin3,3) * briPercent / 100)
-    data.colorMin4 = string.char(string.byte(colorMin4,1) * briPercent / 100, string.byte(colorMin4,2) * briPercent / 100, string.byte(colorMin4,3) * briPercent / 100)
+    data.colorM1 = string.char(string.byte(colorM1,1) * briPercent / 100, string.byte(colorM1,2) * briPercent / 100, string.byte(colorM1,3) * briPercent / 100)
+    data.colorM2 = string.char(string.byte(colorM2,1) * briPercent / 100, string.byte(colorM2,2) * briPercent / 100, string.byte(colorM2,3) * briPercent / 100)
+    data.colorM3 = string.char(string.byte(colorM3,1) * briPercent / 100, string.byte(colorM3,2) * briPercent / 100, string.byte(colorM3,3) * briPercent / 100)
+    data.colorM4 = string.char(string.byte(colorM4,1) * briPercent / 100, string.byte(colorM4,2) * briPercent / 100, string.byte(colorM4,3) * briPercent / 100)
  else
     -- devide by five (Minute 0, Minute 1 to Minute 4 takes the last chars)
     data.colorFg=colorFg
-    data.colorMin1=colorMin1
-    data.colorMin2=colorMin2
-    data.colorMin3=colorMin3
-    data.colorMin4=colorMin4
+    data.colorM1=colorM1
+    data.colorM2=colorM2
+    data.colorM3=colorM3
+    data.colorM4=colorM4
  end
  data.drawnCharacters=0
  local charsPerLine=11
@@ -135,7 +145,7 @@ buf=buf .. space:rep(1)
  end
  -- L fill character
 buf=buf .. space:rep(1)
-if (words.fiveMin== 1) then
+if (words.m5== 1) then
     buf= buf .. drawLEDs(data,4) -- FUENF
   else
     buf= buf .. space:rep(4)
@@ -146,12 +156,12 @@ if (words.fiveMin== 1) then
   else
     space = colorBg
   end
- if (words.tenMin == 1) then
+ if (words.m10 == 1) then
     line= drawLEDs(data,4) -- ZEHN
   else
     line= space:rep(4)
  end
- if (words.twenty == 1) then
+ if (words.m20 == 1) then
     line= line .. drawLEDs(data,7) -- ZWANZIG
   else
     line= line .. space:rep(7)
@@ -167,9 +177,9 @@ if (words.fiveMin== 1) then
   else
     space = colorBg
   end
- if (words.threequater == 1) then
-    line= drawLEDs(data,11) -- Dreiviertel
-  elseif (words.quater == 1) then
+ if (words.h3q == 1) then
+    line= drawLEDs(data,11) -- DREIVIERTEL
+  elseif (words.hq == 1) then
     line= space:rep(4)
     line= line .. drawLEDs(data,7) -- VIERTEL
  else
@@ -183,13 +193,13 @@ if (words.fiveMin== 1) then
   else
     space = colorBg
   end
- if (words.after == 1) then
+ if (words.ha == 1) then
     line= space:rep(2) -- TG
     line= line .. drawLEDs(data,4) -- NACH
   else
     line= space:rep(6)
  end
- if (words.before == 1) then
+ if (words.hb == 1) then
     line= line .. drawLEDs(data,3) -- VOR
     line= line .. space:rep(2) 
   else
@@ -214,7 +224,7 @@ if (words.fiveMin== 1) then
   else
     line= space:rep(5)
  end
- if (words.twelve == 1) then
+ if (words.h12 == 1) then
     line= line .. drawLEDs(data,5) -- ZWOELF
     line= line .. space:rep(1) -- P
   else
@@ -233,18 +243,18 @@ if (words.fiveMin== 1) then
   else
     space = colorBg
   end
- if (words.seven == 1) then
+ if (words.h7 == 1) then
     line= space:rep(5)
     line= line .. drawLEDs(data,6) -- SIEBEN
- elseif (words.oneLong == 1) then
+ elseif (words.h1l == 1) then
     line= space:rep(2)
     line= line .. drawLEDs(data,4) -- EINS
     line= line .. space:rep(5)
- elseif (words.one == 1) then
+ elseif (words.h1 == 1) then
     line= space:rep(2)
     line= line .. drawLEDs(data,3) -- EIN
     line= line .. space:rep(6)
- elseif (words.two == 1) then
+ elseif (words.h2 == 1) then
     line= drawLEDs(data,4) -- ZWEI
     line= line .. space:rep(7)
  else
@@ -263,11 +273,11 @@ if (words.fiveMin== 1) then
   else
     space = colorBg
   end
- if (words.three == 1) then
+ if (words.h3 == 1) then
     line= space:rep(1)
     line= line .. drawLEDs(data,4) -- DREI
     line= line .. space:rep(6)
- elseif (words.five == 1) then
+ elseif (words.h5 == 1) then
     line= space:rep(7)
     line= line .. drawLEDs(data,4) -- FUENF
  else
@@ -280,15 +290,15 @@ if (words.fiveMin== 1) then
   else
     space = colorBg
   end
- if (words.four == 1) then
+ if (words.h4 == 1) then
     line= space:rep(7)
     line= line .. drawLEDs(data,4) -- VIER
-  elseif (words.nine == 1) then
+  elseif (words.h9 == 1) then
     line= space:rep(3)
     line= line .. drawLEDs(data,4) -- NEUN
     line= line .. space:rep(4)
- elseif (words.eleven == 1) then
-    line= drawLEDs(data,3) -- ELEVEN
+ elseif (words.h11 == 1) then
+    line= drawLEDs(data,3) -- ELF
     line= line .. space:rep(8)
  else
     line= space:rep(11)
@@ -303,11 +313,11 @@ if (words.fiveMin== 1) then
   else
     space = colorBg
   end
- if (words.eight == 1) then
+ if (words.h8 == 1) then
     line= space:rep(1)
     line= line .. drawLEDs(data,4) -- ACHT
     line= line .. space:rep(6)
-  elseif (words.ten == 1) then
+  elseif (words.h10 == 1) then
     line= space:rep(5)
     line= line .. drawLEDs(data,4) -- ZEHN
     line= line .. space:rep(2)
@@ -321,14 +331,14 @@ if (words.fiveMin== 1) then
   else
     space = colorBg
   end
- if (words.six == 1) then
+ if (words.h6 == 1) then
     line= space:rep(1)
     line= line .. drawLEDs(data,5) -- SECHS
     line= line .. space:rep(2)
   else
     line= space:rep(8)
  end
- if (words.clock == 1) then
+ if (words.cl == 1) then
     line= line .. drawLEDs(data,3) -- UHR
   else
     line= line .. space:rep(3)
@@ -338,22 +348,22 @@ if (words.fiveMin== 1) then
       buf = buf .. line:sub((11-i)*3-2,(11-i)*3)
  end
 ------ Minutes -----------
- if (words.min1 == 1) then
+ if (words.m1 == 1) then
     buf= buf .. colorFg
   else
     buf= buf .. space:rep(1)
  end
- if (words.min2 == 1) then
+ if (words.m2 == 1) then
     buf= buf .. colorFg
   else
     buf= buf .. space:rep(1)
   end
- if (words.min3 == 1) then
+ if (words.m3 == 1) then
     buf= buf .. colorFg
   else
     buf= buf .. space:rep(1)
   end
- if (words.min4 == 1) then
+ if (words.m4 == 1) then
     buf= buf .. colorFg
   else
     buf= buf .. space:rep(1)
@@ -371,53 +381,51 @@ local countChars = function(words)
             characters = characters + 2
           elseif (key == "is") then
             characters = characters + 3
-          elseif (key == "fiveMin") then
+          elseif (key == "m5") then
             characters = characters + 4
-          elseif (key == "tenMin") then
+          elseif (key == "m10") then
             characters = characters + 4
-          elseif (key == "after") then
+          elseif (key == "ha") then
             characters = characters + 4
-          elseif (key == "before") then
+          elseif (key == "hb") then
             characters = characters + 3
-          elseif (key == "threeHour") then
+          elseif (key == "h3") then
             characters = characters + 4
-          elseif (key == "quater") then
+          elseif (key == "hq") then
             characters = characters + 7
-          elseif (key == "threequater") then
+          elseif (key == "h3q") then
             characters = characters + 11
           elseif (key == "half") then
             characters = characters + 4
-          elseif (key == "one") then
+          elseif (key == "h1") then
             characters = characters + 3
-          elseif (key == "oneLong") then
+          elseif (key == "h1l") then
             characters = characters + 4
-          elseif (key == "two") then
+          elseif (key == "h2") then
             characters = characters + 4
-          elseif (key == "three") then
+          elseif (key == "h3") then
             characters = characters + 4
-          elseif (key == "four") then
+          elseif (key == "h4") then
             characters = characters + 4
-          elseif (key == "five") then
+          elseif (key == "h5") then
             characters = characters + 4
-          elseif (key == "six") then
+          elseif (key == "h6") then
             characters = characters + 4
-          elseif (key == "seven") then
+          elseif (key == "h7") then
             characters = characters + 6
-          elseif (key == "eight") then
+          elseif (key == "h8") then
             characters = characters + 4
-          elseif (key == "nine") then
+          elseif (key == "h9") then
             characters = characters + 4
-          elseif (key == "ten") then
+          elseif (key == "h10") then
             characters = characters + 4
-          elseif (key == "eleven") then
+          elseif (key == "h11") then
             characters = characters + 3
-          elseif (key == "twelve") then
+          elseif (key == "h12") then
             characters = characters + 5
-          elseif (key == "twenty") then
+          elseif (key == "m20") then
             characters = characters + 7
-          elseif (key == "clock") then
-            characters = characters + 3
-          elseif (key == "sr_nc") then
+          elseif (key == "cl") then
             characters = characters + 3
           end
         end
