@@ -20,7 +20,6 @@ function syncTimeFromInternet()
   end
 end
 
-briPercent = 50
 function displayTime()
     collectgarbage()
      local sec, usec = rtctime.get()
@@ -31,12 +30,12 @@ function displayTime()
      local time = getTime(sec, timezoneoffset)
      local words = display_timestat(time.hour, time.minute)
      if ((dim ~= nil) and (dim == "on")) then
-        words.briPercent=briPercent
-        if (words.briPercent ~= nil and words.briPercent < 3) then
-          words.briPercent=3
+        words.briPer=briPer
+        if (words.briPer ~= nil and words.briPer < 3) then
+          words.briPer=3
         end
      else
-        words.briPercent=nil
+        words.briPer=nil
      end
      mydofile("displayword")
      if (displayword ~= nil) then
@@ -59,7 +58,7 @@ function displayTime()
      end
      
      -- cleanup
-     briPercent=words.briPercent
+     briPer=words.briPer
      words=nil
      time=nil
      collectgarbage()
@@ -169,6 +168,7 @@ function normalOperation()
 end
 
 -------------------main program -----------------------------
+briPer = 50   -- Default brightness is set to 50%
 ws2812.init() -- WS2812 LEDs initialized on GPIO2
 
 ----------- button ---------

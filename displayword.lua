@@ -100,15 +100,15 @@ local generateLEDs = function(words, colorBg, colorFg, colorM1, colorM2, colorM3
    data.aoC = 0
  end
 
- if ( (adc ~= nil) and (words.briPercent ~= nil) ) then
+ if ( (adc ~= nil) and (words.briPer ~= nil) ) then
     local per = math.floor(100*adc.read(0)/1000)
-    words.briPercent = tonumber( ((words.briPercent * 4) +  per) / 5)
-    print("Minutes : " .. tostring(minutes) .. " bright: " .. tostring(words.briPercent) .. "% current: " .. tostring(per) .. "%")
-    data.colorFg   = string.char(string.byte(colorFg,1) * briPercent / 100, string.byte(colorFg,2) * briPercent / 100, string.byte(colorFg,3) * briPercent / 100) 
-    data.colorM1 = string.char(string.byte(colorM1,1) * briPercent / 100, string.byte(colorM1,2) * briPercent / 100, string.byte(colorM1,3) * briPercent / 100)
-    data.colorM2 = string.char(string.byte(colorM2,1) * briPercent / 100, string.byte(colorM2,2) * briPercent / 100, string.byte(colorM2,3) * briPercent / 100)
-    data.colorM3 = string.char(string.byte(colorM3,1) * briPercent / 100, string.byte(colorM3,2) * briPercent / 100, string.byte(colorM3,3) * briPercent / 100)
-    data.colorM4 = string.char(string.byte(colorM4,1) * briPercent / 100, string.byte(colorM4,2) * briPercent / 100, string.byte(colorM4,3) * briPercent / 100)
+    words.briPer = tonumber( ((words.briPer * 4) +  per) / 5)
+    print("Minutes : " .. tostring(minutes) .. " bright: " .. tostring(words.briPer) .. "% current: " .. tostring(per) .. "%")
+    data.colorFg   = string.char(string.byte(colorFg,1) * briPer / 100, string.byte(colorFg,2) * briPer / 100, string.byte(colorFg,3) * briPer / 100) 
+    data.colorM1 = string.char(string.byte(colorM1,1) * briPer / 100, string.byte(colorM1,2) * briPer / 100, string.byte(colorM1,3) * briPer / 100)
+    data.colorM2 = string.char(string.byte(colorM2,1) * briPer / 100, string.byte(colorM2,2) * briPer / 100, string.byte(colorM2,3) * briPer / 100)
+    data.colorM3 = string.char(string.byte(colorM3,1) * briPer / 100, string.byte(colorM3,2) * briPer / 100, string.byte(colorM3,3) * briPer / 100)
+    data.colorM4 = string.char(string.byte(colorM4,1) * briPer / 100, string.byte(colorM4,2) * briPer / 100, string.byte(colorM4,3) * briPer / 100)
  else
     -- devide by five (Minute 0, Minute 1 to Minute 4 takes the last chars)
     data.colorFg=colorFg

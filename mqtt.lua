@@ -6,10 +6,10 @@ local t=nil
 
 function handleSingleCommand(client, topic, data)
     if (data == "ON") then
-      briPercent=100
+      briPer=100
       m:publish(mqttPrefix .. "/clock", "ON", 0, 0)
     elseif (data == "OFF") then
-      briPercent=0
+      briPer=0
       m:publish(mqttPrefix .. "/clock", "OFF", 0, 0)
     elseif ((data:sub(1,1) == "#" and data:len() == 7) or (string.match(data, "%d+,%d+,%d+"))) then
       local red=0
@@ -22,7 +22,7 @@ function handleSingleCommand(client, topic, data)
       else
         red, green, blue = string.match(data, "(%d+),(%d+),(%d+)")
       end
-      colorBg=string.char(green * briPercent / 100, red * briPercent / 100, blue * briPercent / 100)
+      colorBg=string.char(green * briPer / 100, red * briPer / 100, blue * briPer / 100)
       print("Updated BG: " .. tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue) )
       m:publish(mqttPrefix .. "/background", tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue), 0, 0)
       if (displayTime~= nil) then
@@ -30,7 +30,7 @@ function handleSingleCommand(client, topic, data)
       end
     else
       if (tonumber(data) >= 0 and tonumber(data) <= 100) then
-        briPercent=tonumber(data)
+        briPer=tonumber(data)
         m:publish(mqttPrefix .. "/clock", tostring(data), 0, 0)
       else
         print "Unknown MQTT command"
@@ -55,7 +55,7 @@ function parseBgColor(data, row)
   end
   if ((red ~= nil) and (green ~= nil) and (blue ~= nil) ) then
     m:publish(mqttPrefix .. "/"..row, tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue), 0, 0)
-    return string.char(green * briPercent / 100, red * briPercent / 100, blue * briPercent / 100)
+    return string.char(green * briPer / 100, red * briPer / 100, blue * briPer / 100)
   else
     return nil
   end
@@ -158,15 +158,15 @@ function startMqttClient()
                 if (t ~= nil) then
                     temp=readTemp()
                 end
-                if (oldBrightness ~= briPercent) then
-                 m:publish(mqttPrefix .. "/brightness", tostring(briPercent), 0, 0)
+                if (oldBrightness ~= briPer) then
+                 m:publish(mqttPrefix .. "/brightness", tostring(briPer), 0, 0)
                 elseif (temp ~= nil and temp ~= oldTemp) then
                   oldTemp = temp
                   m:publish(mqttPrefix .. "/temp", tostring(temp/100).."."..tostring(temp%100), 0, 0)
                 else
                  m:publish(mqttPrefix .. "/heap", tostring(node.heap()), 0, 0)
                 end
-                oldBrightness = briPercent
+                oldBrightness = briPer
             end
         end)
 	mqtttimer:start()
