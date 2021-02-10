@@ -84,7 +84,7 @@ function normalOperation()
     end
     print("Fg Color: " .. tostring(string.byte(color,1)) .. "x" .. tostring(string.byte(color,2)) .. "x" .. tostring(string.byte(color,3)) )
    
-    connect_counter=0
+    local connect_counter=0
     -- Wait to be connect to the WiFi access point. 
     local wifitimer = tmr.create()
     wifitimer:register(5000, tmr.ALARM_SINGLE, function (t)

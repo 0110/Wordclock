@@ -1,8 +1,8 @@
 -- Global variable
-m=nil
-mqttConnected = false
+local m=nil
+local mqttConnected = false
 -- Temp:
-t=nil
+local t=nil
 
 function handleSingleCommand(client, topic, data)
     if (data == "ON") then
@@ -157,7 +157,6 @@ function startMqttClient()
                 local temp = nil
                 if (t ~= nil) then
                     temp=readTemp()
-                    print(tostring(temp) .. "°C")
                 end
                 if (oldBrightness ~= briPercent) then
                  m:publish(mqttPrefix .. "/brightness", tostring(briPercent), 0, 0)
