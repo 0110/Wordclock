@@ -1,9 +1,15 @@
 -- Module filling a buffer, sent to the LEDs
 local M
 do
+
+-- @fn generateLEDs
+-- Module displaying of the words
+-- @param data		struct with the following paramter:
+-- 	aoC 		amount of characters to be used
+-- 	dC  		drawn characters
 local updateColor = function (data)
-    if (data.amountOfChars > 0) then   
-    	local div = tonumber(data.drawnCharacters/data.amountOfChars)
+    if (data.aoC > 0) then   
+    	local div = tonumber(data.dC/data.aoC)
     	if (div < 1) then
     	    return data.colorFg
     	elseif (div < 2) then 
@@ -33,7 +39,7 @@ local drawLEDs = function(data, numberNewChars)
         else
             tmpBuf=tmpBuf .. updateColor(data)
         end
-        data.drawnCharacters=data.drawnCharacters+1
+        data.dC=data.dC+1
     end
     return tmpBuf
 end
@@ -63,8 +69,8 @@ local data={}
 -- @param colorM3 	 foreground color if three minutes after a displayable time is present
 -- @param colorM4 	 foreground color if four minutes after a displayable time is present
 -- @param invertRows	 wheather line 4,5 and 6 shall be inverted or not
--- @param amountOfChars Amount of characters to be displayed
-local generateLEDs = function(words, colorBg, colorFg, colorM1, colorM2, colorM3, colorM4, invertRows, amountOfChars)
+-- @param aoC Amount of characters to be displayed
+local generateLEDs = function(words, colorBg, colorFg, colorM1, colorM2, colorM3, colorM4, invertRows, aoC)
  -- Set the local variables needed for the colored progress bar
  if (words == nil) then
    return nil
@@ -88,10 +94,10 @@ local generateLEDs = function(words, colorBg, colorFg, colorM1, colorM2, colorM3
 	colorFg = string.char(255,255,255)
  end
 
- if (amountOfChars ~= nil) then
-   data.amountOfChars = amountOfChars/minutes
+ if (aoC ~= nil) then
+   data.aoC = aoC/minutes
  else
-   data.amountOfChars = 0
+   data.aoC = 0
  end
 
  if ( (adc ~= nil) and (words.briPercent ~= nil) ) then
@@ -111,7 +117,7 @@ local generateLEDs = function(words, colorBg, colorFg, colorM1, colorM2, colorM3
     data.colorM3=colorM3
     data.colorM4=colorM4
  end
- data.drawnCharacters=0
+ data.dC=0
  local charsPerLine=11
  
  -- Space / background has no color by default

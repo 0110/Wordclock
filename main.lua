@@ -51,24 +51,13 @@ function displayTime()
      displayword = nil
      if (ledBuf ~= nil) then
      	  ws2812.write(ledBuf)
-	 else
-          if ((colorBg ~= nil) and (color ~= nil)) then
-    		  ws2812.write(colorBg:rep(107) .. color:rep(3))
-          else
-             local space=string.char(0,0,0)
-             -- set FG to fix value:
-             colorFg = string.char(255,0,0)
-             ws2812.write(space:rep(107) .. colorFg:rep(3))
-          end
-	end
-     -- Used for debugging
-     if (clockdebug ~= nil) then
-         for key,value in pairs(words) do 
-            if (value > 0) then
-              print(key,value) 
-            end
-         end
+     else
+	  -- set FG to fix value: RED
+	  local space=string.char(0,0,0)
+	  local color = string.char(255,0,0)
+	  ws2812.write(space:rep(107) .. color:rep(3)) -- UHR
      end
+     
      -- cleanup
      briPercent=words.briPercent
      words=nil
