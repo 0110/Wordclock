@@ -8,6 +8,8 @@ DIET=bin/luasrcdiet
 DEVICE=$1
 BAUD=115200
 
+LUASCRIPT_STOP=${TOOLDIR}/stopController.lua
+
 # check environment
 if [ ! -f $LUATOOL ]; then
  echo "$LUATOOL not found"
@@ -59,6 +61,17 @@ if [ $# -eq 1 ]; then
 	    echo "STOOOOP"
 	    exit 1
 	fi
+else
+	echo "Reboot ESP and stop init timer"
+	if [ ! -f $LUASCRIPT_STOP ]; then
+		echo "Cannot find $LUASCRIPT_STOP"
+		exit 1
+	fi
+	python3 $LUATOOL -p $DEVICE -f $LUASCRIPT_STOP -b $BAUD --volatile --delay 2
+	if [ $? -ne 0 ]; then
+	   echo "Could not reboot"
+	   exit 1
+	fi
 fi
 
 echo "Start Flasing ..."
@@ -78,7 +91,9 @@ for f in $FILES; do
     fi
 done
 
-echo "Reboot the ESP"
-echo "node.restart()" >> $DEVICE
+if [ $# -eq 1 ]; then
+	echo "Reboot the ESP"
+	echo "node.restart()" >> $DEVICE
+fi
 
 exit 0
