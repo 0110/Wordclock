@@ -19,8 +19,16 @@ node.restart()
 
 Then disconnect the serial terminal and copy the required files to the microcontroller:
 <pre>
-./tools/initialFlash.sh /dev/ttyUSB0
+./tools/initialDietFlash.sh /dev/ttyUSB0
 </pre>
+
+Install the optional packages:
+<pre>
+./tools/initialDietFlash.sh /dev/ttyUSB0 mqtt.lua
+./tools/initialDietFlash.sh /dev/ttyUSB0 ds18b20.lua
+</pre>
+
+
 
 ### Upgrade
 

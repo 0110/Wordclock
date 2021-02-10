@@ -1,5 +1,5 @@
 # luatool.py
-**Not** supported with python 3.x
+Version 0.8.0 upgraded supported with python 3.x
 ## Source:
 https://github.com/4refr0nt/luatool/tree/master/luatool
 # LuaSrcDiet
