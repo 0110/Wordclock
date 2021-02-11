@@ -448,4 +448,4 @@ M = {
     countChars   = countChars
 }
 end
-displayword = M
+dw = M

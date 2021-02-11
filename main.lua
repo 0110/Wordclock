@@ -1,7 +1,5 @@
 -- Main Module
-
 local looptimer = tmr.create()
-displayword = {}
 rowbgColor= {}
 
 function syncTimeFromInternet()
@@ -13,7 +11,7 @@ function syncTimeFromInternet()
       syncRunning=nil
      end,
      function()
-       print('failed!')
+       print('NTP failed!')
        syncRunning=nil
      end
    )
@@ -27,27 +25,39 @@ function displayTime()
      if (timezoneoffset == nil) then
         timezoneoffset=0
      end
-     local time = getTime(sec, timezoneoffset)
-     local words = display_timestat(time.hour, time.minute)
-     if ((dim ~= nil) and (dim == "on")) then
-        words.briPer=briPer
-        if (words.briPer ~= nil and words.briPer < 3) then
-          words.briPer=3
-        end
-     else
-        words.briPer=nil
+     mydofile("timecore")
+     if (tc == nil) then
+     	return
      end
+     local time = tc.getTime(sec, timezoneoffset)
+     tc = nil
+     collectgarbage()
+     mydofile("wordclock")
+     if (wc ~= nil) then
+	     local words = wc.timestat(time.hour, time.minute)
+	     if ((dim ~= nil) and (dim == "on")) then
+		words.briPer=briPer
+		if (words.briPer ~= nil and words.briPer < 3) then
+		  words.briPer=3
+		end
+	     else
+		words.briPer=nil
+	     end
+     end
+     wc = nil
+     collectgarbage()
+     print("Heap: " .. tostring(node.heap()))
      mydofile("displayword")
-     if (displayword ~= nil) then
+     if (dw ~= nil) then
         --if lines 4 to 6 are inverted due to hardware-fuckup, unfuck it here
         local invertRows=false
 	    if ((inv46 ~= nil) and (inv46 == "on")) then
             invertRows=true
         end
-        local characters = displayword.countChars(words)
-        ledBuf = displayword.generateLEDs(words, colorBg, color, color1, color2, color3, color4, invertRows, characters)
+        local c = dw.countChars(words)
+        ledBuf = dw.generateLEDs(words, colorBg, color, color1, color2, color3, color4, invertRows, c)
      end
-     displayword = nil
+     dw = nil
      if (ledBuf ~= nil) then
      	  ws2812.write(ledBuf)
      else
@@ -114,12 +124,7 @@ function normalOperation()
         t:unregister()
         print('IP: ',wifi.sta.getip())
         -- Here the WLAN is found, and something is done
-        print("Solving dependencies")
-        local dependModules = { "timecore" , "wordclock", "mqtt" }
-        for _,mod in pairs(dependModules) do
-            print("Loading " .. mod)
-            mydofile(mod)
-        end
+        mydofile("mqtt")
 
         local setupCounter=5
 	local alive=0
@@ -146,10 +151,10 @@ function normalOperation()
 	        elseif ( (alive % 120) == 0) then
         	    -- sync the time every 5 minutes
             	syncTimeFromInternet()
-		        alive = alive + 1
+		alive = alive + 1
             else
-                displayTime()
-		        alive = alive + 1
+               displayTime()
+		alive = alive + 1
             end
             collectgarbage()
     	    -- Feed the system watchdog.

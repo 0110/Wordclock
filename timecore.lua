@@ -1,3 +1,6 @@
+local M
+do
+
 --Summer winter time convertion
 --See: https://arduinodiy.wordpress.com/2015/10/13/the-arduino-and-daylight-saving-time/
 --
@@ -27,7 +30,7 @@
 -- @var dow       Current day of week       range (1 - 7)   (1 is Monday, 7 is Sunday)
 -- @return <code>true</code> if we have currently summer time
 -- @return <code>false</code> if we have winter time
-function isSummerTime(time)
+local function isSummerTime(time)
   -- we are in 100% in the summer time
   if (time.month > 3 and time.month < 10) then 
     return true
@@ -103,7 +106,7 @@ local yearsize = function(year)
  end
 end
 
-function getUTCtime(unixtimestmp)
+local function getUTCtime(unixtimestmp)
   local year = EPOCH_YR
   local dayclock = math.floor(unixtimestmp % SECS_DAY)
   local dayno = math.floor(unixtimestmp / SECS_DAY)
@@ -131,10 +134,16 @@ function getUTCtime(unixtimestmp)
 end
 
 
-function getTime(unixtimestmp, timezoneoffset)
+local getTime = function(unixtimestmp, timezoneoffset)
     local time = getUTCtime(unixtimestmp + (3600 * timezoneoffset))
     if ( isSummerTime(time) ) then
         time = getUTCtime(unixtimestmp + (3600 * (timezoneoffset + 1)) )
     end
     return time
 end
+-- Pack everything into a module
+M = {
+    getTime = getTime
+}
+end
+tc = M

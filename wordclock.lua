@@ -1,12 +1,14 @@
 -- Revese engeeniered code of display_wc_ger.c by Vlad Tepesch
 -- See https://www.mikrocontroller.net/articles/Word_cl_Variante_1#Download
+local M
+do
 
--- @fn display_timestat
+-- @fn wc_timestat
 -- Return the leds to use the granuality is 5 minutes
 -- @param hours the current hours (0-23)
 -- @param minutes the current minute (0-59)
 -- @param longmode (optional parameter) 0: no long mode, 1: long mode (itis will be set)
-function display_timestat(hours, minutes, longmode)
+local timestat=function (hours, minutes, longmode)
  if (longmode == nil) then
    longmode=0
  end
@@ -138,3 +140,9 @@ function display_timestat(hours, minutes, longmode)
  collectgarbage()
  return ret
 end
+-- Pack everything into a module
+M = {
+    timestat = timestat
+}
+end
+wc = M
