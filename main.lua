@@ -34,15 +34,15 @@ function displayTime()
      collectgarbage()
      mydofile("wordclock")
      if (wc ~= nil) then
-	     local words = wc.timestat(time.hour, time.minute)
-	     if ((dim ~= nil) and (dim == "on")) then
-		words.briPer=briPer
-		if (words.briPer ~= nil and words.briPer < 3) then
-		  words.briPer=3
-		end
-	     else
-		words.briPer=nil
-	     end
+     local words = wc.timestat(time.hour, time.minute)
+     if ((dim ~= nil) and (dim == "on")) then
+        words.briPer=briPer
+        if (words.briPer ~= nil and words.briPer < 3) then
+          words.briPer=3
+        end
+     else
+        words.briPer=nil
+     end
      end
      wc = nil
      collectgarbage()
@@ -51,7 +51,7 @@ function displayTime()
      if (dw ~= nil) then
         --if lines 4 to 6 are inverted due to hardware-fuckup, unfuck it here
         local invertRows=false
-	    if ((inv46 ~= nil) and (inv46 == "on")) then
+    if ((inv46 ~= nil) and (inv46 == "on")) then
             invertRows=true
         end
         local c = dw.countChars(words)
@@ -83,11 +83,51 @@ function normalOperation()
         color=string.char(0,0,250)
     end
     print("start: " , node.heap())
-   
+    -------------------------------------------------------------
+    -- Define the main loop
+    local setupCounter=5
+    local alive=0
+    looptimer:register(2500, tmr.ALARM_AUTO, function (lt)
+      if (setupCounter > 4) then
+        syncTimeFromInternet()
+        setupCounter=setupCounter-1
+        alive = 1
+      elseif (setupCounter > 3) then
+        -- Here the WLAN is found, and something is done
+        mydofile("mqtt")
+        if (startMqttClient ~= nil) then
+	    startMqttClient()
+        else
+	    print("NO Mqtt found")
+	    mydofile("telnet")
+        end
+        setupCounter=setupCounter-1
+      elseif (setupCounter > 2) then
+        if (startTelnetServer ~= nil) then
+	    startTelnetServer()
+        else
+	    displayTime()
+        end
+        setupCounter=setupCounter-1
+        elseif ( (alive % 120) == 0) then
+	    -- sync the time every 5 minutes
+    	syncTimeFromInternet()
+       alive = alive + 1
+       collectgarbage()
+      else
+       displayTime()
+       alive = alive + 1
+      end
+      -- Feed the system watchdog.
+      tmr.wdclr()
+    end)
+    
+    -------------------------------------------------------------
+    -- Connect to Wifi
     local connect_counter=0
     -- Wait to be connect to the WiFi access point. 
     local wifitimer = tmr.create()
-    wifitimer:register(2000, tmr.ALARM_SINGLE, function (t)
+    wifitimer:register(2000, tmr.ALARM_AUTO, function (timer)
       connect_counter=connect_counter+1
       if wifi.sta.status() ~= 5 then
          print(connect_counter ..  "/60 Connecting to AP...")
@@ -123,51 +163,11 @@ function normalOperation()
            ws2812.write(string.char(0,0,0):rep(114))
          end
       else
-        t:unregister()
+        timer:unregister()
+        wifitimer=nil
+        connect_counter=nil
         print('IP: ',wifi.sta.getip(), " heap: ", node.heap())
-        -- Here the WLAN is found, and something is done
-        mydofile("mqtt")
-
-        local setupCounter=5
-	local alive=0
-	looptimer:register(2500, tmr.ALARM_AUTO, function (lt)
-            if (setupCounter > 4) then
-                syncTimeFromInternet()
-                setupCounter=setupCounter-1
-                alive = 1
-            elseif (setupCounter > 3) then
-                if (startMqttClient ~= nil) then
-                    startMqttClient()
-                else
-                    print("NO Mqtt found")
-                    mydofile("telnet")
-                end
-                setupCounter=setupCounter-1
-            elseif (setupCounter > 2) then
-                if (startTelnetServer ~= nil) then
-                    startTelnetServer()
-                else
-                    displayTime()
-                end
-                setupCounter=setupCounter-1
-	        elseif ( (alive % 120) == 0) then
-        	    -- sync the time every 5 minutes
-            	syncTimeFromInternet()
-		alive = alive + 1
-            else
-               displayTime()
-		alive = alive + 1
-            end
-            collectgarbage()
-    	    -- Feed the system watchdog.
-    	    tmr.wdclr()
-        end)
-        looptimer:start() 
-        
-      end
-      -- when no wifi available, open an accesspoint and ask the user
-      if (connect_counter >= 60) then -- 300 is 30 sec in 100ms cycle
-        startSetupMode()
+        looptimer:start()
       end
     end)
     wifitimer:start()
