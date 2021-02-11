@@ -46,7 +46,7 @@ function displayTime()
      end
      wc = nil
      collectgarbage()
-     print("Heap: " .. tostring(node.heap()))
+     print("wc: " .. tostring(node.heap()))
      mydofile("displayword")
      if (dw ~= nil) then
         --if lines 4 to 6 are inverted due to hardware-fuckup, unfuck it here
@@ -58,6 +58,8 @@ function displayTime()
         ledBuf = dw.generateLEDs(words, colorBg, color, color1, color2, color3, color4, invertRows, c)
      end
      dw = nil
+     collectgarbage()
+     print("dw: " .. tostring(node.heap()))
      if (ledBuf ~= nil) then
      	  ws2812.write(ledBuf)
      else
@@ -80,12 +82,12 @@ function normalOperation()
         -- Color is defined as GREEN, RED, BLUE
         color=string.char(0,0,250)
     end
-    print("Fg Color: " .. tostring(string.byte(color,1)) .. "x" .. tostring(string.byte(color,2)) .. "x" .. tostring(string.byte(color,3)) )
+    print("start: " , node.heap())
    
     local connect_counter=0
     -- Wait to be connect to the WiFi access point. 
     local wifitimer = tmr.create()
-    wifitimer:register(5000, tmr.ALARM_SINGLE, function (t)
+    wifitimer:register(2000, tmr.ALARM_SINGLE, function (t)
       connect_counter=connect_counter+1
       if wifi.sta.status() ~= 5 then
          print(connect_counter ..  "/60 Connecting to AP...")
@@ -122,7 +124,7 @@ function normalOperation()
          end
       else
         t:unregister()
-        print('IP: ',wifi.sta.getip())
+        print('IP: ',wifi.sta.getip(), " heap: ", node.heap())
         -- Here the WLAN is found, and something is done
         mydofile("mqtt")
 
