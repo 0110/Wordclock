@@ -21,10 +21,12 @@ function mydofile(mod)
       dofile( mod .. ".lua")
     elseif (file.open(mod ..  "_diet.lua")) then
       dofile(mod .. "_diet.lua")      
+    elseif (file.open(mod ..  "_diet.lc")) then
+      dofile(mod .. "_diet.lc")      
     elseif (file.open(mod)) then
         dofile(mod)
     else
-      print("Error: " .. mod)
+      print("NA: " .. mod)
     end
 end    
 
@@ -34,6 +36,19 @@ initTimer:register(5000, tmr.ALARM_SINGLE, function (t)
     t:unregister()
     initTimer=nil
     bootledtimer=nil
+    local modlist = { "timecore" , "displayword" }
+    for i,mod in pairs(modlist) do
+        if (file.open(mod .. "_diet.lua")) then
+            print(tostring(i) .. ". Compile " .. mod)
+            ws2812.write(string.char(0,0,0):rep(11*i)..string.char(128,0,0):rep(11))
+            node.compile(mod .. "_diet.lua")
+            print("cleanup..")
+            file.remove(mod .. "_diet.lua")
+            node.restart()
+            return
+        end
+    end
+    
     if ( file.open("config.lua") ) then
         --- Normal operation
         print("Starting main")      

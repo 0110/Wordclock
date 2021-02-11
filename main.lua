@@ -34,7 +34,7 @@ function displayTime()
      collectgarbage()
      mydofile("wordclock")
      if (wc ~= nil) then
-     local words = wc.timestat(time.hour, time.minute)
+     words = wc.timestat(time.hour, time.minute)
      if ((dim ~= nil) and (dim == "on")) then
         words.briPer=briPer
         if (words.briPer ~= nil and words.briPer < 3) then
@@ -51,7 +51,7 @@ function displayTime()
      if (dw ~= nil) then
         --if lines 4 to 6 are inverted due to hardware-fuckup, unfuck it here
         local invertRows=false
-    if ((inv46 ~= nil) and (inv46 == "on")) then
+        if ((inv46 ~= nil) and (inv46 == "on")) then
             invertRows=true
         end
         local c = dw.countChars(words)
