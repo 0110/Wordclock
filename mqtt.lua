@@ -95,8 +95,10 @@ function registerMqtt()
                 m=nil
                 t=nil
                 mqttConnected = false
-		if (looptimer ~= nil) then
-			looptimer:unregister()
+		if (mlt ~= nil) then
+	          mlt:unregister()
+		else
+	          print("main loop unstoppable")
 		end
                 collectgarbage()
                 mydofile("telnet")

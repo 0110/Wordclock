@@ -1,5 +1,5 @@
 -- Main Module
-local looptimer = tmr.create()
+mlt = tmr.create() -- Main loop timer
 rowbgColor= {}
 
 function syncTimeFromInternet()
@@ -87,7 +87,7 @@ function normalOperation()
     -- Define the main loop
     local setupCounter=5
     local alive=0
-    looptimer:register(2500, tmr.ALARM_AUTO, function (lt)
+    mlt:register(2500, tmr.ALARM_AUTO, function (lt)
       if (setupCounter > 4) then
         syncTimeFromInternet()
         setupCounter=setupCounter-1
@@ -167,7 +167,7 @@ function normalOperation()
         wifitimer=nil
         connect_counter=nil
         print('IP: ',wifi.sta.getip(), " heap: ", node.heap())
-        looptimer:start()
+        mlt:start()
       end
     end)
     wifitimer:start()
@@ -185,7 +185,7 @@ local btnCounter=0
 local btntimer = tmr.create()
 btntimer:register(5000, tmr.ALARM_AUTO, function (t)
      if (gpio.read(3) == 0) then
-	looptimer:unregister()
+	mlt:unregister()
         print("Button pressed " .. tostring(btnCounter))
         btnCounter = btnCounter + 5
         local ledBuf= string.char(128,0,0):rep(btnCounter) .. string.char(0,0,0):rep(110 - btnCounter)
