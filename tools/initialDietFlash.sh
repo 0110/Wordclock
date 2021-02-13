@@ -3,6 +3,7 @@
 TOOLDIR=tools/
 LUATOOL=${TOOLDIR}luatool.py
 
+#DIET=bin/luasrcdiet --maximum
 DIET=bin/luasrcdiet
 
 DEVICE=$1
