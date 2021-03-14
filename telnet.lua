@@ -26,13 +26,13 @@ function startTelnetServer()
 	    end)
 	    c:on("sent", function()        
 		if (#lines > 0) then
-		  l1=nil
-		  for k,v in pairs(lines) do if (k==1) then l1=v end end
-		  if (l1 ~= nil) then
-                    table.remove(lines, 1)
-                    print( tostring(l1) )
-		    telnetClient:send(l1)
-                  end
+		  local line1=nil
+		  for k,v in pairs(lines) do if (k==1) then line1=v end end
+		  if ( line1 ~= nil ) then
+		   table.remove(lines, 1)
+		   print( tostring(line1) )
+		   telnetClient:send(line1)
+		  end
 		end
 	    end)
 	    print("Welcome to the Wordclock.")
