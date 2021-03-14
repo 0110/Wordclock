@@ -6,7 +6,7 @@ local MAXLEDS=110
 local counter1=0
 ws2812.write(string.char(0,0,0):rep(114))
 local bootledtimer = tmr.create()
-bootledtimer:register(500, tmr.ALARM_AUTO, function (t)
+bootledtimer:register(100, tmr.ALARM_AUTO, function (t)
     counter1=counter1+1
     spaceLeds = math.max(MAXLEDS - (counter1*2), 0)
     ws2812.write(string.char(128,0,0):rep(counter1) .. string.char(0,0,0):rep(spaceLeds) .. string.char(0,0,64):rep(counter1))
