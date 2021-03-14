@@ -1,6 +1,10 @@
 -- Main Module
 mlt = tmr.create() -- Main loop timer
 rowbgColor= {}
+-- Buffer of the clock
+rgbBuffer = ws2812.newBuffer(114, 3) 
+-- 110 Character plus one LED for each minute, 
+-- that cannot be displayed, as the clock as only a resolution of 5 minutes
 
 function syncTimeFromInternet()
   if (syncRunning == nil) then
@@ -64,12 +68,14 @@ function displayTime()
      	  ws2812.write(ledBuf)
      else
 	  -- set FG to fix value: RED
-	  local space=string.char(0,0,0)
 	  local color = string.char(255,0,0)
-	  ws2812.write(space:rep(107) .. color:rep(3)) -- UHR
+	  rgbBuffer.fill(0,0,0) -- disable all LEDs
+	  for i=108,110, 1 do rgbBuffer.set(i, color) end
+	  ws2812.write(rgbBuffer)
      end
      
      -- cleanup
+     i=nil
      briPer=words.briPer
      words=nil
      time=nil
@@ -131,37 +137,23 @@ function normalOperation()
       connect_counter=connect_counter+1
       if wifi.sta.status() ~= 5 then
          print(connect_counter ..  "/60 Connecting to AP...")
+         rgbBuffer.fill(0,0,0) -- clear all LEDs
          if (connect_counter % 5 ~= 4) then
             local wlanColor=string.char((connect_counter % 6)*20,(connect_counter % 5)*20,(connect_counter % 3)*20)
-            local space=string.char(0,0,0)
-            local buf=space:rep(6)
             if ((connect_counter % 5) >= 1) then
-                buf = buf .. wlanColor
-            else
-                buf = buf .. space
+		rgbBuffer.set(7, wlanColor)
             end
-            buf = buf .. space:rep(4)
-            buf= buf .. space:rep(3) 
             if ((connect_counter % 5) >= 3) then
-                buf = buf .. wlanColor
-            else
-                buf = buf .. space
+		rgbBuffer.set(15, wlanColor)
             end
             if ((connect_counter % 5) >= 2) then
-                buf = buf .. wlanColor
-            else
-                buf = buf .. space
+		rgbBuffer.set(16, wlanColor)
             end
             if ((connect_counter % 5) >= 0) then
-                buf = buf .. wlanColor
-            else
-                buf = buf .. space
+		rgbBuffer.set(17, wlanColor)
             end
-            buf = buf .. space:rep(100)
-            ws2812.write(buf)
-         else
-           ws2812.write(string.char(0,0,0):rep(114))
          end
+	 ws2812.write(rgbBuffer)
       else
         timer:unregister()
         wifitimer=nil
@@ -188,8 +180,8 @@ btntimer:register(5000, tmr.ALARM_AUTO, function (t)
 	mlt:unregister()
         print("Button pressed " .. tostring(btnCounter))
         btnCounter = btnCounter + 5
-        local ledBuf= string.char(128,0,0):rep(btnCounter) .. string.char(0,0,0):rep(110 - btnCounter)
-        ws2812.write(ledBuf)
+	for i=1,btnCounter do rgbBuffer.set(i, 128, 0, 0) end
+	ws2812.write(rgbBuffer)
         if (btnCounter >= 110) then
             file.remove("config.lua")
             file.remove("config.lc")
