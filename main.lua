@@ -69,8 +69,8 @@ function displayTime()
      else
 	  -- set FG to fix value: RED
 	  local color = string.char(255,0,0)
-	  rgbBuffer.fill(0,0,0) -- disable all LEDs
-	  for i=108,110, 1 do rgbBuffer.set(i, color) end
+	  rgbBuffer:fill(0,0,0) -- disable all LEDs
+	  for i=108,110, 1 do rgbBuffer:set(i, color) end
 	  ws2812.write(rgbBuffer)
      end
      
@@ -137,20 +137,20 @@ function normalOperation()
       connect_counter=connect_counter+1
       if wifi.sta.status() ~= 5 then
          print(connect_counter ..  "/60 Connecting to AP...")
-         rgbBuffer.fill(0,0,0) -- clear all LEDs
+         rgbBuffer:fill(0,0,0) -- clear all LEDs
          if (connect_counter % 5 ~= 4) then
             local wlanColor=string.char((connect_counter % 6)*20,(connect_counter % 5)*20,(connect_counter % 3)*20)
             if ((connect_counter % 5) >= 1) then
-		rgbBuffer.set(7, wlanColor)
+		rgbBuffer:set(7, wlanColor)
             end
             if ((connect_counter % 5) >= 3) then
-		rgbBuffer.set(15, wlanColor)
+		rgbBuffer:set(15, wlanColor)
             end
             if ((connect_counter % 5) >= 2) then
-		rgbBuffer.set(16, wlanColor)
+		rgbBuffer:set(16, wlanColor)
             end
             if ((connect_counter % 5) >= 0) then
-		rgbBuffer.set(17, wlanColor)
+		rgbBuffer:set(17, wlanColor)
             end
          end
 	 ws2812.write(rgbBuffer)
@@ -180,7 +180,7 @@ btntimer:register(5000, tmr.ALARM_AUTO, function (t)
 	mlt:unregister()
         print("Button pressed " .. tostring(btnCounter))
         btnCounter = btnCounter + 5
-	for i=1,btnCounter do rgbBuffer.set(i, 128, 0, 0) end
+	for i=1,btnCounter do rgbBuffer:set(i, 128, 0, 0) end
 	ws2812.write(rgbBuffer)
         if (btnCounter >= 110) then
             file.remove("config.lua")
