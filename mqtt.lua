@@ -117,7 +117,11 @@ function registerMqtt()
         end
       end
     end)
-    
+    m:on("offline", function(client)
+	print("MQTT Disconnected")
+	mqttConnected = false
+    end
+    )
     m:connect(mqttServer, 1883, false, function(client)
       print("MQTT is connected")
       mqttConnected = true
