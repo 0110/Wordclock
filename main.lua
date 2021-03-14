@@ -109,7 +109,7 @@ function normalOperation()
 	    displayTime()
         end
         setupCounter=setupCounter-1
-        elseif ( (alive % 120) == 0) then
+      elseif ( (alive % 120) == 0) then
 	    -- sync the time every 5 minutes
     	syncTimeFromInternet()
        alive = alive + 1
