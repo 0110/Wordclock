@@ -32,13 +32,12 @@ local drawLEDs = function(data, numberNewChars)
     if (numberNewChars == nil) then
         numberNewChars=0
     end
+    if (data.rgbBuffer == nil) then
+    	return
+    end
     local tmpBuf=nil
     for i=1,numberNewChars do
-        if (tmpBuf == nil) then
-            tmpBuf = updateColor(data)
-        else
-            tmpBuf=tmpBuf .. updateColor(data)
-        end
+        data.rgbBuffer:set(data.dC + 1, updateColor(data))
         data.dC=data.dC+1
     end
     return tmpBuf
@@ -61,6 +60,7 @@ local data={}
 
 -- @fn generateLEDs
 -- Module displaying of the words
+-- @param rgbBuffer	 OutputBuffer with 114 LEDs
 -- @param words
 -- @param colorBg 	 background color
 -- @param colorFg 	 foreground color
@@ -70,7 +70,7 @@ local data={}
 -- @param colorM4 	 foreground color if four minutes after a displayable time is present
 -- @param invertRows	 wheather line 4,5 and 6 shall be inverted or not
 -- @param aoC Amount of characters to be displayed
-local generateLEDs = function(words, colorBg, colorFg, colorM1, colorM2, colorM3, colorM4, invertRows, aoC)
+local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, colorM2, colorM3, colorM4, invertRows, aoC)
  -- Set the local variables needed for the colored progress bar
  if (words == nil) then
    return nil
@@ -99,6 +99,7 @@ local generateLEDs = function(words, colorBg, colorFg, colorM1, colorM2, colorM3
  else
    data.aoC = 0
  end
+ data.rgbBuffer = rgbBuffer
 
  if ( (adc ~= nil) and (words.briPer ~= nil) ) then
     local per = math.floor(100*adc.read(0)/1000)
@@ -129,253 +130,211 @@ local generateLEDs = function(words, colorBg, colorFg, colorM1, colorM2, colorM3
  else
   colorBg = space
  end
+ rgbBuffer:fill(colorBg) -- draw the background
 
  -- Set the foreground color as the default color
  local buf=data.colorFg
- local line=space
  -- line 1----------------------------------------------
  if (rowbgColor[1] ~= nil) then
-    space = rowbgColor[1]
+    for i=1,11, 1 do data.rgbBuffer:set(i, rowbgColor[1]) end
  end
  if (words.it==1) then
-    buf=drawLEDs(data,2) -- ES
+    drawLEDs(data,2) -- ES
   else
-    buf=space:rep(2)
+    data.dC=data.dC+2
  end
 -- K fill character
 buf=buf .. space:rep(1)
  if (words.is == 1) then
-    buf=buf .. drawLEDs(data,3) -- IST
+    drawLEDs(data,3) -- IST
  else
-    buf=buf .. space:rep(3)
+    data.dC=data.dC+3
  end
  -- L fill character
 buf=buf .. space:rep(1)
 if (words.m5== 1) then
-    buf= buf .. drawLEDs(data,4) -- FUENF
+    drawLEDs(data,4) -- FUENF
   else
-    buf= buf .. space:rep(4)
+    data.dC=data.dC+4
  end
  -- line 2-- even row (so inverted) --------------------
   if (rowbgColor[2] ~= nil) then
-    space = rowbgColor[2]
-  else
-    space = colorBg
+     for i=12,23, 1 do data.rgbBuffer:set(i, rowbgColor[2]) end
   end
  if (words.m10 == 1) then
-    line= drawLEDs(data,4) -- ZEHN
+    drawLEDs(data,4) -- ZEHN
   else
-    line= space:rep(4)
+    data.dC=data.dC+4
  end
  if (words.m20 == 1) then
-    line= line .. drawLEDs(data,7) -- ZWANZIG
+    drawLEDs(data,7) -- ZWANZIG
   else
-    line= line .. space:rep(7)
- end
- -- fill, the buffer
- for i = 0,10 do
-      buf = buf .. line:sub((11-i)*3-2,(11-i)*3)
+    data.dC=data.dC+7
  end
 
  -- line3----------------------------------------------
   if (rowbgColor[3] ~= nil) then
-    space = rowbgColor[3]
-  else
-    space = colorBg
+     for i=23,34, 1 do data.rgbBuffer:set(i, rowbgColor[3]) end
   end
  if (words.h3q == 1) then
     line= drawLEDs(data,11) -- DREIVIERTEL
   elseif (words.hq == 1) then
-    line= space:rep(4)
-    line= line .. drawLEDs(data,7) -- VIERTEL
+    data.dC=data.dC+4
+    drawLEDs(data,7) -- VIERTEL
  else
-    line= space:rep(11)
+    data.dC=data.dC+11
  end
- -- fill, the buffer
- buf = buf .. line
  --line 4-------- even row (so inverted) -------------
   if (rowbgColor[4] ~= nil) then
-    space = rowbgColor[4]
-  else
-    space = colorBg
+     for i=34,45, 1 do data.rgbBuffer:set(i, rowbgColor[4]) end
   end
  if (words.ha == 1) then
-    line= space:rep(2) -- TG
-    line= line .. drawLEDs(data,4) -- NACH
+    data.dC=data.dC+2 -- TG
+    drawLEDs(data,4) -- NACH
   else
-    line= space:rep(6)
+    data.dC=data.dC+6
  end
  if (words.hb == 1) then
-    line= line .. drawLEDs(data,3) -- VOR
-    line= line .. space:rep(2) 
+    drawLEDs(data,3) -- VOR
+    data.dC=data.dC+2
   else
-    line= line .. space:rep(5)
+    data.dC=data.dC+5
  end
- if (invertRows == true) then
-     buf = buf .. line
- else
+ if (invertRows ~= true) then
      for i = 0,10 do
+     	-- TODO swap line in buffer
           buf = buf .. line:sub((11-i)*3-2,(11-i)*3)
      end
  end
  ------------------------------------------------
   if (rowbgColor[5] ~= nil) then
-    space = rowbgColor[5]
-  else
-    space = colorBg
+     for i=45,56, 1 do data.rgbBuffer:set(i, rowbgColor[5]) end
   end
  if (words.half == 1) then
-    line= drawLEDs(data,4) -- HALB
-    line= line .. space:rep(1) -- X
+    drawLEDs(data,4) -- HALB
+    data.dC=data.dC+1 -- X
   else
-    line= space:rep(5)
+    data.dC=data.dC+5
  end
  if (words.h12 == 1) then
-    line= line .. drawLEDs(data,5) -- ZWOELF
-    line= line .. space:rep(1) -- P
+    drawLEDs(data,5) -- ZWOELF
+    data.dC=data.dC+1 -- P
   else
-    line= line .. space:rep(6)
+    data.dC=data.dC+6
  end
  if (invertRows == true) then
      for i = 0,10 do
+          --TODO swap line in the buffer
           buf = buf .. line:sub((11-i)*3-2,(11-i)*3)
      end
- else
-    buf=buf .. line
  end
  ------------even row (so inverted) ---------------------
   if (rowbgColor[6] ~= nil) then
-    space = rowbgColor[6]
-  else
-    space = colorBg
+    for i=56,67, 1 do data.rgbBuffer:set(i, rowbgColor[6]) end
   end
  if (words.h7 == 1) then
-    line= space:rep(5)
-    line= line .. drawLEDs(data,6) -- SIEBEN
+    data.dC=data.dC+5
+    drawLEDs(data,6) -- SIEBEN
  elseif (words.h1l == 1) then
-    line= space:rep(2)
-    line= line .. drawLEDs(data,4) -- EINS
-    line= line .. space:rep(5)
+    data.dC=data.dC+2
+    drawLEDs(data,4) -- EINS
+    data.dC=data.dC+5
  elseif (words.h1 == 1) then
-    line= space:rep(2)
-    line= line .. drawLEDs(data,3) -- EIN
-    line= line .. space:rep(6)
+    data.dC=data.dC+2
+    drawLEDs(data,3) -- EIN
+    data.dC=data.dC+6
  elseif (words.h2 == 1) then
-    line= drawLEDs(data,4) -- ZWEI
-    line= line .. space:rep(7)
+    drawLEDs(data,4) -- ZWEI
+    data.dC=data.dC+7
  else
-    line= space:rep(11)
+    data.dC=data.dC+7
  end
- if (invertRows == true) then
-     buf = buf .. line
- else
+ if (invertRows ~= true) then
+     --TODO invert buffer
      for i = 0,10 do
           buf = buf .. line:sub((11-i)*3-2,(11-i)*3)
      end
  end
  ------------------------------------------------
   if (rowbgColor[7] ~= nil) then
-    space = rowbgColor[7]
-  else
-    space = colorBg
+    for i=67,78, 1 do data.rgbBuffer:set(i, rowbgColor[7]) end
   end
  if (words.h3 == 1) then
-    line= space:rep(1)
+    data.dC=data.dC+1
     line= line .. drawLEDs(data,4) -- DREI
-    line= line .. space:rep(6)
+    data.dC=data.dC+6
  elseif (words.h5 == 1) then
-    line= space:rep(7)
+    data.dC=data.dC+7
     line= line .. drawLEDs(data,4) -- FUENF
  else
-    line= space:rep(11)
+    data.dC=data.dC+11
  end
- buf = buf .. line
  ------------even row (so inverted) ---------------------
   if (rowbgColor[8] ~= nil) then
-    space = rowbgColor[8]
-  else
-    space = colorBg
+    for i=78,89, 1 do data.rgbBuffer:set(i, rowbgColor[8]) end
   end
  if (words.h4 == 1) then
-    line= space:rep(7)
-    line= line .. drawLEDs(data,4) -- VIER
+    data.dC=data.dC+7
+    drawLEDs(data,4) -- VIER
   elseif (words.h9 == 1) then
-    line= space:rep(3)
-    line= line .. drawLEDs(data,4) -- NEUN
-    line= line .. space:rep(4)
+    data.dC=data.dC+3
+    drawLEDs(data,4) -- NEUN
+    data.dC=data.dC+4
  elseif (words.h11 == 1) then
-    line= drawLEDs(data,3) -- ELF
-    line= line .. space:rep(8)
+    drawLEDs(data,3) -- ELF
+    data.dC=data.dC+8
  else
-    line= space:rep(11)
+    data.dC=data.dC+11
  end
 
- for i = 0,10 do
-      buf = buf .. line:sub((11-i)*3-2,(11-i)*3)
- end
+ 
  ------------------------------------------------
   if (rowbgColor[9] ~= nil) then
-    space = rowbgColor[9]
-  else
-    space = colorBg
+    for i=89,99, 1 do data.rgbBuffer:set(i, rowbgColor[9]) end
   end
  if (words.h8 == 1) then
-    line= space:rep(1)
-    line= line .. drawLEDs(data,4) -- ACHT
-    line= line .. space:rep(6)
+    data.dC=data.dC+1
+    drawLEDs(data,4) -- ACHT
+    data.dC=data.dC+6
   elseif (words.h10 == 1) then
-    line= space:rep(5)
-    line= line .. drawLEDs(data,4) -- ZEHN
-    line= line .. space:rep(2)
+    data.dC=data.dC+5
+    drawLEDs(data,4) -- ZEHN
+    data.dC=data.dC+2
  else
-    line= space:rep(11)
- end
- buf = buf .. line
- ------------even row (so inverted) ---------------------
-  if (rowbgColor[10] ~= nil) then
-    space = rowbgColor[10]
-  else
-    space = colorBg
-  end
- if (words.h6 == 1) then
-    line= space:rep(1)
-    line= line .. drawLEDs(data,5) -- SECHS
-    line= line .. space:rep(2)
-  else
-    line= space:rep(8)
- end
- if (words.cl == 1) then
-    line= line .. drawLEDs(data,3) -- UHR
-  else
-    line= line .. space:rep(3)
+    data.dC=data.dC+11
  end
 
- for i = 0,10 do
-      buf = buf .. line:sub((11-i)*3-2,(11-i)*3)
+ ------------even row (so inverted) ---------------------
+  if (rowbgColor[10] ~= nil) then
+    for i=100,110, 1 do data.rgbBuffer:set(i, rowbgColor[10]) end
+  end
+ if (words.h6 == 1) then
+    data.dC=data.dC+1
+    drawLEDs(data,5) -- SECHS
+    data.dC=data.dC+2
+  else
+    data.dC=data.dC+8
  end
+ if (words.cl == 1) then
+    drawLEDs(data,3) -- UHR
+  else
+    data.dC=data.dC+3
+ end
+
 ------ Minutes -----------
  if (words.m1 == 1) then
-    buf= buf .. colorFg
-  else
-    buf= buf .. space:rep(1)
+    data.rgbBuffer:set(111, colorFg)
  end
  if (words.m2 == 1) then
-    buf= buf .. colorFg
-  else
-    buf= buf .. space:rep(1)
+    data.rgbBuffer:set(112, colorFg)
   end
  if (words.m3 == 1) then
-    buf= buf .. colorFg
-  else
-    buf= buf .. space:rep(1)
+    data.rgbBuffer:set(113, colorFg)
   end
  if (words.m4 == 1) then
-    buf= buf .. colorFg
-  else
-    buf= buf .. space:rep(1)
+    data.rgbBuffer:set(114, colorFg)
   end
   collectgarbage()
-  return buf
 end
 
 -- Count amount of characters to display
