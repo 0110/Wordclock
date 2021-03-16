@@ -105,7 +105,7 @@ public class ESP8266Tmr extends TwoArgFunction {
                 final int delay = varargs.arg(2).toint();
                 final LuaValue code = varargs.arg(4);
                 dynamicThreads[dynIndex] = new LuaThreadTmr(dynIndex, code, (endlessloop.contains("AUTO")), Math.max(delay / gTimingFactor, 1));
-                System.out.println("[TMR] DynTimer" + dynamicThreadCounter + " registered");
+                System.out.println("[TMR] DynTimer" + dynIndex + " registered");
             }
             return LuaValue.valueOf(true);
         }
