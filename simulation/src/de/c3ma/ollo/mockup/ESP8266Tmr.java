@@ -6,6 +6,7 @@ import org.luaj.vm2.Varargs;
 import org.luaj.vm2.lib.OneArgFunction;
 import org.luaj.vm2.lib.TwoArgFunction;
 import org.luaj.vm2.lib.VarArgFunction;
+import org.luaj.vm2.lib.ZeroArgFunction;
 
 import de.c3ma.ollo.LuaThreadTmr;
 
@@ -21,6 +22,8 @@ public class ESP8266Tmr extends TwoArgFunction {
     private static final int MAXTHREADS = 7;
     
     private static LuaThreadTmr[] allThreads = new LuaThreadTmr[MAXTHREADS];
+    private static LuaThreadTmr[] dynamicThreads = new LuaThreadTmr[MAXTHREADS];
+    private static int dynamicThreadCounter=0;
 
     public static int gTimingFactor = 1;
     
@@ -30,11 +33,15 @@ public class ESP8266Tmr extends TwoArgFunction {
         final LuaTable tmr = new LuaTable();
         tmr.set("stop", new stop());
         tmr.set("alarm", new alarm());
+        tmr.set("create", new create());
         env.set("tmr", tmr);
         env.get("package").get("loaded").set("tmr", tmr);
         
         /* initialize the Threads */
         for (Thread t : allThreads) {
+            t = null;
+        }
+        for (Thread t : dynamicThreads) {
             t = null;
         }
         
@@ -84,6 +91,68 @@ public class ESP8266Tmr extends TwoArgFunction {
                 allThreads[timerNumer].start();
             }
             return LuaValue.valueOf(true);
+        }
+    }
+    
+    private class dynRegister extends VarArgFunction {
+    	private final int dynIndex;
+    	public dynRegister(int index) {
+    		this.dynIndex = index;
+    	}
+        public Varargs invoke(Varargs varargs) {
+            if (varargs.narg() == 4) {
+                final String endlessloop = varargs.arg(3).toString().toString();
+                final int delay = varargs.arg(2).toint();
+                final LuaValue code = varargs.arg(4);
+                dynamicThreads[dynIndex] = new LuaThreadTmr(dynIndex, code, (endlessloop.contains("AUTO")), Math.max(delay / gTimingFactor, 1));
+                System.out.println("[TMR] DynTimer" + dynamicThreadCounter + " registered");
+            }
+            return LuaValue.valueOf(true);
+        }
+    }
+    
+    private class dynStart extends VarArgFunction {
+    	private final int dynIndex;
+    	public dynStart(int index) {
+    		this.dynIndex = index;
+    	}
+        public Varargs invoke(Varargs varargs) {
+            if (varargs.narg()== 0) {
+                if (dynamicThreads[dynIndex] != null) {
+                    dynamicThreads[dynIndex].start();
+                    System.out.println("[TMR] DynTimer" + dynIndex + " started");
+                }
+            }
+            return LuaValue.valueOf(true);
+        }
+    }
+    
+    private class dynStop extends ZeroArgFunction {
+    	private final int dynIndex;
+    	public dynStop(int index) {
+    		this.dynIndex = index;
+    	}
+        public LuaValue call() {
+            if (dynamicThreads[dynIndex] != null) {
+            	dynamicThreads[dynIndex].stopThread();
+            	dynamicThreads[dynIndex] = null;
+            	System.out.println("[TMR] DynTimer" + dynIndex + " stopped");
+            }
+			return LuaValue.valueOf(true);
+        }
+    }
+    
+    private class create extends ZeroArgFunction {
+        public LuaValue call() {                
+            if (dynamicThreadCounter >= MAXTHREADS) {
+                return LuaValue.error("[TMR] DynTimer" + dynamicThreadCounter + " exeeded maximum");
+            }
+            final LuaTable dynTimer = new LuaTable();
+            dynTimer.set("register", new dynRegister(dynamicThreadCounter));
+            dynTimer.set("start", new dynStart(dynamicThreadCounter));
+            dynTimer.set("unregister", new dynStop(dynamicThreadCounter));
+            dynamicThreadCounter++;
+            return dynTimer;
         }
     }
     
