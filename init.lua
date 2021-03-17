@@ -33,7 +33,7 @@ end
 initTimer = tmr.create()
 initTimer:register(5000, tmr.ALARM_SINGLE, function (t)
     bootledtimer:unregister()
-    t:unregister()
+    initTimer:unregister()
     initTimer=nil
     bootledtimer=nil
     local modlist = { "timecore" , "displayword" }
