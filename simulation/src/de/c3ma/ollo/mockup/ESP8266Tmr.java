@@ -111,19 +111,19 @@ public class ESP8266Tmr extends TwoArgFunction {
         }
     }
     
-    private class dynStart extends VarArgFunction {
+    private class dynStart extends ZeroArgFunction {
     	private final int dynIndex;
     	public dynStart(int index) {
     		this.dynIndex = index;
     	}
-        public Varargs invoke(Varargs varargs) {
-            if (varargs.narg()== 0) {
-                if (dynamicThreads[dynIndex] != null) {
-                    dynamicThreads[dynIndex].start();
-                    System.out.println("[TMR] DynTimer" + dynIndex + " started");
-                }
+        public LuaValue call() {
+            if (dynamicThreads[dynIndex] != null) {
+                dynamicThreads[dynIndex].start();
+                System.out.println("[TMR] DynTimer" + dynIndex + " started");
+                return LuaValue.valueOf(true);   
+            } else {
+            	return LuaValue.valueOf(false);
             }
-            return LuaValue.valueOf(true);
         }
     }
     
@@ -133,12 +133,14 @@ public class ESP8266Tmr extends TwoArgFunction {
     		this.dynIndex = index;
     	}
         public LuaValue call() {
+        	boolean status = false;
             if (dynamicThreads[dynIndex] != null) {
             	dynamicThreads[dynIndex].stopThread();
             	dynamicThreads[dynIndex] = null;
             	System.out.println("[TMR] DynTimer" + dynIndex + " stopped");
+            	status = true;
             }
-			return LuaValue.valueOf(true);
+			return LuaValue.valueOf(status);
         }
     }
     
