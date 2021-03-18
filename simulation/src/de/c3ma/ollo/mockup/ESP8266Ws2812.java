@@ -123,6 +123,7 @@ public class ESP8266Ws2812 extends TwoArgFunction {
                 
                 return LuaValue.valueOf(true);
             } else {
+            	System.err.println("[WS2812] fill with " + varargs.narg() + " arguments undefined.");
             	return LuaValue.NIL;
             }
         }
