@@ -35,6 +35,8 @@ public class ESP8266Tmr extends TwoArgFunction {
         tmr.set("alarm", new alarm());
         tmr.set("create", new create());
         tmr.set("wdclr", new watchDog());
+        tmr.set("ALARM_AUTO", "ALARM_AUTO");
+        tmr.set("ALARM_SINGLE", "ALARM_SINGLE");
         env.set("tmr", tmr);
         env.get("package").get("loaded").set("tmr", tmr);
         
