@@ -319,5 +319,18 @@ public class WS2812Layout extends JFrame {
 			}
 		}
 	}
+	
+	public void fillLEDs(int r, int g, int b) {
+		if (mElements != null) {
+			for(int i=0;(i < mElements.length); i++) {
+				for (int j=0; (j < mElements[i].length); j++) {
+					if  (mElements[i][j] != null) {
+						Element curlbl = mElements[i][j];
+						curlbl.setColor(r, g, b);
+					}
+				}
+			}
+		}
+	}
 
 }

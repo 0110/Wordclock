@@ -7,11 +7,14 @@ import javax.swing.SwingUtilities;
 import org.luaj.vm2.LuaString;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
+import org.luaj.vm2.Varargs;
 import org.luaj.vm2.lib.OneArgFunction;
 import org.luaj.vm2.lib.TwoArgFunction;
+import org.luaj.vm2.lib.VarArgFunction;
 import org.luaj.vm2.lib.ZeroArgFunction;
 
 import de.c3ma.ollo.LuaSimulation;
+import de.c3ma.ollo.LuaThreadTmr;
 import de.c3ma.ollo.mockup.ui.WS2812Layout;
 
 /**
@@ -32,6 +35,7 @@ public class ESP8266Ws2812 extends TwoArgFunction {
 		final LuaTable ws2812 = new LuaTable();
 		ws2812.set("init", new init());
 		ws2812.set("write", new write());
+		ws2812.set("newBuffer", new newBuffer());
 		env.set("ws2812", ws2812);
 		env.get("package").get("loaded").set("ws2812", ws2812);
 		return ws2812;
@@ -75,8 +79,11 @@ public class ESP8266Ws2812 extends TwoArgFunction {
 					System.out.println("[WS2812] write length:" + length);
 				} else {
 				}
+				return LuaValue.valueOf(true);
+			} else {
+				System.out.println("[WS2812] write no string given");
+				return LuaValue.NIL;
 			}
-			return LuaValue.valueOf(true);
 		}
 	}
 
@@ -85,4 +92,61 @@ public class ESP8266Ws2812 extends TwoArgFunction {
 			ESP8266Ws2812.layout = WS2812Layout.parse(file, nodemcuSimu);
 		}
 	}
+	
+	private class newBuffer extends VarArgFunction {
+    	
+        public Varargs invoke(Varargs varargs) {
+            if (varargs.narg() == 2) {
+                final int leds = varargs.arg(1).toint();
+                final int bytesPerLeds = varargs.arg(2).toint();
+                final LuaTable rgbBuffer = new LuaTable();
+                rgbBuffer.set("fill", new bufferFill());
+                rgbBuffer.set("set", new bufferWrite());
+                System.out.println("[WS2812] " + leds + "leds (" + bytesPerLeds + "bytes per led)");                
+                return rgbBuffer;
+            } else {
+            	return LuaValue.NIL;
+            }
+        }
+    }
+	
+	private class bufferFill extends VarArgFunction {
+    	
+        public Varargs invoke(Varargs varargs) {
+            if (varargs.narg() == 3) {
+                final int red = varargs.arg(1).toint();
+                final int green = varargs.arg(2).toint();
+                final int blue = varargs.arg(3).toint();
+                if (ESP8266Ws2812.layout != null) {
+					ESP8266Ws2812.layout.fillLEDs(red, green, blue);
+				}
+                
+                return LuaValue.valueOf(true);
+            } else {
+            	return LuaValue.NIL;
+            }
+        }
+    }
+	
+	private class bufferWrite extends VarArgFunction {
+    	
+        public Varargs invoke(Varargs varargs) {
+            if (varargs.narg() == 2) {
+                final int index = varargs.arg(1).toint();
+                final LuaString color = varargs.arg(2).checkstring();
+				final int length = color.rawlen();
+				if (length == 3) {
+					final byte[] array = color.m_bytes;
+					int r = array[0]+(Byte.MIN_VALUE*-1);
+					int b = array[1]+(Byte.MIN_VALUE*-1);
+					int g = array[2]+(Byte.MIN_VALUE*-1);
+					ESP8266Ws2812.layout.updateLED(index, r, g, b);
+				}
+                
+                return LuaValue.valueOf(true);
+            } else {
+            	return LuaValue.NIL;
+            }
+        }
+    }
 }
