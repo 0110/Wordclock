@@ -34,6 +34,7 @@ public class ESP8266Tmr extends TwoArgFunction {
         tmr.set("stop", new stop());
         tmr.set("alarm", new alarm());
         tmr.set("create", new create());
+        tmr.set("wdclr", new watchDog());
         env.set("tmr", tmr);
         env.get("package").get("loaded").set("tmr", tmr);
         
@@ -124,6 +125,15 @@ public class ESP8266Tmr extends TwoArgFunction {
             } else {
             	return LuaValue.valueOf(false);
             }
+        }
+    }
+    
+    private class watchDog extends ZeroArgFunction {
+    	
+        public LuaValue call() {
+            System.out.println("[TMR] Watchdog fed");
+            return LuaValue.valueOf(true);   
+            
         }
     }
     
