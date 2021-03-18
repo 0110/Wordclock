@@ -155,7 +155,7 @@ function normalOperation()
          end
 	 ws2812.write(rgbBuffer)
       else
-        timer:unregister()
+        wifitimer:unregister()
         wifitimer=nil
         connect_counter=nil
         print('IP: ',wifi.sta.getip(), " heap: ", node.heap())
