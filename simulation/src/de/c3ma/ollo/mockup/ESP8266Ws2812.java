@@ -122,6 +122,18 @@ public class ESP8266Ws2812 extends TwoArgFunction {
 				}
                 
                 return LuaValue.valueOf(true);
+            } else if (varargs.isstring(2)) {
+            	//FIXME to be tested
+            	 final LuaString color = varargs.arg(2).checkstring();
+ 				final int length = color.rawlen();
+ 				if (length == 3) {
+ 					final byte[] array = color.m_bytes;
+ 					int r = array[0]+(Byte.MIN_VALUE*-1);
+ 					int b = array[1]+(Byte.MIN_VALUE*-1);
+ 					int g = array[2]+(Byte.MIN_VALUE*-1);
+ 					ESP8266Ws2812.layout.fillLEDs(r, g, b);
+ 				}
+ 				return LuaValue.valueOf(true);
             } else {
             	System.err.println("[WS2812] fill with " + varargs.narg() + " arguments undefined.");
             	return LuaValue.NIL;
