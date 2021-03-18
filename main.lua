@@ -59,7 +59,7 @@ function displayTime()
             invertRows=true
         end
         local c = dw.countChars(words)
-        ledBuf = dw.generateLEDs(words, colorBg, color, color1, color2, color3, color4, invertRows, c)
+        ledBuf = dw.generateLEDs(rgbBuffer, words, colorBg, color, color1, color2, color3, color4, invertRows, c)
      end
      dw = nil
      collectgarbage()
