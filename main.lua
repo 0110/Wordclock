@@ -59,19 +59,20 @@ function displayTime()
             invertRows=true
         end
         local c = dw.countChars(words)
-        ledBuf = dw.generateLEDs(rgbBuffer, words, colorBg, color, color1, color2, color3, color4, invertRows, c)
+        dw.generateLEDs(rgbBuffer, words, colorBg, color, color1, color2, color3, color4, invertRows, c)
      end
      dw = nil
      collectgarbage()
      print("dw: " .. tostring(node.heap()))
-     if (ledBuf ~= nil) then
-     	  ws2812.write(ledBuf)
+     if (rgbBuffer ~= nil) then
+     	  ws2812.write(rgbBuffer)
      else
 	  -- set FG to fix value: RED
 	  local color = string.char(255,0,0)
 	  rgbBuffer:fill(0,0,0) -- disable all LEDs
 	  for i=108,110, 1 do rgbBuffer:set(i, color) end
 	  ws2812.write(rgbBuffer)
+	  print("Fallback no time displayed")
      end
      
      -- cleanup
@@ -95,6 +96,7 @@ function normalOperation()
     local alive=0
     mlt:register(2500, tmr.ALARM_AUTO, function (lt)
       if (setupCounter > 4) then
+	rgbBuffer:fill(0,0,0) -- disable all LEDs
         syncTimeFromInternet()
         setupCounter=setupCounter-1
         alive = 1
@@ -159,6 +161,9 @@ function normalOperation()
         wifitimer=nil
         connect_counter=nil
         print('IP: ',wifi.sta.getip(), " heap: ", node.heap())
+         rgbBuffer:fill(0,0,0) -- clear all LEDs
+	 rgbBuffer:set(13, color)
+	 ws2812.write(rgbBuffer)
         mlt:start()
       end
     end)

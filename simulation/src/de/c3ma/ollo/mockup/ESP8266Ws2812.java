@@ -5,6 +5,7 @@ import java.io.File;
 
 import javax.swing.SwingUtilities;
 
+import org.luaj.vm2.LuaNil;
 import org.luaj.vm2.LuaString;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
@@ -162,10 +163,12 @@ public class ESP8266Ws2812 extends TwoArgFunction {
 	private class bufferWrite extends VarArgFunction {
     	
         public Varargs invoke(Varargs varargs) {
-            if (varargs.narg() == 2) {
-                final int index = varargs.arg(1).toint();
-                final LuaString color = varargs.arg(2).checkstring();
-				final int length = color.rawlen();
+            if (varargs.narg() == 3) {
+                final int index = varargs.arg(2).toint();
+                
+                
+                final LuaString color = varargs.arg(3).checkstring();
+ 				final int length = color.rawlen();
 				if (length == 3) {
 					SwingUtilities.invokeLater(new Runnable() {
 						@Override
@@ -177,10 +180,17 @@ public class ESP8266Ws2812 extends TwoArgFunction {
 							ESP8266Ws2812.layout.updateLED(index, r, g, b);
 						}
 					});
+	                return LuaValue.valueOf(true);
+				} else {
+					for(int i=0; i <= varargs.narg(); i++) {
+						System.err.println("[WS2812] write ["+(i) + "] (" + varargs.arg(i).typename() + ") " + varargs.arg(i).toString() );
+					}
+					
+					System.err.println("[WS2812] set with " + varargs.narg() + " arguments at index="+ index + " and "+ length + " charactes not matching");
+	            	return LuaValue.NIL;	
 				}
-                
-                return LuaValue.valueOf(true);
             } else {
+            	System.err.println("[WS2812] set with " + varargs.narg() + " arguments undefined.");
             	return LuaValue.NIL;
             }
         }
