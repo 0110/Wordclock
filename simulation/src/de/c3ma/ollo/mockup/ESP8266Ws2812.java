@@ -1,5 +1,6 @@
 package de.c3ma.ollo.mockup;
 
+import java.awt.Color;
 import java.io.File;
 
 import javax.swing.SwingUtilities;
@@ -16,6 +17,7 @@ import org.luaj.vm2.lib.ZeroArgFunction;
 import de.c3ma.ollo.LuaSimulation;
 import de.c3ma.ollo.LuaThreadTmr;
 import de.c3ma.ollo.mockup.ui.WS2812Layout;
+import de.c3ma.ollo.mockup.ui.WS2812Layout.Element;
 
 /**
  * created at 28.12.2017 - 23:34:04<br />
@@ -58,6 +60,12 @@ public class ESP8266Ws2812 extends TwoArgFunction {
 			if (arg.isstring()) {
 				LuaString jstring = arg.checkstring();
 				final int length = jstring.rawlen();
+
+				if (ESP8266Ws2812.layout == null) {
+					System.err.println("[WS2812] Not initialized (" + length + "bytes to be updated)");
+					return LuaValue.valueOf(false);
+				}
+				
 				if ((length % 3) == 0) {
 					final byte[] array = jstring.m_bytes;
 					SwingUtilities.invokeLater(new Runnable() {
@@ -73,11 +81,6 @@ public class ESP8266Ws2812 extends TwoArgFunction {
 							}
 						}
 					});
-				}
-
-				if (ESP8266Ws2812.layout == null) {
-					System.out.println("[WS2812] write length:" + length);
-				} else {
 				}
 				return LuaValue.valueOf(true);
 			} else {
@@ -102,6 +105,7 @@ public class ESP8266Ws2812 extends TwoArgFunction {
                 final LuaTable rgbBuffer = new LuaTable();
                 rgbBuffer.set("fill", new bufferFill());
                 rgbBuffer.set("set", new bufferWrite());
+                rgbBuffer.set("get", new bufferRead());
                 System.out.println("[WS2812] " + leds + "leds (" + bytesPerLeds + "bytes per led)");                
                 return rgbBuffer;
             } else {
@@ -162,4 +166,27 @@ public class ESP8266Ws2812 extends TwoArgFunction {
             }
         }
     }
+	
+	private class bufferRead extends OneArgFunction {
+
+		@Override
+		public LuaValue call(LuaValue arg) {			
+			final int offset = arg.toint();
+			if (ESP8266Ws2812.layout != null) {
+				
+				Element e = ESP8266Ws2812.layout.getLED(offset);
+				if (e != null) {
+					Color color = e.getColor();
+					final byte[] array = new byte[3];
+					array[0] = (byte) color.getRed();
+					array[1] = (byte) color.getGreen();
+					array[2] = (byte) color.getBlue();
+					return LuaString.valueOf(array);
+				}
+			}
+
+			System.err.println("[WS2812] reading " + offset + " impossible");
+			return LuaValue.NIL;
+		}
+	}
 }

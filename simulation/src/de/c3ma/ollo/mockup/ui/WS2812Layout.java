@@ -288,6 +288,10 @@ public class WS2812Layout extends JFrame {
 			this.setForeground(new Color(red, green, blue));
 			this.repaint();
 		}
+		
+		public Color getColor() {
+			return this.getForeground();
+		}
 
 		@Override
 		public String toString() {
@@ -317,6 +321,23 @@ public class WS2812Layout extends JFrame {
 				Element curlbl = mElements[i][j];
 				curlbl.setColor(r, g, b);
 			}
+		}
+	}
+	
+	public Element getLED(int index) {
+		if (mElements != null) {
+			int i = (index / mColumn);
+			int j = (index % mColumn);
+			if (i % 2 == 1) {
+				j = (mColumn-1) - j;
+			}
+			if ((i < mElements.length) && (j < mElements[i].length) && (mElements[i][j] != null)) {
+				return mElements[i][j];
+			} else {
+				return null;
+			}
+		} else {
+			return null;
 		}
 	}
 	
