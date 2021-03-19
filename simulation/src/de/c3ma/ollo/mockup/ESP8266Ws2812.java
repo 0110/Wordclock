@@ -117,32 +117,41 @@ public class ESP8266Ws2812 extends TwoArgFunction {
 	private class bufferFill extends VarArgFunction {
     	
         public Varargs invoke(Varargs varargs) {
-            if (varargs.narg() == 3) {
+            if (varargs.narg() >= 3) {
                 final int red = varargs.arg(1).toint();
                 final int green = varargs.arg(2).toint();
                 final int blue = varargs.arg(3).toint();
                 if (ESP8266Ws2812.layout != null) {
-					ESP8266Ws2812.layout.fillLEDs(red, green, blue);
+                	SwingUtilities.invokeLater(new Runnable() {
+						@Override
+						public void run() {
+							ESP8266Ws2812.layout.fillLEDs(red, green, blue);
+						}
+                	});
 				}
-                
+                System.out.println("[WS2812] buffer fill with " + red + "," + green + "," +  blue);
                 return LuaValue.valueOf(true);
             } else if (varargs.isstring(2)) {
-            	//FIXME to be tested
             	 final LuaString color = varargs.arg(2).checkstring();
  				final int length = color.rawlen();
- 				if (length == 3) {
+ 				if ((length == 3) && (ESP8266Ws2812.layout != null)) {
+
+ 					final byte[] array = color.m_bytes;
+ 					final int r = array[0]+(Byte.MIN_VALUE*-1);
+ 					final int b = array[1]+(Byte.MIN_VALUE*-1);
+ 					final int g = array[2]+(Byte.MIN_VALUE*-1);
  					SwingUtilities.invokeLater(new Runnable() {
 						@Override
 						public void run() {
-		 					final byte[] array = color.m_bytes;
-		 					int r = array[0]+(Byte.MIN_VALUE*-1);
-		 					int b = array[1]+(Byte.MIN_VALUE*-1);
-		 					int g = array[2]+(Byte.MIN_VALUE*-1);
 		 					ESP8266Ws2812.layout.fillLEDs(r, g, b);
 						} 
 					});
+ 	 				System.out.println("[WS2812] buffer fill with " + r + "," + g + "," +  b);
+ 	 				return LuaValue.valueOf(true);
+ 				} else {
+ 					System.err.println("[WS2812] buffer not initialized ("+varargs.narg() +"args) , length "+ length + ", raw:" + color.toString());
+ 	 				return LuaValue.NIL;
  				}
- 				return LuaValue.valueOf(true);
             } else {
             	System.err.println("[WS2812] fill with " + varargs.narg() + " arguments undefined.");
             	return LuaValue.NIL;
