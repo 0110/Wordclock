@@ -58,6 +58,23 @@ end
 
 local data={}
 
+-- @fn swapLine
+-- @param lineOffset  offset (starting at 1) where the line is located to be swapped
+-- works on the rgbBuffer, defined in data struct
+-- @return <code>false</code> on errors, else <code>true</code>
+local swapLine = function(lineOffset)
+ if (data.rgbBuffer == nil) then
+   return false
+ end
+
+ for i = 0,10 do
+   local tmpColor=data.rgbBuffer:get(lineOffset+i)
+   data.rgbBuffer:set(lineIdx+i, data.rgbBuffer:get(lineOffset+10-i))
+   data.rgbBuffer:set(lineIdx+10-i, tmpColor)
+ end
+ return true
+end
+
 -- @fn generateLEDs
 -- Module displaying of the words
 -- @param rgbBuffer	 OutputBuffer with 114 LEDs
@@ -134,9 +151,11 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
 
  -- Set the foreground color as the default color
  local buf=data.colorFg
+ local lineIdx=1
  -- line 1----------------------------------------------
+ lineIdx=11
  if (rowbgColor[1] ~= nil) then
-    for i=1,11, 1 do data.rgbBuffer:set(i, rowbgColor[1]) end
+    for i=lineIdx,11, 1 do data.rgbBuffer:set(i, rowbgColor[1]) end
  end
  if (words.it==1) then
     drawLEDs(data,2) -- ES
@@ -158,8 +177,9 @@ if (words.m5== 1) then
     data.dC=data.dC+4
  end
  -- line 2-- even row (so inverted) --------------------
+ lineIdx=12
   if (rowbgColor[2] ~= nil) then
-     for i=12,23, 1 do data.rgbBuffer:set(i, rowbgColor[2]) end
+     for i=lineIdx,(lineIdx+11), 1 do data.rgbBuffer:set(i, rowbgColor[2]) end
   end
  if (words.m10 == 1) then
     drawLEDs(data,4) -- ZEHN
@@ -171,10 +191,12 @@ if (words.m5== 1) then
   else
     data.dC=data.dC+7
  end
-
+ -- swap line
+ swapLine(lineIdx)
  -- line3----------------------------------------------
+ lineIdx=23
   if (rowbgColor[3] ~= nil) then
-     for i=23,34, 1 do data.rgbBuffer:set(i, rowbgColor[3]) end
+     for i=lineIdx,lineIdx+11, 1 do data.rgbBuffer:set(i, rowbgColor[3]) end
   end
  if (words.h3q == 1) then
     line= drawLEDs(data,11) -- DREIVIERTEL
@@ -185,8 +207,9 @@ if (words.m5== 1) then
     data.dC=data.dC+11
  end
  --line 4-------- even row (so inverted) -------------
-  if (rowbgColor[4] ~= nil) then
-     for i=34,45, 1 do data.rgbBuffer:set(i, rowbgColor[4]) end
+ lineIdx=34
+ if (rowbgColor[4] ~= nil) then
+     for i=lineIdx,lineIdx+11, 1 do data.rgbBuffer:set(i, rowbgColor[4]) end
   end
  if (words.ha == 1) then
     data.dC=data.dC+2 -- TG
@@ -201,14 +224,12 @@ if (words.m5== 1) then
     data.dC=data.dC+5
  end
  if (invertRows ~= true) then
-     for i = 0,10 do
-     	-- TODO swap line in buffer
-          buf = buf .. line:sub((11-i)*3-2,(11-i)*3)
-     end
+   swapLine(lineIdx)
  end
  ------------------------------------------------
-  if (rowbgColor[5] ~= nil) then
-     for i=45,56, 1 do data.rgbBuffer:set(i, rowbgColor[5]) end
+ lineIdx=45
+ if (rowbgColor[5] ~= nil) then
+     for i=lineIdx,lineIdx+11, 1 do data.rgbBuffer:set(i, rowbgColor[5]) end
   end
  if (words.half == 1) then
     drawLEDs(data,4) -- HALB
@@ -223,14 +244,12 @@ if (words.m5== 1) then
     data.dC=data.dC+6
  end
  if (invertRows == true) then
-     for i = 0,10 do
-          --TODO swap line in the buffer
-          buf = buf .. line:sub((11-i)*3-2,(11-i)*3)
-     end
+   swapLine(lineIdx)
  end
  ------------even row (so inverted) ---------------------
-  if (rowbgColor[6] ~= nil) then
-    for i=56,67, 1 do data.rgbBuffer:set(i, rowbgColor[6]) end
+ lineIdx=56
+ if (rowbgColor[6] ~= nil) then
+    for i=lineIdx,lineIdx+11, 1 do data.rgbBuffer:set(i, rowbgColor[6]) end
   end
  if (words.h7 == 1) then
     data.dC=data.dC+5
@@ -250,14 +269,12 @@ if (words.m5== 1) then
     data.dC=data.dC+7
  end
  if (invertRows ~= true) then
-     --TODO invert buffer
-     for i = 0,10 do
-          buf = buf .. line:sub((11-i)*3-2,(11-i)*3)
-     end
+   swapLine(lineIdx)
  end
  ------------------------------------------------
-  if (rowbgColor[7] ~= nil) then
-    for i=67,78, 1 do data.rgbBuffer:set(i, rowbgColor[7]) end
+ lineIdx=67
+ if (rowbgColor[7] ~= nil) then
+    for i=lineIdx,lineIdx+11, 1 do data.rgbBuffer:set(i, rowbgColor[7]) end
   end
  if (words.h3 == 1) then
     data.dC=data.dC+1
@@ -270,8 +287,9 @@ if (words.m5== 1) then
     data.dC=data.dC+11
  end
  ------------even row (so inverted) ---------------------
-  if (rowbgColor[8] ~= nil) then
-    for i=78,89, 1 do data.rgbBuffer:set(i, rowbgColor[8]) end
+ lineIdx=78
+ if (rowbgColor[8] ~= nil) then
+    for i=lineIdx,lineIdx+11, 1 do data.rgbBuffer:set(i, rowbgColor[8]) end
   end
  if (words.h4 == 1) then
     data.dC=data.dC+7
@@ -286,11 +304,11 @@ if (words.m5== 1) then
  else
     data.dC=data.dC+11
  end
-
- 
+ swapLine(lineIdx)
  ------------------------------------------------
-  if (rowbgColor[9] ~= nil) then
-    for i=89,99, 1 do data.rgbBuffer:set(i, rowbgColor[9]) end
+ lineIdx=89
+ if (rowbgColor[9] ~= nil) then
+    for i=lineIdx,lineIdx+11, 1 do data.rgbBuffer:set(i, rowbgColor[9]) end
   end
  if (words.h8 == 1) then
     data.dC=data.dC+1
@@ -305,8 +323,9 @@ if (words.m5== 1) then
  end
 
  ------------even row (so inverted) ---------------------
-  if (rowbgColor[10] ~= nil) then
-    for i=100,110, 1 do data.rgbBuffer:set(i, rowbgColor[10]) end
+ lineIdx=100
+ if (rowbgColor[10] ~= nil) then
+    for i=lineIdx,lineIdx+11, 1 do data.rgbBuffer:set(i, rowbgColor[10]) end
   end
  if (words.h6 == 1) then
     data.dC=data.dC+1
@@ -320,7 +339,7 @@ if (words.m5== 1) then
   else
     data.dC=data.dC+3
  end
-
+ swapLine(lineIdx)
 ------ Minutes -----------
  if (words.m1 == 1) then
     data.rgbBuffer:set(111, colorFg)
