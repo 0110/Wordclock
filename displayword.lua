@@ -62,15 +62,15 @@ local data={}
 -- @param lineOffset  offset (starting at 1) where the line is located to be swapped
 -- works on the rgbBuffer, defined in data struct
 -- @return <code>false</code> on errors, else <code>true</code>
-local swapLine = function(lineOffset)
+local swapLine = function(data, lineOffset)
  if (data.rgbBuffer == nil) then
    return false
  end
 
  for i = 0,10 do
    local tmpColor=data.rgbBuffer:get(lineOffset+i)
-   data.rgbBuffer:set(lineIdx+i, data.rgbBuffer:get(lineOffset+10-i))
-   data.rgbBuffer:set(lineIdx+10-i, tmpColor)
+   data.rgbBuffer:set(lineOffset+i, data.rgbBuffer:get(lineOffset+10-i))
+   data.rgbBuffer:set(lineOffset+10-i, tmpColor)
  end
  return true
 end
@@ -192,7 +192,7 @@ if (words.m5== 1) then
     data.dC=data.dC+7
  end
  -- swap line
- swapLine(lineIdx)
+ swapLine(data,lineIdx)
  -- line3----------------------------------------------
  lineIdx=23
   if (rowbgColor[3] ~= nil) then
@@ -224,7 +224,7 @@ if (words.m5== 1) then
     data.dC=data.dC+5
  end
  if (invertRows ~= true) then
-   swapLine(lineIdx)
+   swapLine(data,lineIdx)
  end
  ------------------------------------------------
  lineIdx=45
@@ -244,7 +244,7 @@ if (words.m5== 1) then
     data.dC=data.dC+6
  end
  if (invertRows == true) then
-   swapLine(lineIdx)
+   swapLine(data,lineIdx)
  end
  ------------even row (so inverted) ---------------------
  lineIdx=56
@@ -269,7 +269,7 @@ if (words.m5== 1) then
     data.dC=data.dC+7
  end
  if (invertRows ~= true) then
-   swapLine(lineIdx)
+   swapLine(data,lineIdx)
  end
  ------------------------------------------------
  lineIdx=67
@@ -304,7 +304,7 @@ if (words.m5== 1) then
  else
     data.dC=data.dC+11
  end
- swapLine(lineIdx)
+ swapLine(data,lineIdx)
  ------------------------------------------------
  lineIdx=89
  if (rowbgColor[9] ~= nil) then
@@ -339,7 +339,7 @@ if (words.m5== 1) then
   else
     data.dC=data.dC+3
  end
- swapLine(lineIdx)
+ swapLine(data,lineIdx)
 ------ Minutes -----------
  if (words.m1 == 1) then
     data.rgbBuffer:set(111, colorFg)
