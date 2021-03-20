@@ -28,19 +28,15 @@ local updateColor = function (data)
     end
 end
 
-local drawLEDs = function(data, numberNewChars)
+local drawLEDs = function(data, offset, numberNewChars)
     if (numberNewChars == nil) then
         numberNewChars=0
     end
     if (data.rgbBuffer == nil) then
     	return
     end
-    local skipped=0
-    if (data.sC ~= nil) then
-      skipped=tonumber(data.sC)
-    end
     for i=1,numberNewChars do
-        data.rgbBuffer:set(skipped + data.dC + 1, updateColor(data))
+        data.rgbBuffer:set(offset + i - 1, updateColor(data))
         data.dC=data.dC+1
     end
 end
@@ -139,7 +135,6 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
     data.colorM4=colorM4
  end
  data.dC=0 -- drawn characters
- data.sC=0 -- skipped characters
  local charsPerLine=11
  
  -- Space / background has no color by default
@@ -153,31 +148,21 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
  end
  rgbBuffer:fill(colorBg) -- draw the background
 
- -- Set the foreground color as the default color
  local lineIdx=1
  -- line 1----------------------------------------------
- lineIdx=11
  if (rowbgColor[1] ~= nil) then
     for i=lineIdx,11, 1 do data.rgbBuffer:set(i, rowbgColor[1]) end
  end
  if (words.it==1) then
-    drawLEDs(data,2) -- ES
-  else
-    data.sC=data.sC+2
+    drawLEDs(data, lineIdx, 2) -- ES
  end
  -- K fill character
- data.sC=data.sC+1
  if (words.is == 1) then
-    drawLEDs(data,3) -- IST
- else
-    data.sC=data.sC+3
+    drawLEDs(data, lineIdx+3, 3) -- IST
  end
  -- L fill character
- data.sC=data.sC+1
  if (words.m5== 1) then
-    drawLEDs(data,4) -- FUENF
-  else
-    data.sC=data.sC+4
+    drawLEDs(data, lineIdx+7, 4) -- FUENF
  end
  -- line 2-- even row (so inverted) --------------------
  lineIdx=12
@@ -185,14 +170,10 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
      for i=lineIdx,(lineIdx+11), 1 do data.rgbBuffer:set(i, rowbgColor[2]) end
   end
  if (words.m10 == 1) then
-    drawLEDs(data,4) -- ZEHN
-  else
-    data.sC=data.sC+4
+    drawLEDs(data, lineIdx, 4) -- ZEHN
  end
  if (words.m20 == 1) then
-    drawLEDs(data,7) -- ZWANZIG
-  else
-    data.sC=data.sC+7
+    drawLEDs(data, lineIdx + 4, 7) -- ZWANZIG
  end
  -- swap line
  swapLine(data,lineIdx)
@@ -202,12 +183,9 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
      for i=lineIdx,lineIdx+11, 1 do data.rgbBuffer:set(i, rowbgColor[3]) end
   end
  if (words.h3q == 1) then
-    drawLEDs(data,11) -- DREIVIERTEL
+    drawLEDs(data,lineIdx, 11) -- DREIVIERTEL
   elseif (words.hq == 1) then
-    data.sC=data.sC+4
-    drawLEDs(data,7) -- VIERTEL
- else
-    data.sC=data.sC+11
+    drawLEDs(data, lineIdx + 4, 7) -- VIERTEL
  end
  --line 4-------- even row (so inverted) -------------
  lineIdx=34
@@ -215,36 +193,27 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
      for i=lineIdx,lineIdx+11, 1 do data.rgbBuffer:set(i, rowbgColor[4]) end
   end
  if (words.ha == 1) then
-    data.sC=data.sC+2 -- TG
-    drawLEDs(data,4) -- NACH
-  else
-    data.sC=data.sC+6
+    -- TG
+    drawLEDs(data, lineIdx + 2, 4) -- NACH
  end
  if (words.hb == 1) then
-    drawLEDs(data,3) -- VOR
-    data.sC=data.sC+2
-  else
-    data.sC=data.sC+5
+    drawLEDs(data, lineIdx + 6, 3) -- VOR
  end
  if (invertRows ~= true) then
    swapLine(data,lineIdx)
  end
- ------------------------------------------------
+ -- line 5 ----------------------------------------------
  lineIdx=45
  if (rowbgColor[5] ~= nil) then
      for i=lineIdx,lineIdx+11, 1 do data.rgbBuffer:set(i, rowbgColor[5]) end
   end
  if (words.half == 1) then
-    drawLEDs(data,4) -- HALB
-    data.sC=data.sC+1 -- X
-  else
-    data.sC=data.sC+5
+    drawLEDs(data, lineIdx, 4) -- HALB
+     -- X
  end
  if (words.h12 == 1) then
-    drawLEDs(data,5) -- ZWOELF
-    data.sC=data.sC+1 -- P
-  else
-    data.sC=data.sC+6
+    drawLEDs(data, lineIdx + 5,5) -- ZWOELF
+    -- P
  end
  if (invertRows == true) then
    swapLine(data,lineIdx)
@@ -255,21 +224,13 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
     for i=lineIdx,lineIdx+11, 1 do data.rgbBuffer:set(i, rowbgColor[6]) end
   end
  if (words.h7 == 1) then
-    data.sC=data.sC+5
-    drawLEDs(data,6) -- SIEBEN
+    drawLEDs(data, lineIdx + 5, 6) -- SIEBEN
  elseif (words.h1l == 1) then
-    data.sC=data.sC+2
-    drawLEDs(data,4) -- EINS
-    data.sC=data.sC+5
+    drawLEDs(data, lineIdx + 2,4) -- EINS
  elseif (words.h1 == 1) then
-    data.sC=data.sC+2
-    drawLEDs(data,3) -- EIN
-    data.sC=data.sC+6
+    drawLEDs(data, lineIdx + 2, 3) -- EIN
  elseif (words.h2 == 1) then
-    drawLEDs(data,4) -- ZWEI
-    data.sC=data.sC+7
- else
-    data.sC=data.sC+7
+    drawLEDs(data, lineIdx, 4) -- ZWEI
  end
  if (invertRows ~= true) then
    swapLine(data,lineIdx)
@@ -280,14 +241,9 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
     for i=lineIdx,lineIdx+11, 1 do data.rgbBuffer:set(i, rowbgColor[7]) end
   end
  if (words.h3 == 1) then
-    data.sC=data.sC+1
-    drawLEDs(data,4) -- DREI
-    data.sC=data.sC+6
+    drawLEDs(data, lineIdx + 1,4) -- DREI
  elseif (words.h5 == 1) then
-    data.sC=data.sC+7
-    drawLEDs(data,4) -- FUENF
- else
-    data.sC=data.sC+11
+    drawLEDs(data, lineIdx + 7, 4) -- FUENF
  end
  ------------even row (so inverted) ---------------------
  lineIdx=78
@@ -295,17 +251,11 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
     for i=lineIdx,lineIdx+11, 1 do data.rgbBuffer:set(i, rowbgColor[8]) end
   end
  if (words.h4 == 1) then
-    data.sC=data.sC+7
-    drawLEDs(data,4) -- VIER
+    drawLEDs(data, lineIdx + 7, 4) -- VIER
   elseif (words.h9 == 1) then
-    data.sC=data.sC+3
-    drawLEDs(data,4) -- NEUN
-    data.sC=data.sC+4
+    drawLEDs(data, lineIdx + 3, 4) -- NEUN
  elseif (words.h11 == 1) then
-    drawLEDs(data,3) -- ELF
-    data.sC=data.sC+8
- else
-    data.sC=data.sC+11
+    drawLEDs(data, lineIdx, 3) -- ELF
  end
  swapLine(data,lineIdx)
  ------------------------------------------------
@@ -314,15 +264,9 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
     for i=lineIdx,lineIdx+11, 1 do data.rgbBuffer:set(i, rowbgColor[9]) end
   end
  if (words.h8 == 1) then
-    data.sC=data.sC+1
-    drawLEDs(data,4) -- ACHT
-    data.sC=data.sC+6
+    drawLEDs(data, lineIdx + 1, 4) -- ACHT
   elseif (words.h10 == 1) then
-    data.sC=data.sC+5
-    drawLEDs(data,4) -- ZEHN
-    data.sC=data.sC+2
- else
-    data.sC=data.sC+11
+    drawLEDs(data, lineIdx + 5, 4) -- ZEHN
  end
 
  ------------even row (so inverted) ---------------------
@@ -331,16 +275,10 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
     for i=lineIdx,lineIdx+11, 1 do data.rgbBuffer:set(i, rowbgColor[10]) end
   end
  if (words.h6 == 1) then
-    data.sC=data.sC+1
-    drawLEDs(data,5) -- SECHS
-    data.sC=data.sC+2
-  else
-    data.sC=data.sC+8
+    drawLEDs(data, lineIdx + 1, 5) -- SECHS
  end
  if (words.cl == 1) then
-    drawLEDs(data,3) -- UHR
-  else
-    data.sC=data.sC+3
+    drawLEDs(data, lineIdx + 8, 3) -- UHR
  end
  swapLine(data,lineIdx)
 ------ Minutes -----------
