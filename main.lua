@@ -162,7 +162,12 @@ function normalOperation()
         connect_counter=nil
         print('IP: ',wifi.sta.getip(), " heap: ", node.heap())
          rgbBuffer:fill(0,0,0) -- clear all LEDs
-	 rgbBuffer:set(13, color)
+	 rgbBuffer:set(13, color) -- I
+         if ((inv46 ~= nil) and (inv46 == "on")) then
+	   rgbBuffer:set(45, color) -- P
+         else
+	   rgbBuffer:set(55, color) -- P
+	 end
 	 ws2812.write(rgbBuffer)
         mlt:start()
       end
