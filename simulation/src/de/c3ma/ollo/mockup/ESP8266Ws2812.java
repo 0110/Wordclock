@@ -196,11 +196,11 @@ public class ESP8266Ws2812 extends TwoArgFunction {
         }
     }
 	
-	private class bufferRead extends OneArgFunction {
+	private class bufferRead extends VarArgFunction {
 
 		@Override
-		public LuaValue call(LuaValue arg) {			
-			final int offset = arg.toint();
+		public Varargs invoke(Varargs varargs) {	
+			final int offset = varargs.arg(2).toint();
 			if (ESP8266Ws2812.layout != null) {
 				
 				Element e = ESP8266Ws2812.layout.getLED(offset - 1);

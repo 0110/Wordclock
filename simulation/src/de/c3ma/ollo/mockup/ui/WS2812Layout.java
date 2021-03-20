@@ -331,6 +331,11 @@ public class WS2812Layout extends JFrame {
 			if (i % 2 == 1) {
 				j = (mColumn-1) - j;
 			}
+			if (i < 0 || j < 0) {
+				System.err.println("LED index" + index + " results in " + i + "x" + j + " coordinate");
+				return null;
+			}
+			
 			if ((i < mElements.length) && (j < mElements[i].length) && (mElements[i][j] != null)) {
 				return mElements[i][j];
 			} else {
