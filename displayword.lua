@@ -66,11 +66,12 @@ local swapLine = function(data, lineOffset)
  if (data.rgbBuffer == nil) then
    return false
  end
-
  for i = 0,10 do
-   local tmpColor=data.rgbBuffer:get(lineOffset+i)
-   data.rgbBuffer:set(lineOffset+i, data.rgbBuffer:get(lineOffset+10-i))
-   data.rgbBuffer:set(lineOffset+10-i, tmpColor)
+   local num=tonumber(lineOffset)+i
+   local num2=tonumber(lineOffset)+10-i
+   local tmpColor=data.rgbBuffer:get(num)
+   data.rgbBuffer:set(num, data.rgbBuffer:get(num2))
+   data.rgbBuffer:set(num2, tmpColor)
  end
  return true
 end
