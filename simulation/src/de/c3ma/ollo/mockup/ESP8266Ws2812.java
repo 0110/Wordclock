@@ -177,7 +177,7 @@ public class ESP8266Ws2812 extends TwoArgFunction {
 							int r = array[0]+(Byte.MIN_VALUE*-1);
 							int b = array[1]+(Byte.MIN_VALUE*-1);
 							int g = array[2]+(Byte.MIN_VALUE*-1);
-							ESP8266Ws2812.layout.updateLED(index, r, g, b);
+							ESP8266Ws2812.layout.updateLED(index - 1, r, g, b);
 						}
 					});
 	                return LuaValue.valueOf(true);
@@ -203,7 +203,7 @@ public class ESP8266Ws2812 extends TwoArgFunction {
 			final int offset = arg.toint();
 			if (ESP8266Ws2812.layout != null) {
 				
-				Element e = ESP8266Ws2812.layout.getLED(offset);
+				Element e = ESP8266Ws2812.layout.getLED(offset - 1);
 				if (e != null) {
 					Color color = e.getColor();
 					final byte[] array = new byte[3];
