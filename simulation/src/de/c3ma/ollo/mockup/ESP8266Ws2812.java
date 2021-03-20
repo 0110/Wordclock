@@ -206,10 +206,12 @@ public class ESP8266Ws2812 extends TwoArgFunction {
 				Element e = ESP8266Ws2812.layout.getLED(offset - 1);
 				if (e != null) {
 					Color color = e.getColor();
-					final byte[] array = new byte[3];
-					array[0] = (byte) color.getRed();
-					array[1] = (byte) color.getGreen();
-					array[2] = (byte) color.getBlue();
+					final char[] array = new char[3];
+					array[0] = (char) (color.getRed() );
+					array[1] = (char) (color.getGreen() );
+					array[2] = (char) (color.getBlue() );
+					
+					System.err.println("[WS2812] reading " + offset + ":" + ((int)array[0]) +"," + ((int) array[1]) + "," + ((int) array[2])  + " from " + color);
 					return LuaString.valueOf(array);
 				}
 			}
