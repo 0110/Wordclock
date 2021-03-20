@@ -202,7 +202,7 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
      for i=lineIdx,lineIdx+11, 1 do data.rgbBuffer:set(i, rowbgColor[3]) end
   end
  if (words.h3q == 1) then
-    line= drawLEDs(data,11) -- DREIVIERTEL
+    drawLEDs(data,11) -- DREIVIERTEL
   elseif (words.hq == 1) then
     data.sC=data.sC+4
     drawLEDs(data,7) -- VIERTEL
@@ -281,11 +281,11 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
   end
  if (words.h3 == 1) then
     data.sC=data.sC+1
-    line= line .. drawLEDs(data,4) -- DREI
+    drawLEDs(data,4) -- DREI
     data.sC=data.sC+6
  elseif (words.h5 == 1) then
     data.sC=data.sC+7
-    line= line .. drawLEDs(data,4) -- FUENF
+    drawLEDs(data,4) -- FUENF
  else
     data.sC=data.sC+11
  end
