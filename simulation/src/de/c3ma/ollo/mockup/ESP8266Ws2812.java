@@ -2,6 +2,7 @@ package de.c3ma.ollo.mockup;
 
 import java.awt.Color;
 import java.io.File;
+import java.util.ArrayList;
 
 import javax.swing.SwingUtilities;
 
@@ -104,9 +105,13 @@ public class ESP8266Ws2812 extends TwoArgFunction {
                 final int leds = varargs.arg(1).toint();
                 final int bytesPerLeds = varargs.arg(2).toint();
                 final LuaTable rgbBuffer = new LuaTable();
-                rgbBuffer.set("fill", new bufferFill());
-                rgbBuffer.set("set", new bufferWrite());
-                rgbBuffer.set("get", new bufferRead());
+                ArrayList<Color> ledList = new ArrayList<Color>();
+                for(int i=0; i < leds; i++) {
+                	ledList.add(new Color(0,0,0));
+                }
+                rgbBuffer.set("fill", new bufferFill(ledList));
+                rgbBuffer.set("set", new bufferWrite(ledList));
+                rgbBuffer.set("get", new bufferRead(ledList));
                 System.out.println("[WS2812] " + leds + "leds (" + bytesPerLeds + "bytes per led)");                
                 return rgbBuffer;
             } else {
@@ -116,12 +121,23 @@ public class ESP8266Ws2812 extends TwoArgFunction {
     }
 	
 	private class bufferFill extends VarArgFunction {
+		
+		private ArrayList<Color> ledList = null;
+		
+		public bufferFill(ArrayList<Color> ledList) {
+			this.ledList = ledList;
+		}
     	
         public Varargs invoke(Varargs varargs) {
             if (varargs.narg() >= 3) {
                 final int red = varargs.arg(1).toint();
                 final int green = varargs.arg(2).toint();
                 final int blue = varargs.arg(3).toint();
+                /* update local buffer */ 
+                for(int i=0; i < ledList.size(); i++) {
+                	ledList.set(i, new Color(red, green, blue));
+                }
+                /* Update GUI */
                 if (ESP8266Ws2812.layout != null) {
                 	SwingUtilities.invokeLater(new Runnable() {
 						@Override
@@ -133,7 +149,8 @@ public class ESP8266Ws2812 extends TwoArgFunction {
                 System.out.println("[WS2812] buffer fill with " + red + "," + green + "," +  blue);
                 return LuaValue.valueOf(true);
             } else if (varargs.isstring(2)) {
-            	 final LuaString color = varargs.arg(2).checkstring();
+            	final LuaString color = varargs.arg(2).checkstring();
+            	
  				final int length = color.rawlen();
  				if ((length == 3) && (ESP8266Ws2812.layout != null)) {
 
@@ -141,6 +158,11 @@ public class ESP8266Ws2812 extends TwoArgFunction {
  					final int r = array[0]+(Byte.MIN_VALUE*-1);
  					final int b = array[1]+(Byte.MIN_VALUE*-1);
  					final int g = array[2]+(Byte.MIN_VALUE*-1);
+ 					/* update local buffer */ 
+ 	                for(int i=0; i < ledList.size(); i++) {
+ 	                	ledList.set(i, new Color(r, g, b));
+ 	                }
+ 	                /* Update GUI */
  					SwingUtilities.invokeLater(new Runnable() {
 						@Override
 						public void run() {
@@ -161,22 +183,29 @@ public class ESP8266Ws2812 extends TwoArgFunction {
     }
 	
 	private class bufferWrite extends VarArgFunction {
-    	
+		private ArrayList<Color> ledList = null;
+		
+		public bufferWrite(ArrayList<Color> ledList) {
+			this.ledList = ledList;
+		}
+		
         public Varargs invoke(Varargs varargs) {
             if (varargs.narg() == 3) {
                 final int index = varargs.arg(2).toint();
-                
-                
                 final LuaString color = varargs.arg(3).checkstring();
  				final int length = color.rawlen();
 				if (length == 3) {
+					final byte[] array = color.m_bytes;
+					final int r = array[0]+(Byte.MIN_VALUE*-1);
+					final int b = array[1]+(Byte.MIN_VALUE*-1);
+					final int g = array[2]+(Byte.MIN_VALUE*-1);
+					// update buffer
+	                ledList.set(index - 1, new Color(r, g, b));
+	                
+	                // update GUI
 					SwingUtilities.invokeLater(new Runnable() {
 						@Override
 						public void run() {
-							final byte[] array = color.m_bytes;
-							int r = array[0]+(Byte.MIN_VALUE*-1);
-							int b = array[1]+(Byte.MIN_VALUE*-1);
-							int g = array[2]+(Byte.MIN_VALUE*-1);
 							ESP8266Ws2812.layout.updateLED(index - 1, r, g, b);
 						}
 					});
@@ -197,23 +226,26 @@ public class ESP8266Ws2812 extends TwoArgFunction {
     }
 	
 	private class bufferRead extends VarArgFunction {
-
+		private ArrayList<Color> ledList = null;
+		
+		public bufferRead(ArrayList<Color> ledList) {
+			this.ledList = ledList;
+		}
+		
 		@Override
 		public Varargs invoke(Varargs varargs) {	
 			final int offset = varargs.arg(2).toint();
-			if (ESP8266Ws2812.layout != null) {
+			
+			if (ledList != null) {
+				// receiver from buffer
+				Color color = ledList.get(offset - 1);
+				final char[] array = new char[3];
+				array[0] = (char) (color.getRed() );
+				array[1] = (char) (color.getGreen() );
+				array[2] = (char) (color.getBlue() );
 				
-				Element e = ESP8266Ws2812.layout.getLED(offset - 1);
-				if (e != null) {
-					Color color = e.getColor();
-					final char[] array = new char[3];
-					array[0] = (char) (color.getRed() );
-					array[1] = (char) (color.getGreen() );
-					array[2] = (char) (color.getBlue() );
-					
-					System.err.println("[WS2812] reading " + offset + ":" + ((int)array[0]) +"," + ((int) array[1]) + "," + ((int) array[2])  + " from " + color);
-					return LuaString.valueOf(array);
-				}
+				System.err.println("[WS2812] reading " + offset + ":" + ((int)array[0]) +"," + ((int) array[1]) + "," + ((int) array[2])  + " from " + color);
+				return LuaString.valueOf(array);
 			}
 
 			System.err.println("[WS2812] reading " + offset + " impossible");
