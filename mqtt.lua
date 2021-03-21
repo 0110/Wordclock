@@ -155,7 +155,7 @@ function startMqttClient()
     if (mqttServer ~= nil and mqttPrefix ~= nil) then
         registerMqtt()
         print "Started MQTT client"
-        if (file.open("ds18b20_diet.lua")) then
+        if (file.open("ds18b20_diet.lc")) then
           t=require("ds18b20_diet")
           t.setup(2) -- GPIO4
           readTemp() -- read once, to setup chip
