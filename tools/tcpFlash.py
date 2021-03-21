@@ -43,7 +43,7 @@ def sendCmd(s, message, cleaningEnter=False):
         print "ERROR, received : " + reply
         return False
 
-def main(nodeip, luafile, volatile=None):
+def main(nodeip, luafile, volatile=None, outfile=None):
     if ( not os.path.isfile(luafile) ):
         print "The file " + luafile + " is not available"
     else:
@@ -71,12 +71,16 @@ def main(nodeip, luafile, volatile=None):
                 print "NOT communicating with an ESP8266 running LUA (nodemcu) firmware"
                 s.close()
                 sys.exit(3)
-    
+             
             if (volatile is None):
-                print "Flashing " + luafile
-                sendCmd(s, "file.remove(\"" + luafile+"\");", True)
+                if (outfile is None):
+                    print "Flashing " + luafile
+                    outfile=luafile
+                else:
+                    print "Flashing " + luafile + " as " + outfile
+                sendCmd(s, "file.remove(\"" + outfile +"\");", True)
                 sendCmd(s, "w= file.writeline", True)
-                sendCmd(s, "file.open(\"" + luafile + "\",\"w+\");", True)
+                sendCmd(s, "file.open(\"" + outfile + "\",\"w+\");", True)
             else:
                 print "Executing " + luafile + " on nodemcu"
 
@@ -112,11 +116,11 @@ def main(nodeip, luafile, volatile=None):
                     sys.exit(4)
                 
                 # Check if the file exists:
-                if (not sendRecv(s, "=file.exists(\"" + luafile + "\")", "true")):
-                    print("Cannot send " + luafile + " to the ESP")
+                if (not sendRecv(s, "=file.exists(\"" + outfile + "\")", "true")):
+                    print("Cannot send " + outfile + " to the ESP")
                     sys.exit(4)
                 else:
-                    print("Updated " + luafile + " successfully")
+                    print("Updated " + outfile + " successfully")
             else:
                 print("Send " + luafile + " successfully")
 
@@ -131,12 +135,16 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-t', '--target', help='IP address or dns of the ESP to flash')
     parser.add_argument('-f', '--file', help='LUA file, that should be updated')
+    parser.add_argument('-o', '--outfile', help='LUA file name on the microcontroller (default: same name as on host)')
     parser.add_argument('-v', '--volatile', help='File is executed at the commandline', action='store_const', const=1)
 
     args = parser.parse_args()
-
-    if (args.target and args.file and args.volatile):
-        main(args.target, args.file, args.volatile)
+    if (args.target and args.file and args.volatile and args.outfile):
+        main(args.target, args.file, args.volatile, args.outfile)
+    elif (args.target and args.file and args.outfile):
+         main(args.target, args.file, None, args.outfile)
+    elif (args.target and args.file and args.volatile):
+       main(args.target, args.file, args.volatile)
     elif (args.target and args.file):
         main(args.target, args.file)
     else:
