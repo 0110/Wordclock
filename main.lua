@@ -64,17 +64,7 @@ function displayTime()
      dw = nil
      collectgarbage()
      print("dw: " .. tostring(node.heap()))
-     if (rgbBuffer ~= nil) then
-     	  ws2812.write(rgbBuffer)
-     else
-	  -- set FG to fix value: RED
-	  local color = string.char(255,0,0)
-	  rgbBuffer:fill(0,0,0) -- disable all LEDs
-	  for i=108,110, 1 do rgbBuffer:set(i, color) end
-	  ws2812.write(rgbBuffer)
-	  print("Fallback no time displayed")
-     end
-     
+    
      -- cleanup
      i=nil
      briPer=words.briPer
@@ -100,11 +90,25 @@ function normalOperation()
         syncTimeFromInternet()
         setupCounter=setupCounter-1
         alive = 1
+	rgbBuffer:set(19, color) -- N
+	rgbBuffer:set(31, color) -- T
+        if ((inv46 ~= nil) and (inv46 == "on")) then
+	   rgbBuffer:set(45, color) -- P
+        else
+	   rgbBuffer:set(55, color) -- P
+	end
       elseif (setupCounter > 3) then
         -- Here the WLAN is found, and something is done
         mydofile("mqtt")
+	rgbBuffer:fill(0,0,0) -- disable all LEDs
         if (startMqttClient ~= nil) then
-	    startMqttClient()
+	 if ((inv46 ~= nil) and (inv46 == "on")) then
+	   rgbBuffer:set(34, color) -- M
+         else
+	   rgbBuffer:set(44, color) -- M
+	 end
+	 rgbBuffer:set(82, color) -- T
+         startMqttClient()
         else
 	    print("NO Mqtt found")
 	    mydofile("telnet")
@@ -120,11 +124,21 @@ function normalOperation()
       elseif ( (alive % 120) == 0) then
 	    -- sync the time every 5 minutes
     	syncTimeFromInternet()
-       alive = alive + 1
-       collectgarbage()
+        alive = alive + 1
+        collectgarbage()
       else
        displayTime()
        alive = alive + 1
+      end
+      if (rgbBuffer ~= nil) then
+     	  ws2812.write(rgbBuffer)
+      else
+	  -- set FG to fix value: RED
+	  local color = string.char(255,0,0)
+	  rgbBuffer:fill(0,0,0) -- disable all LEDs
+	  for i=108,110, 1 do rgbBuffer:set(i, color) end
+	  ws2812.write(rgbBuffer)
+	  print("Fallback no time displayed")
       end
       -- Feed the system watchdog.
       tmr.wdclr()
