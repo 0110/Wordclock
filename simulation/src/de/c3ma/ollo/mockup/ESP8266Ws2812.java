@@ -169,7 +169,7 @@ public class ESP8266Ws2812 extends TwoArgFunction {
 		 					ESP8266Ws2812.layout.fillLEDs(r, g, b);
 						} 
 					});
- 	 				System.out.println("[WS2812] buffer fill with " + r + "," + g + "," +  b);
+ 	 				//System.out.println("[WS2812] buffer fill with " + r + "," + g + "," +  b);
  	 				return LuaValue.valueOf(true);
  				} else {
  					System.err.println("[WS2812] buffer not initialized ("+varargs.narg() +"args) , length "+ length + ", raw:" + color.toString());
@@ -211,9 +211,9 @@ public class ESP8266Ws2812 extends TwoArgFunction {
 					});
 	                return LuaValue.valueOf(true);
 				} else {
-					for(int i=0; i <= varargs.narg(); i++) {
-						System.err.println("[WS2812] write ["+(i) + "] (" + varargs.arg(i).typename() + ") " + varargs.arg(i).toString() );
-					}
+//					for(int i=0; i <= varargs.narg(); i++) {
+//						System.err.println("[WS2812] write ["+(i) + "] (" + varargs.arg(i).typename() + ") " + varargs.arg(i).toString() );
+//					}
 					
 					System.err.println("[WS2812] set with " + varargs.narg() + " arguments at index="+ index + " and "+ length + " charactes not matching");
 	            	return LuaValue.NIL;	
@@ -244,7 +244,7 @@ public class ESP8266Ws2812 extends TwoArgFunction {
 				array[1] = (char) (color.getGreen() );
 				array[2] = (char) (color.getBlue() );
 				
-				System.err.println("[WS2812] reading " + offset + ":" + ((int)array[0]) +"," + ((int) array[1]) + "," + ((int) array[2])  + " from " + color);
+//				System.err.println("[WS2812] reading " + offset + ":" + ((int)array[0]) +"," + ((int) array[1]) + "," + ((int) array[2])  + " from " + color);
 				return LuaString.valueOf(array);
 			}
 
