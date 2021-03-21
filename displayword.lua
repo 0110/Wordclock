@@ -21,23 +21,26 @@ end
 -- Module displaying of the words
 -- @param data		struct with the following paramter:
 -- 	aoC 		amount of characters for the complete message
--- 	mC		amout of characters per minute
+-- 	mC		amout of minutes to show
 -- 	dC  		drawn characters
 local updateColor = function (data)
-    if (data.aoC > 0) and (data.mC ~= nil) and (data.mC > 0) then   
-    	local div = tonumber(data.dC / data.mC)
-    	local divRound = round(div)
-	local perCentColor = tonumber(100 * data.mC / data.aoC)
-	print (tostring(data.dC) .. " -> " .. tostring(div) .. " " .. tostring(divRound) .. "")
-    	if (divRound < 1) then
+    if (data.aoC > 0) and (data.mC ~= nil) then   
+	local specialChar = data.dC
+	if (data.mC < 1) then
+	  specialChar = 0
+	elseif (data.dC > data.mC) then
+	  specialChar = 0
+	end
+	print (tostring(data.dC) .. " -> " .. tostring(specialChar) .. " " .. tostring(data.mC) .. "minutes")
+    	if (specialChar < 1) then
     	    return data.colorFg
-    	elseif (divRound < 2) then 
+    	elseif (specialChar < 2) then 
     	    return data.colorM1
-    	elseif (divRound < 3) then 
+    	elseif (specialChar < 3) then 
     	    return data.colorM2
-    	elseif (divRound < 4) then 
+    	elseif (specialChar < 4) then 
     	    return data.colorM3
-    	elseif (divRound < 5) then 
+    	elseif (specialChar < 5) then 
     	    return data.colorM4
     	else
     	    return data.colorFg
@@ -99,7 +102,7 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
     invertRows=false
  end
 
- local minutes=1
+ local minutes=0
  if (words.m1 == 1) then
    minutes = minutes + 1
  elseif (words.m2 == 1) then
@@ -116,7 +119,7 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
 
  if (aoC ~= nil) then
    data.aoC = aoC
-   data.mC = round(aoC/minutes)
+   data.mC = minutes
  else
    data.aoC = 0
  end
@@ -138,7 +141,6 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
     data.colorM2=colorM2
     data.colorM3=colorM3
     data.colorM4=colorM4
-    print("Minutes : " .. tostring(minutes) .. " using " .. tostring(data.aoC) .. " chars with " .. tostring(data.mC) .. " per color")
  end
  data.dC=0 -- drawn characters
  local charsPerLine=11
