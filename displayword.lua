@@ -2,6 +2,21 @@
 local M
 do
 
+local data={}
+
+-- Utility function for round
+local round = function(num)
+    under = math.floor(num)
+    upper = math.floor(num) + 1
+    underV = -(under - num)
+    upperV = upper - num
+    if (upperV > underV) then
+        return under
+    else
+        return upper
+    end
+end
+
 -- @fn generateLEDs
 -- Module displaying of the words
 -- @param data		struct with the following paramter:
@@ -10,16 +25,19 @@ do
 -- 	dC  		drawn characters
 local updateColor = function (data)
     if (data.aoC > 0) and (data.mC ~= nil) and (data.mC > 0) then   
-    	local div = tonumber(data.dC/data.mC)
-    	if (div < 1) then
+    	local div = tonumber(data.dC / data.mC)
+    	local divRound = round(div)
+	local perCentColor = tonumber(100 * data.mC / data.aoC)
+	print (tostring(data.dC) .. " -> " .. tostring(div) .. " " .. tostring(divRound) .. "")
+    	if (divRound < 1) then
     	    return data.colorFg
-    	elseif (div < 2) then 
+    	elseif (divRound < 2) then 
     	    return data.colorM1
-    	elseif (div < 3) then 
+    	elseif (divRound < 3) then 
     	    return data.colorM2
-    	elseif (div < 4) then 
+    	elseif (divRound < 4) then 
     	    return data.colorM3
-    	elseif (div < 5) then 
+    	elseif (divRound < 5) then 
     	    return data.colorM4
     	else
     	    return data.colorFg
@@ -37,25 +55,10 @@ local drawLEDs = function(data, offset, numberNewChars)
     	return
     end
     for i=1,numberNewChars do
-        data.rgbBuffer:set(offset + i - 1, updateColor(data))
         data.dC=data.dC+1
+        data.rgbBuffer:set(offset + i - 1, updateColor(data))
     end
 end
-
--- Utility function for round
-local round = function(num)
-    under = math.floor(num)
-    upper = math.floor(num) + 1
-    underV = -(under - num)
-    upperV = upper - num
-    if (upperV > underV) then
-        return under
-    else
-        return upper
-    end
-end
-
-local data={}
 
 -- @fn swapLine
 -- @param lineOffset  offset (starting at 1) where the line is located to be swapped
@@ -113,7 +116,7 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
 
  if (aoC ~= nil) then
    data.aoC = aoC
-   data.mC = aoC/minutes
+   data.mC = round(aoC/minutes)
  else
    data.aoC = 0
  end
