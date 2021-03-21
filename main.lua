@@ -86,7 +86,11 @@ function normalOperation()
     local alive=0
     mlt:register(2500, tmr.ALARM_AUTO, function (lt)
       if (setupCounter > 4) then
-	rgbBuffer:fill(0,0,0) -- disable all LEDs
+	if (colorBg ~= nil) then
+	  rgbBuffer:fill(string.byte(colorBg,1), string.byte(colorBg,2), string.byte(colorBg,3)) -- disable all LEDs
+	else
+	  rgbBuffer:fill(0,0,0) -- disable all LEDs
+	end
         syncTimeFromInternet()
         setupCounter=setupCounter-1
         alive = 1

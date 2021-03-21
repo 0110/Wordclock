@@ -58,7 +58,7 @@ local drawLEDs = function(data, offset, numberNewChars)
     end
     for i=1,numberNewChars do
         data.dC=data.dC+1
-        data.rgbBuffer:set(offset + i - 1, updateColor(data))
+        data.rgbBuffer:set(tonumber(offset + i - 1), updateColor(data))
     end
 end
 
@@ -72,10 +72,11 @@ local swapLine = function(data, lineOffset)
  end
  for i = 0,4 do
    local num=tonumber(lineOffset)+i
-   local num2=tonumber(lineOffset)+10-i
-   local tmpColor=data.rgbBuffer:get(num)
-   data.rgbBuffer:set(num, data.rgbBuffer:get(num2))
-   data.rgbBuffer:set(num2, tmpColor)
+   local num2=tonumber(tonumber(lineOffset)+10-i)
+   local tmpC1, tmpC2, tmpC3=data.rgbBuffer:get(num)
+   local c1, c2, c3 =data.rgbBuffer:get(num2)
+   data.rgbBuffer:set(num, c1, c2, c3)
+   data.rgbBuffer:set(num2, tmpC1, tmpC2, tmpC3)
  end
  return true
 end
@@ -144,16 +145,13 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
  data.dC=0 -- drawn characters
  local charsPerLine=11
  
- -- Space / background has no color by default
- local space=string.char(0,0,0)
-
  -- Background color must always be set
  if (colorBg ~= nil) then
-  space = colorBg
+  rgbBuffer:fill(string.byte(colorBg,1), string.byte(colorBg,2), string.byte(colorBg,3)) -- draw the background
  else
-  colorBg = space
+  -- Space / background has no color by default
+  rgbBuffer:fill(0, 0, 0) -- draw the background
  end
- rgbBuffer:fill(colorBg) -- draw the background
 
  local lineIdx=1
  -- line 1----------------------------------------------
