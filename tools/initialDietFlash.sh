@@ -37,22 +37,35 @@ else
 	FILES=$2
 fi
 
-echo "Generate DIET version of the files"
-OUTFILES=""
-ROOTDIR=$PWD
-cd $TOOLDIR
-for f in $FILES; do
-	if [[ "$f" == *.lua ]] && [[ "$f" != init.lua ]]; then
-		echo "Compress $f ..."
-		out=$(echo "$f" | sed 's/.lua/_diet.lua/g')
-		$DIET ../$f -o ../diet/$out
-		OUTFILES="$OUTFILES diet/$out"
-	else
-		OUTFILES="$OUTFILES $f"
-	fi
-done
-FILES=$OUTFILES
-cd $ROOTDIR
+# Convert files, if necessary
+if [ "$FILES" != "config.lua" ]; then
+	echo "Generate DIET version of the files"
+	OUTFILES=""
+	ROOTDIR=$PWD
+	cd $TOOLDIR
+	for f in $FILES; do
+		if [[ "$f" == *.lua ]] && [[ "$f" != init.lua ]]; then
+			echo "Compress $f ..."
+			out=$(echo "$f" | sed 's/.lua/_diet.lua/g')
+			$DIET ../$f -o ../diet/$out
+			OUTFILES="$OUTFILES diet/$out"
+		else
+			OUTFILES="$OUTFILES $f"
+		fi
+	done
+	FILES=$OUTFILES
+	cd $ROOTDIR
+fi
+echo "Reboot ESP and stop init timer"
+if [ ! -f $LUASCRIPT_STOP ]; then
+	echo "Cannot find $LUASCRIPT_STOP"
+	exit 1
+fi
+python3 $LUATOOL -p $DEVICE -f $LUASCRIPT_STOP -b $BAUD --volatile --delay 2
+if [ $? -ne 0 ]; then
+   echo "Could not reboot"
+   exit 1
+fi
 
 if [ $# -eq 1 ]; then
 	# Format filesystem first
@@ -61,17 +74,6 @@ if [ $# -eq 1 ]; then
 	if [ $? -ne 0 ]; then
 	    echo "STOOOOP"
 	    exit 1
-	fi
-else
-	echo "Reboot ESP and stop init timer"
-	if [ ! -f $LUASCRIPT_STOP ]; then
-		echo "Cannot find $LUASCRIPT_STOP"
-		exit 1
-	fi
-	python3 $LUATOOL -p $DEVICE -f $LUASCRIPT_STOP -b $BAUD --volatile --delay 2
-	if [ $? -ne 0 ]; then
-	   echo "Could not reboot"
-	   exit 1
 	fi
 fi
 
