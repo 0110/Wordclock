@@ -31,7 +31,6 @@ local updateColor = function (data)
 	elseif (data.dC > data.mC) then
 	  specialChar = 0
 	end
-	print (tostring(data.dC) .. " -> " .. tostring(specialChar) .. " " .. tostring(data.mC) .. "minutes")
     	if (specialChar < 1) then
     	    return data.colorFg
     	elseif (specialChar < 2) then 
