@@ -39,6 +39,7 @@ initTimer:register(5000, tmr.ALARM_SINGLE, function (t)
     local modlist = { "timecore" , "displayword" }
     for i,mod in pairs(modlist) do
         if (file.open(mod .. "_diet.lua")) then
+            file.remove(mod .. "_diet.lc")
             print(tostring(i) .. ". Compile " .. mod)
             ws2812.write(string.char(0,0,0):rep(11*i)..string.char(128,0,0):rep(11))
             node.compile(mod .. "_diet.lua")
