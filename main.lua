@@ -138,7 +138,7 @@ function normalOperation()
 	  -- show Mqtt status
 	  if (startMqttClient ~= nil) then
 		if (not	connectedMqtt()) then
-		 rgbBuffer:set(110-4, 128,0,0)
+		 rgbBuffer:set(103, 0, 64,0)
 		end
           end
      	  ws2812.write(rgbBuffer)
