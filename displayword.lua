@@ -5,11 +5,12 @@ do
 -- @fn generateLEDs
 -- Module displaying of the words
 -- @param data		struct with the following paramter:
--- 	aoC 		amount of characters to be used
+-- 	aoC 		amount of characters for the complete message
+-- 	mC		amout of characters per minute
 -- 	dC  		drawn characters
 local updateColor = function (data)
-    if (data.aoC > 0) then   
-    	local div = tonumber(data.dC/data.aoC)
+    if (data.aoC > 0) and (data.mC ~= nil) and (data.mC > 0) then   
+    	local div = tonumber(data.dC/data.mC)
     	if (div < 1) then
     	    return data.colorFg
     	elseif (div < 2) then 
@@ -64,7 +65,7 @@ local swapLine = function(data, lineOffset)
  if (data.rgbBuffer == nil) then
    return false
  end
- for i = 0,10 do
+ for i = 0,4 do
    local num=tonumber(lineOffset)+i
    local num2=tonumber(lineOffset)+10-i
    local tmpColor=data.rgbBuffer:get(num)
@@ -85,7 +86,7 @@ end
 -- @param colorM3 	 foreground color if three minutes after a displayable time is present
 -- @param colorM4 	 foreground color if four minutes after a displayable time is present
 -- @param invertRows	 wheather line 4,5 and 6 shall be inverted or not
--- @param aoC Amount of characters to be displayed
+-- @param aoC 		 Amount of characters to be displayed
 local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, colorM2, colorM3, colorM4, invertRows, aoC)
  -- Set the local variables needed for the colored progress bar
  if (words == nil) then
@@ -111,7 +112,8 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
  end
 
  if (aoC ~= nil) then
-   data.aoC = aoC/minutes
+   data.aoC = aoC
+   data.mC = aoC/minutes
  else
    data.aoC = 0
  end
@@ -133,6 +135,7 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
     data.colorM2=colorM2
     data.colorM3=colorM3
     data.colorM4=colorM4
+    print("Minutes : " .. tostring(minutes) .. " using " .. tostring(data.aoC) .. " chars with " .. tostring(data.mC) .. " per color")
  end
  data.dC=0 -- drawn characters
  local charsPerLine=11
