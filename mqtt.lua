@@ -104,6 +104,8 @@ function registerMqtt()
                 mydofile("telnet")
                 if (startTelnetServer ~= nil) then
                     startTelnetServer()
+		else
+		    print("Cannost start Telnet Server!")
                 end
             else
              for i=1,10,1 do
@@ -153,8 +155,8 @@ function startMqttClient()
     if (mqttServer ~= nil and mqttPrefix ~= nil) then
         registerMqtt()
         print "Started MQTT client"
-        if (file.open("ds18b20.lc")) then
-          t=require("ds18b20")
+        if (file.open("ds18b20_diet.lua")) then
+          t=require("ds18b20_diet")
           t.setup(2) -- GPIO4
           readTemp() -- read once, to setup chip
           print "Setup temperature"
