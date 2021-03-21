@@ -135,6 +135,12 @@ function normalOperation()
        alive = alive + 1
       end
       if (rgbBuffer ~= nil) then
+	  -- show Mqtt status
+	  if (startMqttClient ~= nil) then
+		if (not	connectedMqtt()) then
+		 rgbBuffer:set(110-4, 128,0,0)
+		end
+          end
      	  ws2812.write(rgbBuffer)
       else
 	  -- set FG to fix value: RED
@@ -153,7 +159,7 @@ function normalOperation()
     local connect_counter=0
     -- Wait to be connect to the WiFi access point. 
     local wifitimer = tmr.create()
-    wifitimer:register(2000, tmr.ALARM_AUTO, function (timer)
+    wifitimer:register(500, tmr.ALARM_AUTO, function (timer)
       connect_counter=connect_counter+1
       if wifi.sta.status() ~= 5 then
          print(connect_counter ..  "/60 Connecting to AP...")

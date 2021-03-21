@@ -145,6 +145,10 @@ function registerMqtt()
     end)
 end
 
+function connectedMqtt()
+  return mqttConnected
+end
+
 function startMqttClient()
     if (mqttServer ~= nil and mqttPrefix ~= nil) then
         registerMqtt()
