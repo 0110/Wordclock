@@ -2,6 +2,7 @@
 
 MQTTSERVER=$1
 MQTTPREFIX=$2
+CUSTOMFILE=$3
 
 FLASHTOOL=./tools/tcpFlash.py
 
@@ -31,19 +32,27 @@ fi
 echo "Activate Telnet server"
 mosquitto_pub -h $MQTTSERVER -t "$MQTTPREFIX/cmd/telnet" -m "a"
 TELNETIP=$(mosquitto_sub -h $MQTTSERVER -t "$MQTTPREFIX/telnet" -C 1)
-echo "Upgrading $MQTTPREFIX via telenet on $TELNETIP"
-
-echo "stopWordclock()" > $UPGRADEPREP
+echo "Upgrading $MQTTPREFIX via telenet on $TELNETIP ..."
+sleep 1
+echo "if (mlt ~= nil) then mlt:unregister() end" > $UPGRADEPREP
 echo "uart.write(0, tostring(node.heap())" >> $UPGRADEPREP
-echo "c = string.char(0,0,128)"  >> $UPGRADEPREP
+echo "collectgarbage()"  >> $UPGRADEPREP
+echo "" >> $UPGRADEPREP
+echo "download = string.char(0,0,64)"  >> $UPGRADEPREP
 echo "w = string.char(0,0,0)"  >> $UPGRADEPREP
-echo "ws2812.write(w:rep(4) .. c .. w:rep(15) .. c .. w:rep(9) .. c .. w:rep(30) .. c .. w:rep(41) .. c )" >> $UPGRADEPREP
+echo "ws2812.write(w:rep(4) .. download .. w:rep(15) .. download .. w:rep(9) .. download .. w:rep(30) .. download .. w:rep(41) .. download )"  >> $UPGRADEPREP
+echo "collectgarbage()"  >> $UPGRADEPREP
 $FLASHTOOL -f $UPGRADEPREP -t $TELNETIP -v
 
-exit 2
-FILES="displayword.lua main.lua timecore.lua webpage.html webserver.lua wordclock.lua init.lua"
+if [[ "$CUSTOMFILE" == "" ]]; then
+	FILES="displayword.lua main.lua timecore.lua webpage.html webserver.lua wordclock.lua init.lua"
+	echo "Start Flasing ..."
+else
+	FILES=$CUSTOMFILE
+	echo "Start Flasing $FILES"
+fi
 
-echo "Start Flasing ..."
+exit 2
 for f in $FILES; do
     if [ ! -f $f ]; then
         echo "Cannot find $f"

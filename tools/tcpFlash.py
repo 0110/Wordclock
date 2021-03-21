@@ -72,8 +72,6 @@ def main(nodeip, luafile, volatile=None):
                 s.close()
                 sys.exit(3)
     
-            sendCmd(s, "for i=0,5 do tmr.stop(i) end")
-            sendCmd(s, "collectgarbage()")
             if (volatile is None):
                 print "Flashing " + luafile
                 sendCmd(s, "file.remove(\"" + luafile+"\");", True)
