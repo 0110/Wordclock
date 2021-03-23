@@ -156,7 +156,7 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
  local lineIdx=1
  -- line 1----------------------------------------------
  if (rowbgColor[1] ~= nil) then
-    for i=lineIdx,11, 1 do data.rgbBuffer:set(i, rowbgColor[1]) end
+    for i=lineIdx,lineIdx+10, 1 do data.rgbBuffer:set(i, rowbgColor[1]) end
  end
  if (words.it==1) then
     drawLEDs(data, lineIdx, 2) -- ES
@@ -172,7 +172,7 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
  -- line 2-- even row (so inverted) --------------------
  lineIdx=12
   if (rowbgColor[2] ~= nil) then
-     for i=lineIdx,(lineIdx+11), 1 do data.rgbBuffer:set(i, rowbgColor[2]) end
+     for i=lineIdx,lineIdx+10, 1 do data.rgbBuffer:set(i, rowbgColor[2]) end
   end
  if (words.m10 == 1) then
     drawLEDs(data, lineIdx, 4) -- ZEHN
@@ -185,7 +185,7 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
  -- line3----------------------------------------------
  lineIdx=23
   if (rowbgColor[3] ~= nil) then
-     for i=lineIdx,lineIdx+11, 1 do data.rgbBuffer:set(i, rowbgColor[3]) end
+     for i=lineIdx,lineIdx+10, 1 do data.rgbBuffer:set(i, rowbgColor[3]) end
   end
  if (words.h3q == 1) then
     drawLEDs(data,lineIdx, 11) -- DREIVIERTEL
@@ -195,7 +195,7 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
  --line 4-------- even row (so inverted) -------------
  lineIdx=34
  if (rowbgColor[4] ~= nil) then
-     for i=lineIdx,lineIdx+11, 1 do data.rgbBuffer:set(i, rowbgColor[4]) end
+     for i=lineIdx,lineIdx+10, 1 do data.rgbBuffer:set(i, rowbgColor[4]) end
   end
  if (words.ha == 1) then
     -- TG
@@ -210,7 +210,7 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
  -- line 5 ----------------------------------------------
  lineIdx=45
  if (rowbgColor[5] ~= nil) then
-     for i=lineIdx,lineIdx+11, 1 do data.rgbBuffer:set(i, rowbgColor[5]) end
+     for i=lineIdx,lineIdx+10, 1 do data.rgbBuffer:set(i, rowbgColor[5]) end
   end
  if (words.half == 1) then
     drawLEDs(data, lineIdx, 4) -- HALB
@@ -226,7 +226,7 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
  ------------even row (so inverted) ---------------------
  lineIdx=56
  if (rowbgColor[6] ~= nil) then
-    for i=lineIdx,lineIdx+11, 1 do data.rgbBuffer:set(i, rowbgColor[6]) end
+    for i=lineIdx,lineIdx+10, 1 do data.rgbBuffer:set(i, rowbgColor[6]) end
   end
  if (words.h7 == 1) then
     drawLEDs(data, lineIdx + 5, 6) -- SIEBEN
@@ -243,7 +243,7 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
  ------------------------------------------------
  lineIdx=67
  if (rowbgColor[7] ~= nil) then
-    for i=lineIdx,lineIdx+11, 1 do data.rgbBuffer:set(i, rowbgColor[7]) end
+    for i=lineIdx,lineIdx+10, 1 do data.rgbBuffer:set(i, rowbgColor[7]) end
   end
  if (words.h3 == 1) then
     drawLEDs(data, lineIdx + 1,4) -- DREI
@@ -253,7 +253,7 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
  ------------even row (so inverted) ---------------------
  lineIdx=78
  if (rowbgColor[8] ~= nil) then
-    for i=lineIdx,lineIdx+11, 1 do data.rgbBuffer:set(i, rowbgColor[8]) end
+    for i=lineIdx,lineIdx+10, 1 do data.rgbBuffer:set(i, rowbgColor[8]) end
   end
  if (words.h4 == 1) then
     drawLEDs(data, lineIdx + 7, 4) -- VIER
@@ -266,7 +266,7 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
  ------------------------------------------------
  lineIdx=89
  if (rowbgColor[9] ~= nil) then
-    for i=lineIdx,lineIdx+11, 1 do data.rgbBuffer:set(i, rowbgColor[9]) end
+    for i=lineIdx,lineIdx+10, 1 do data.rgbBuffer:set(i, rowbgColor[9]) end
   end
  if (words.h8 == 1) then
     drawLEDs(data, lineIdx + 1, 4) -- ACHT
@@ -277,7 +277,7 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
  ------------even row (so inverted) ---------------------
  lineIdx=100
  if (rowbgColor[10] ~= nil) then
-    for i=lineIdx,lineIdx+11, 1 do data.rgbBuffer:set(i, rowbgColor[10]) end
+    for i=lineIdx,lineIdx+10, 1 do data.rgbBuffer:set(i, rowbgColor[10]) end
   end
  if (words.h6 == 1) then
     drawLEDs(data, lineIdx + 1, 5) -- SECHS
