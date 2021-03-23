@@ -25,9 +25,6 @@ function handleSingleCommand(client, topic, data)
       colorBg=string.char(green * briPer / 100, red * briPer / 100, blue * briPer / 100)
       print("Updated BG: " .. tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue) )
       m:publish(mqttPrefix .. "/background", tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue), 0, 0)
-      if (displayTime~= nil) then
-        displayTime()
-      end
     else
       if (tonumber(data) >= 0 and tonumber(data) <= 100) then
         briPer=tonumber(data)
