@@ -14,6 +14,7 @@ import de.c3ma.ollo.mockup.DoFileFunction;
 import de.c3ma.ollo.mockup.ESP8266Adc;
 import de.c3ma.ollo.mockup.ESP8266File;
 import de.c3ma.ollo.mockup.ESP8266Gpio;
+import de.c3ma.ollo.mockup.ESP8266Mqtt;
 import de.c3ma.ollo.mockup.ESP8266Net;
 import de.c3ma.ollo.mockup.ESP8266Node;
 import de.c3ma.ollo.mockup.ESP8266Time;
@@ -39,6 +40,7 @@ public class WS2812Simulation implements LuaSimulation {
 	private DoFileFunction doFile = new DoFileFunction(globals);
 	private ESP8266Ws2812 ws2812 = new ESP8266Ws2812();
 	private ESP8266Gpio gpio = new ESP8266Gpio();
+	private ESP8266Mqtt mqtt = new ESP8266Mqtt();
 	private ESP8266Adc adc = new ESP8266Adc();
 	private String scriptName;
 
@@ -50,6 +52,7 @@ public class WS2812Simulation implements LuaSimulation {
 		globals.load(espNode);
 		globals.load(adc);
 		globals.load(gpio);
+		globals.load(mqtt);
 		globals.load(new ESP8266Wifi());
 		globals.load(new ESP8266Net());
 		globals.load(new ESP8266Time());
