@@ -11,3 +11,5 @@ color4=string.char(0,0 ,tonumber(blue*0.2))
 colorBg=string.char(0,0,0) -- black is the default background color
 sntpserverhostname="ptbtime1.ptb.de"
 timezoneoffset=1
+mqttServer="192.168.1.1"
+mqttPrefix="test"
