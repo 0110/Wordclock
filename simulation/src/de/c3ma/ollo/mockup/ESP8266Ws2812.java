@@ -6,7 +6,6 @@ import java.util.ArrayList;
 
 import javax.swing.SwingUtilities;
 
-import org.luaj.vm2.LuaNil;
 import org.luaj.vm2.LuaString;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
@@ -17,9 +16,7 @@ import org.luaj.vm2.lib.VarArgFunction;
 import org.luaj.vm2.lib.ZeroArgFunction;
 
 import de.c3ma.ollo.LuaSimulation;
-import de.c3ma.ollo.LuaThreadTmr;
 import de.c3ma.ollo.mockup.ui.WS2812Layout;
-import de.c3ma.ollo.mockup.ui.WS2812Layout.Element;
 
 /**
  * created at 28.12.2017 - 23:34:04<br />
@@ -210,15 +207,30 @@ public class ESP8266Ws2812 extends TwoArgFunction {
 						}
 					});
 	                return LuaValue.valueOf(true);
-				} else {
-//					for(int i=0; i <= varargs.narg(); i++) {
-//						System.err.println("[WS2812] write ["+(i) + "] (" + varargs.arg(i).typename() + ") " + varargs.arg(i).toString() );
-//					}
-					
+				} else {					
 					System.err.println("[WS2812] set with " + varargs.narg() + " arguments at index="+ index + " and "+ length + " charactes not matching");
 	            	return LuaValue.NIL;	
 				}
+            } else if (varargs.narg() == 5) {
+                final int index = varargs.arg(2).toint();
+                final int green = varargs.arg(3).toint();
+                final int red = varargs.arg(4).toint();
+                final int blue = varargs.arg(5).toint();
+                // update buffer
+                ledList.set(index - 1, new Color(red, green, blue));
+                
+                // update GUI
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						ESP8266Ws2812.layout.updateLED(index - 1, red, green, blue);
+					}
+				});
+				return LuaValue.valueOf(true);
             } else {
+				for(int i=0; i <= varargs.narg(); i++) {
+					System.err.println("[WS2812] write ["+(i) + "] (" + varargs.arg(i).typename() + ") " + varargs.arg(i).toString() );
+				}
             	System.err.println("[WS2812] set with " + varargs.narg() + " arguments undefined.");
             	return LuaValue.NIL;
             }

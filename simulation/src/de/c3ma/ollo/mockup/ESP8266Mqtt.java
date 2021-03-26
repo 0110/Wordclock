@@ -53,6 +53,11 @@ public class ESP8266Mqtt extends TwoArgFunction {
             final LuaTable onMqtt = new LuaTable();
         	if (varargs.narg() == 2) {
         		System.out.println("[MQTT] On " + this.client);
+        	} else {
+        		for(int i=0; i <= varargs.narg(); i++) {
+					System.err.println("[MQTT] On ["+(i) + "] (" + varargs.arg(i).typename() + ") " + varargs.arg(i).toString() );
+				}
+        		return LuaValue.NIL;
         	}
         	return onMqtt;
         }
@@ -64,6 +69,11 @@ public class ESP8266Mqtt extends TwoArgFunction {
             final LuaTable onMqtt = new LuaTable();
         	if (varargs.narg() == 2) {
         		System.out.println("[MQTT] publish ");
+        	} else {
+        		for(int i=0; i <= varargs.narg(); i++) {
+					System.err.println("[MQTT] publish ["+(i) + "] (" + varargs.arg(i).typename() + ") " + varargs.arg(i).toString() );
+				}
+        		return LuaValue.NIL;
         	}
         	return onMqtt;
         }
@@ -75,6 +85,11 @@ public class ESP8266Mqtt extends TwoArgFunction {
             final LuaTable onMqtt = new LuaTable();
         	if (varargs.narg() == 2) {
         		System.out.println("[MQTT] subscribe ");
+        	} else {
+        		for(int i=0; i <= varargs.narg(); i++) {
+					System.err.println("[MQTT] subscribe ["+(i) + "] (" + varargs.arg(i).typename() + ") " + varargs.arg(i).toString() );
+				}
+        		return LuaValue.NIL;
         	}
         	return onMqtt;
         }
