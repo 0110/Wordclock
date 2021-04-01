@@ -107,8 +107,14 @@ private class ConnectMqtt extends VarArgFunction {
 		
         public LuaValue invoke(Varargs varargs) {
             final LuaTable onMqtt = new LuaTable();
-        	if (varargs.narg() == 1) {
-        		System.out.println("[MQTT] connect ");
+        	if (varargs.narg() == 6) {
+        		final LuaTable table = varargs.arg(1).checktable();
+        		final String targetIP = varargs.arg(2).toString().toString();
+        		final int portnumber = varargs.arg(3).toint();
+        		final boolean unkownParameter = varargs.arg(4).toboolean();
+        		final LuaValue codeOnConnected = varargs.arg(5);
+        		final LuaValue codeOnFailed = varargs.arg(6);
+        		System.out.println("[MQTT] connect to " + targetIP + ":" + portnumber);
         	} else {
         		for(int i=0; i <= varargs.narg(); i++) {
 					System.err.println("[MQTT] connect ["+(i) + "] (" + varargs.arg(i).typename() + ") " + varargs.arg(i).toString() );
