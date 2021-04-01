@@ -13,3 +13,9 @@ sntpserverhostname="ptbtime1.ptb.de"
 timezoneoffset=1
 mqttServer="192.168.1.1"
 mqttPrefix="test"
+
+if (file.open("simulation.config.lua")) then
+  dofile("simulation.config.lua")
+else
+  print("Default configuration, used")
+end
