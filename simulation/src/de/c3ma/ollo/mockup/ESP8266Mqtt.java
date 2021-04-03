@@ -6,6 +6,8 @@ import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
@@ -81,8 +83,28 @@ public class ESP8266Mqtt extends TwoArgFunction {
 				
         public LuaValue invoke(Varargs varargs) {
             final LuaTable onMqtt = new LuaTable();
-        	if (varargs.narg() == 2) {
-        		System.out.println("[MQTT] publish ");
+        	if (varargs.narg() == 5) {
+        		final String topic = varargs.arg(2).toString().toString();
+        		final String message = varargs.arg(3).toString().toString();
+        		final String qos = varargs.arg(4).toString().toString();
+        		final String retain = varargs.arg(4).toString().toString();
+        		if ( !mMqttClient.isConnected()) {
+        			return LuaValue.NIL;
+                }           
+                MqttMessage msg = new MqttMessage(message.getBytes());
+                if (qos.equals("0")) {
+                	msg.setQos(0);
+                }
+                
+                msg.setRetained(!retain.contentEquals("0"));
+                try {
+					mMqttClient.publish(topic,msg);
+	        		System.out.println("[MQTT] publish " + topic);
+				} catch (MqttPersistenceException e) {
+					System.err.println("[MQTT] publish " + topic + " failed : " + e.getMessage());
+				} catch (MqttException e) {
+					System.err.println("[MQTT] publish " + topic + " failed : " + e.getMessage());
+				}      
         	} else {
         		for(int i=0; i <= varargs.narg(); i++) {
 					System.err.println("[MQTT] publish ["+(i) + "] (" + varargs.arg(i).typename() + ") " + varargs.arg(i).toString() );
