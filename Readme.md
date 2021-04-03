@@ -42,7 +42,8 @@ Mandatory:
 * GPIO2     LEDs
 * GPIO0	    Bootloader (at start)
 * GPIO0	    factory reset (long during operation)
-Optinal:
+
+Optional:
 * ADC       VT93N2, 48k  light resistor  
 * GPIO4     DS18B20 Temperatur sensor
 
@@ -50,6 +51,11 @@ Optinal:
 ### Status
 * **basetopic**/brightness **Current brightness in percent**
 * **basetopic**/background **Current background color**
+* **basetopic**/color **Current foreground color**
+* **basetopic**/color1 **Current foreground color for first minute**
+* **basetopic**/color2 **Current foreground color for second minute**
+* **basetopic**/color3 **Current foreground color for third minute**
+* **basetopic**/color4 **Current foreground color for fourth minute**
 * **basetopic**/row1 **Current background color**
 * **basetopic**/temp **Temperatur**
 
@@ -60,8 +66,18 @@ Optinal:
   * 0-100 **Set brightness to given value**
   * #rrggbb **Background color is set to hex representation of red, green and blue**
   * 0-255,0-255,0-255 **Background color is set to decimal representation of red, green an blue**
+* **basetopic**/cmd/color
+  * 0-255,0-255,0-255 **Foreground color is set to decimal representation of red, green an blue**
+* **basetopic**/cmd/color1
+  * 0-255,0-255,0-255 **Foreground color for first minute is set to decimal representation of red, green an blue**
+* **basetopic**/cmd/color2
+  * 0-255,0-255,0-255 **Foreground color for second minute is set to decimal representation of red, green an blue**
+* **basetopic**/cmd/color3
+  * 0-255,0-255,0-255 **Foreground color for third minute is set to decimal representation of red, green an blue**
+* **basetopic**/cmd/color4
+  * 0-255,0-255,0-255 **Foreground color for fourth minute is set to decimal representation of red, green an blue**
 * **basetopic**/cmd/telnet
-  * ignored **Stop MQTT server and start telnetserver at port 23**
+  * ignored **Stop MQTT server, clock and start telnetserver at port 23**
 * **basetopic**/cmd/row1
   * 0-255,0-255,0-255 **Background color is set to decimal representation of red, green an blue**
 * **basetopic**/cmd/row1

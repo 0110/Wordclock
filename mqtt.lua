@@ -39,7 +39,8 @@ end
 -- Parse MQTT data and extract color
 -- @param data MQTT information
 -- @param row string of the row e.g. "row1" used to publish current state
-function parseBgColor(data, row)
+-- @param per percent the color should be dimmed
+function parseBgColor(data, row, per)
   local red=nil
   local green=nil
   local blue=nil
@@ -52,7 +53,11 @@ function parseBgColor(data, row)
   end
   if ((red ~= nil) and (green ~= nil) and (blue ~= nil) ) then
     m:publish(mqttPrefix .. "/"..row, tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue), 0, 0)
-    return string.char(green * briPer / 100, red * briPer / 100, blue * briPer / 100)
+    if (per ~= nil) then
+      return string.char(green * per / 100, red * per / 100, blue * per / 100)
+    else
+      return string.char(green , red , blue )
+    end
   else
     return nil
   end
@@ -104,10 +109,25 @@ function registerMqtt()
 		else
 		    print("Cannost start Telnet Server!")
                 end
-            else
+	   elseif (string.match(topic, "color$")) then
+	        color = parseBgColor(data, "color")
+                print("Updated color" .. tostring(i) )
+           elseif (string.match(topic, "color1$")) then
+	        color1 = parseBgColor(data, "color1")
+                print("Updated color1" .. tostring(i) )
+           elseif (string.match(topic, "color2$")) then
+	        color = parseBgColor(data, "color2")
+                print("Updated color2" .. tostring(i) )
+           elseif (string.match(topic, "color3$")) then
+	        color = parseBgColor(data, "color3")
+                print("Updated color3" .. tostring(i) )
+           elseif (string.match(topic, "color4$")) then
+	        color = parseBgColor(data, "color4")
+                print("Updated color4" .. tostring(i) )
+           else
              for i=1,10,1 do
               if (string.match(topic, "row".. tostring(i) .."$")) then
-                rowbgColor[i] = parseBgColor(data, "row" .. tostring(i))
+                rowbgColor[i] = parseBgColor(data, "row" .. tostring(i), briPer)
                 print("Updated row" .. tostring(i) )
                 return
               end
