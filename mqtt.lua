@@ -143,13 +143,13 @@ function registerMqtt()
 	        color1 = parseBgColor(data, "color1")
                 print("Updated color1" )
            elseif (string.match(topic, "color2$")) then
-	        color = parseBgColor(data, "color2")
+	        color2 = parseBgColor(data, "color2")
                 print("Updated color2" )
            elseif (string.match(topic, "color3$")) then
-	        color = parseBgColor(data, "color3")
+	        color3 = parseBgColor(data, "color3")
                 print("Updated color3" )
            elseif (string.match(topic, "color4$")) then
-	        color = parseBgColor(data, "color4")
+	        color4 = parseBgColor(data, "color4")
                 print("Updated color4" )
            else
              for i=1,10,1 do
