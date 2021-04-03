@@ -121,22 +121,22 @@ function registerMqtt()
 	mqttConnected = false
     end
     )
-    m:connect(mqttServer, 1883, false, function(client)
+    m:connect(mqttServer, 1883, false, function(c)
       print("MQTT is connected")
       mqttConnected = true
       -- subscribe topic with qos = 0
-      client:subscribe(mqttPrefix .. "/cmd/#", 0)
-      local mytimer = tmr.create()
-      mytimer:register(1000, tmr.ALARM_SINGLE, function (t)
-	      -- publish a message with data = hello, QoS = 0, retain = 0
-	      client:publish(mqttPrefix .. "/ip", tostring(wifi.sta.getip()), 0, 0)
+      m:subscribe(mqttPrefix .. "/cmd/#", 0)
+      local tmr1 = tmr.create()
+      tmr1:register(1000, tmr.ALARM_SINGLE, function (t)
+	  -- publish a message with data = hello, QoS = 0, retain = 0
+	  m:publish(mqttPrefix .. "/ip", tostring(wifi.sta.getip()), 0, 0)
           local red = string.byte(colorBg,2)
           local green = string.byte(colorBg,1)
           local blue = string.byte(colorBg,3)
-          client:publish(mqttPrefix .. "/background", tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue), 0, 0)
-	  t:unregister()
+          m:publish(mqttPrefix .. "/background", tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue), 0, 0)
+	  tmr1:unregister()
       end)
-      mytimer:start()
+      tmr1:start()
     end,
     function(client, reason)
       print("failed reason: " .. reason)
