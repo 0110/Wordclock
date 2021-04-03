@@ -78,6 +78,33 @@ function readTemp()
   end
 end
 
+-- Connect or reconnect to mqtt server
+function reConnectMqtt()
+ if (not mqttConnected) then
+    m:connect(mqttServer, 1883, false, function(c)
+      print("MQTT is connected")
+      mqttConnected = true
+      -- subscribe topic with qos = 0
+      m:subscribe(mqttPrefix .. "/cmd/#", 0)
+      local tmr1 = tmr.create()
+      tmr1:register(1000, tmr.ALARM_SINGLE, function (t)
+	  -- publish a message with data = hello, QoS = 0, retain = 0
+	  m:publish(mqttPrefix .. "/ip", tostring(wifi.sta.getip()), 0, 0)
+          local red = string.byte(colorBg,2)
+          local green = string.byte(colorBg,1)
+          local blue = string.byte(colorBg,3)
+          m:publish(mqttPrefix .. "/background", tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue), 0, 0)
+	  tmr1:unregister()
+      end)
+      tmr1:start()
+    end,
+    function(client, reason)
+      print("failed reason: " .. reason)
+      mqttConnected = false
+    end)
+ end
+end
+
 -- MQTT extension
 function registerMqtt()
     m = mqtt.Client("wordclock", 120)
@@ -141,27 +168,7 @@ function registerMqtt()
 	mqttConnected = false
     end
     )
-    m:connect(mqttServer, 1883, false, function(c)
-      print("MQTT is connected")
-      mqttConnected = true
-      -- subscribe topic with qos = 0
-      m:subscribe(mqttPrefix .. "/cmd/#", 0)
-      local tmr1 = tmr.create()
-      tmr1:register(1000, tmr.ALARM_SINGLE, function (t)
-	  -- publish a message with data = hello, QoS = 0, retain = 0
-	  m:publish(mqttPrefix .. "/ip", tostring(wifi.sta.getip()), 0, 0)
-          local red = string.byte(colorBg,2)
-          local green = string.byte(colorBg,1)
-          local blue = string.byte(colorBg,3)
-          m:publish(mqttPrefix .. "/background", tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue), 0, 0)
-	  tmr1:unregister()
-      end)
-      tmr1:start()
-    end,
-    function(client, reason)
-      print("failed reason: " .. reason)
-      mqttConnected = false
-    end)
+    reConnectMqtt()
 end
 
 function connectedMqtt()
@@ -201,3 +208,4 @@ function startMqttClient()
 	mqtttimer:start()
     end
 end
+

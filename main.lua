@@ -139,6 +139,11 @@ function normalOperation()
 	  if (startMqttClient ~= nil) then
 		if (not	connectedMqtt()) then
 		 rgbBuffer:set(103, 0, 64,0)
+		 -- check every thirty seconds, if reconnecting is necessary
+		 if (((tmr.now() / 1000000) % 100) == 30) then
+		   print("MQTT reconnecting... ")
+		   reConnectMqtt()
+	         end
 		end
           end
      	  ws2812.write(rgbBuffer)
