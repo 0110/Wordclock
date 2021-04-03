@@ -9,7 +9,7 @@ local bootledtimer = tmr.create()
 bootledtimer:register(100, tmr.ALARM_AUTO, function (t)
     counter1=counter1+1
     spaceLeds = math.max(MAXLEDS - (counter1*2), 0)
-    ws2812.write(string.char(128,0,0):rep(counter1) .. string.char(0,0,0):rep(spaceLeds) .. string.char(0,0,64):rep(counter1))
+    ws2812.write(string.char(32,0,0):rep(counter1) .. string.char(0,0,0):rep(spaceLeds) .. string.char(0,0,16):rep(counter1))
     if ((counter1*2) > 114) then
         t:unregister()
     end
@@ -36,7 +36,7 @@ initTimer:register(5000, tmr.ALARM_SINGLE, function (t)
     initTimer:unregister()
     initTimer=nil
     bootledtimer=nil
-    local modlist = { "timecore" , "displayword", "ds18b20" }
+    local modlist = { "timecore" , "displayword", "ds18b20", "mqtt", "main" }
     for i,mod in pairs(modlist) do
         if (file.open(mod .. "_diet.lua")) then
             file.remove(mod .. "_diet.lc")
