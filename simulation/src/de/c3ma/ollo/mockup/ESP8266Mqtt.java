@@ -1,12 +1,16 @@
 package de.c3ma.ollo.mockup;
 
+import java.util.UUID;
+
+import org.eclipse.paho.client.mqttv3.IMqttClient;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
 import org.luaj.vm2.lib.TwoArgFunction;
 import org.luaj.vm2.lib.VarArgFunction;
-
-import de.c3ma.ollo.LuaThreadTmr;
 
 /**
  * 
@@ -14,19 +18,21 @@ import de.c3ma.ollo.LuaThreadTmr;
  *
  */
 public class ESP8266Mqtt extends TwoArgFunction {
+	
+	private IMqttClient mMqttClient = null;
 
 	@Override
 	public LuaValue call(LuaValue modname, LuaValue env) {
         env.checkglobals();
         final LuaTable mqtt = new LuaTable();
-        mqtt.set("Client", new MqttClient());
+        mqtt.set("Client", new LuaMqttClient());
         env.set("mqtt", mqtt);
         env.get("package").get("loaded").set("tmr", mqtt);
         System.out.println("[MQTT] Modlue loaded");
         return mqtt;
     }
 
-	private class MqttClient extends VarArgFunction {
+	private class LuaMqttClient extends VarArgFunction {
         public LuaValue invoke(Varargs varargs) {
             final LuaTable dynMqtt = new LuaTable();
         	if (varargs.narg() == 2) {
@@ -107,14 +113,30 @@ private class ConnectMqtt extends VarArgFunction {
 		
         public LuaValue invoke(Varargs varargs) {
             final LuaTable onMqtt = new LuaTable();
-        	if (varargs.narg() == 6) {
+        	if ((varargs.narg() == 6) && (mMqttClient == null)) {
         		final LuaTable table = varargs.arg(1).checktable();
         		final String targetIP = varargs.arg(2).toString().toString();
         		final int portnumber = varargs.arg(3).toint();
-        		final boolean unkownParameter = varargs.arg(4).toboolean();
+        		final boolean secureTLS = varargs.arg(4).toboolean();
         		final LuaValue codeOnConnected = varargs.arg(5);
         		final LuaValue codeOnFailed = varargs.arg(6);
-        		System.out.println("[MQTT] connect to " + targetIP + ":" + portnumber);
+        		String publisherId = "LuaSim" + UUID.randomUUID().toString();
+        		try {
+					mMqttClient = new MqttClient("tcp://" + targetIP + ":" + portnumber,publisherId);
+	        		MqttConnectOptions options = new MqttConnectOptions();
+	        		options.setAutomaticReconnect(false);
+	        		options.setCleanSession(true);
+	        		options.setConnectionTimeout(10);
+	        		mMqttClient.connect(options);
+	        		System.out.println("[MQTT] connected to " + targetIP + ":" + portnumber);
+	        		codeOnConnected.call();
+				} catch (MqttException e) {
+					System.err.println("[MQTT] connect failed : " + e.getMessage());
+					codeOnFailed.call();
+				}
+        	} else if (mMqttClient != null) {
+        		System.err.println("[MQTT] client already exists : " + mMqttClient);
+        		return LuaValue.NIL;
         	} else {
         		for(int i=0; i <= varargs.narg(); i++) {
 					System.err.println("[MQTT] connect ["+(i) + "] (" + varargs.arg(i).typename() + ") " + varargs.arg(i).toString() );
