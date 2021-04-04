@@ -84,7 +84,7 @@ function normalOperation()
     -- Define the main loop
     local setupCounter=5
     local alive=0
-    mlt:register(2500, tmr.ALARM_AUTO, function (lt)
+    mlt:register(1000, tmr.ALARM_AUTO, function (lt)
       if (setupCounter > 4) then
 	if (colorBg ~= nil) then
 	  rgbBuffer:fill(string.byte(colorBg,1), string.byte(colorBg,2), string.byte(colorBg,3)) -- disable all LEDs
