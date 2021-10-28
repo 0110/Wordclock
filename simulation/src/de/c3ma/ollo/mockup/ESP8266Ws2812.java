@@ -126,10 +126,11 @@ public class ESP8266Ws2812 extends TwoArgFunction {
 		}
     	
         public Varargs invoke(Varargs varargs) {
-            if (varargs.narg() >= 3) {
-                final int red = varargs.arg(1).toint();
-                final int green = varargs.arg(2).toint();
-                final int blue = varargs.arg(3).toint();
+            if (varargs.narg() == 4) {
+            	/* first argument is the object itself */
+                final int red = varargs.arg(2).toint();
+                final int green = varargs.arg(3).toint();
+                final int blue = varargs.arg(4).toint();
                 /* update local buffer */ 
                 for(int i=0; i < ledList.size(); i++) {
                 	ledList.set(i, new Color(red, green, blue));
