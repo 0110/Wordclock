@@ -48,6 +48,11 @@ function displayTime()
         words.briPer=nil
      end
      end
+     local tw=nil
+     local tcol=nil
+     if (mqttDispTemp ~= nil) then
+	tw, tcol  = wc.temp(dw, rgbBuffer, invertRows)
+     end
      wc = nil
      collectgarbage()
      print("wc: " .. tostring(node.heap()))
@@ -61,12 +66,9 @@ function displayTime()
         local c = dw.countChars(words)
         dw.generateLEDs(rgbBuffer, words, colorBg, color, color1, color2, color3, color4, invertRows, c)
      end
-     if (mqttDispTemp ~= nil) then
-	local tw, tcol  = mqttDispTemp(dw, rgbBuffer, invertRows)
-	if ( (tw ~= nil) and (tcol ~= nil) ) then
+     if ( (tw ~= nil) and (tcol ~= nil) ) then
 	  local c1 = dw.countChars(tw)
           dw.generateLEDs(rgbBuffer, tw, nil, tcol, nil, nil, nil, nil, invertRows, c1)
-	end
      end
      dw = nil
      collectgarbage()

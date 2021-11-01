@@ -140,9 +140,60 @@ local timestat=function (hours, minutes, longmode)
  collectgarbage()
  return ret
 end
+
+
+-- Logic to display Mqtt
+function temp(dw, rgbBuffer, invertRows, dispTemp)
+if (dispTemp ~= nil) then
+   -- Values: it, is, 5 minutes, 10 minutes, afer, before, three hour, quarter, dreiviertel, half, s
+   --  hours: one, one Long, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve
+   -- Special ones: twenty, clock, minute 1 flag, minute 2 flag, minute 3 flag, minute 4 flag
+   local ret = { it=0, is=0, m5=0, m10=0, ha=0, hb=0, h3=0, hq=0, h3q=0, half=0, s=0, 
+               h1=0, h1l=0, h2=0, h3=0, h4=0, h5=0, h6=0, h7=0, h8=0, h9=0, h10=0, h11=0, h12=0,
+               m20=0, cl=0, m1=0, m2=0, m3=0, m4=0 }
+
+   print("Mqtt Display of temperature: " .. tostring(dispTemp) )
+   if (dispTemp == 1) or (dispTemp == -1) then
+     ret.h1=1
+   elseif (dispTemp == 2) or (dispTemp == -2) then
+     ret.h2=1
+   elseif (dispTemp == 3) or (dispTemp == -3) then
+     ret.h3=1
+   elseif (dispTemp == 4) or (dispTemp == -4) then
+     ret.h4=1
+   elseif (dispTemp == 5) or (dispTemp == -5) then
+     ret.h5=1
+   elseif (dispTemp == 6) or (dispTemp == -6) then
+     ret.h6=1
+   elseif (dispTemp == 7) or (dispTemp == -7) then
+     ret.h7=1
+   elseif (dispTemp == 8) or (dispTemp == -8) then
+     ret.h8=1
+   elseif (dispTemp == 9) or (dispTemp == -9) then
+     ret.h9=1
+   elseif (dispTemp == 10) or (dispTemp == -10) then
+     ret.h10=1
+   elseif (dispTemp == 11) or (dispTemp == -11) then
+     ret.h11=1
+   elseif (dispTemp == 12) or (dispTemp == -12) then
+     ret.h12=1
+   else
+       -- over or under temperature
+   end
+   local col=string.char(128,0,0) -- red; positive degrees
+   if (dispTemp < 0) then
+    col=string.char(0,0,128) -- blue; negative degrees
+   end
+   return ret, col
+else
+   return nil, nil
+end
+
+end
 -- Pack everything into a module
 M = {
-    timestat = timestat
+    timestat = timestat,
+    temp = temp
 }
 end
 wc = M
