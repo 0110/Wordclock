@@ -148,9 +148,6 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
  -- Background color must always be set
  if (colorBg ~= nil) then
   rgbBuffer:fill(string.byte(colorBg,1), string.byte(colorBg,2), string.byte(colorBg,3)) -- draw the background
- else
-  -- Space / background has no color by default
-  rgbBuffer:fill(0, 0, 0) -- draw the background
  end
 
  local lineIdx=1
