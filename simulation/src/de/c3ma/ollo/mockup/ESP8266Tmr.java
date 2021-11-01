@@ -19,7 +19,7 @@ import de.c3ma.ollo.LuaThreadTmr;
  */
 public class ESP8266Tmr extends TwoArgFunction {
 
-    private static final int MAXTHREADS = 7;
+    private static final int MAXTHREADS = 10;
     
     private static LuaThreadTmr[] allThreads = new LuaThreadTmr[MAXTHREADS];
     private static LuaThreadTmr[] dynamicThreads = new LuaThreadTmr[MAXTHREADS];
