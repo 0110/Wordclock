@@ -3,7 +3,7 @@ local m=nil
 local mqttConnected = false
 -- Temp:
 local t=nil
-local dispTemp=10
+local dispTemp=nil
 
 function handleSingleCommand(client, topic, data)
     if (data == "ON") then
