@@ -3,11 +3,13 @@ package de.c3ma.ollo.mockup;
 import java.util.UUID;
 
 import org.eclipse.paho.client.mqttv3.IMqttClient;
+import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
+import org.eclipse.paho.client.mqttv3.MqttSecurityException;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
@@ -19,7 +21,7 @@ import org.luaj.vm2.lib.VarArgFunction;
  * @author ollo
  *
  */
-public class ESP8266Mqtt extends TwoArgFunction {
+public class ESP8266Mqtt extends TwoArgFunction implements IMqttMessageListener {
 	
 	private IMqttClient mMqttClient = null;
 
@@ -68,7 +70,7 @@ public class ESP8266Mqtt extends TwoArgFunction {
         		final String callback = varargs.arg(2).toString().toString();
         		final LuaValue code = varargs.arg(3);
         		System.out.println("[MQTT] On " + this.client + " " + callback);        		
-        		onMqtt.set("function", code);
+        		onMqtt.set("on_" + callback, code);
         	} else {
         		for(int i=0; i <= varargs.narg(); i++) {
 					System.err.println("[MQTT] On ["+(i) + "] (" + varargs.arg(i).typename() + ") " + varargs.arg(i).toString() );
@@ -119,11 +121,30 @@ public class ESP8266Mqtt extends TwoArgFunction {
 		
         public LuaValue invoke(Varargs varargs) {
             final LuaTable onMqtt = new LuaTable();
-        	if (varargs.narg() == 2) {
-        		System.out.println("[MQTT] subscribe ");
+            final int numberArg = varargs.narg();
+        	if (numberArg  == 3) {
+        		final String topic = varargs.arg(2).toString().toString();
+        		final int qos = varargs.arg(3).tonumber().toint();
+
+    			try {
+    				if (mMqttClient != null) {
+						mMqttClient.subscribe(topic, ESP8266Mqtt.this);
+	            		System.out.println("[MQTT] subscribe " + topic + " (QoS " + qos + ")");
+            		} else {
+            			throw new Exception("Client not instantiated");
+            		}
+				} catch (MqttSecurityException e) {
+					System.err.println("[MQTT] subscribe " + topic + " (QoS " + qos + ") failed: " + e.getMessage());
+					e.printStackTrace();
+				} catch (MqttException e) {
+					System.err.println("[MQTT] subscribe " + topic + " (QoS " + qos + ") failed: " + e.getMessage());
+					e.printStackTrace();
+				} catch (Exception e) {
+        			System.err.println("[MQTT] subscribe " + topic + " (QoS " + qos + ") failed: " + e.getMessage());
+				}
         	} else {
-        		for(int i=0; i <= varargs.narg(); i++) {
-					System.err.println("[MQTT] subscribe ["+(i) + "] (" + varargs.arg(i).typename() + ") " + varargs.arg(i).toString() );
+        		for(int i=0; i <= numberArg; i++) {
+					System.err.println("[MQTT] subscribe ["+(i) + "/" + numberArg  + "] (" + varargs.arg(i).typename() + ") " + varargs.arg(i).toString() );
 				}
         		return LuaValue.NIL;
         	}
@@ -131,7 +152,7 @@ public class ESP8266Mqtt extends TwoArgFunction {
         }
 	}
 	
-private class ConnectMqtt extends VarArgFunction {
+	private class ConnectMqtt extends VarArgFunction {
 		
         public LuaValue invoke(Varargs varargs) {
             final LuaTable onMqtt = new LuaTable();
@@ -167,5 +188,10 @@ private class ConnectMqtt extends VarArgFunction {
         	}
         	return onMqtt;
         }
+	}
+
+	@Override
+	public void messageArrived(String topic, MqttMessage message) throws Exception {
+		System.err.println("[MQTT] message "+ topic + " : " + message);
 	}
 }
