@@ -10,6 +10,7 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.MqttSecurityException;
+import org.luaj.vm2.LuaString;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
@@ -23,7 +24,10 @@ import org.luaj.vm2.lib.VarArgFunction;
  */
 public class ESP8266Mqtt extends TwoArgFunction implements IMqttMessageListener {
 	
+	private static final String ON_PREFIX = "on_";
+	private static final String MESSAGE = "message";
 	private IMqttClient mMqttClient = null;
+    final LuaTable onMqtt = new LuaTable();
 
 	@Override
 	public LuaValue call(LuaValue modname, LuaValue env) {
@@ -63,14 +67,13 @@ public class ESP8266Mqtt extends TwoArgFunction implements IMqttMessageListener 
 		}
 		
         public LuaValue invoke(Varargs varargs) {
-            final LuaTable onMqtt = new LuaTable();
             
         	if (varargs.narg() == 3) {
         		final LuaTable table = varargs.arg(1).checktable();
         		final String callback = varargs.arg(2).toString().toString();
         		final LuaValue code = varargs.arg(3);
         		System.out.println("[MQTT] On " + this.client + " " + callback);        		
-        		onMqtt.set("on_" + callback, code);
+        		onMqtt.set(ON_PREFIX + callback, code);
         	} else {
         		for(int i=0; i <= varargs.narg(); i++) {
 					System.err.println("[MQTT] On ["+(i) + "] (" + varargs.arg(i).typename() + ") " + varargs.arg(i).toString() );
@@ -192,6 +195,14 @@ public class ESP8266Mqtt extends TwoArgFunction implements IMqttMessageListener 
 
 	@Override
 	public void messageArrived(String topic, MqttMessage message) throws Exception {
-		System.err.println("[MQTT] message "+ topic + " : " + message);
+		LuaValue messageCallback = onMqtt.get(ON_PREFIX + MESSAGE);
+		if (messageCallback != null) {
+			LuaValue call2 = messageCallback.call(LuaValue.NIL,
+					LuaValue.valueOf(topic), 
+					LuaValue.valueOf(message.getPayload()));
+			//FIXME call the LUA code
+		} else {
+			System.err.println("[MQTT] message "+ topic + " : " + message + " without callback");
+		}
 	}
 }
