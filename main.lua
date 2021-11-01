@@ -38,20 +38,15 @@ function displayTime()
      collectgarbage()
      mydofile("wordclock")
      if (wc ~= nil) then
-     words = wc.timestat(time.hour, time.minute)
-     if ((dim ~= nil) and (dim == "on")) then
+       words = wc.timestat(time.hour, time.minute)
+       if ((dim ~= nil) and (dim == "on")) then
         words.briPer=briPer
         if (words.briPer ~= nil and words.briPer < 3) then
           words.briPer=3
         end
-     else
+       else
         words.briPer=nil
-     end
-     end
-     local tw=nil
-     local tcol=nil
-     if (mqttDispTemp ~= nil) then
-	tw, tcol  = wc.temp(dw, rgbBuffer, invertRows)
+       end
      end
      wc = nil
      collectgarbage()

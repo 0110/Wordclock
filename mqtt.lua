@@ -3,7 +3,8 @@ local m=nil
 local mqttConnected = false
 -- Temp:
 local t=nil
-dispTemp=nil
+local tw=nil
+local tcol=nil
 
 function handleSingleCommand(client, topic, data)
     if (data == "ON") then
@@ -118,9 +119,20 @@ function registerMqtt()
             handleSingleCommand(client, topic, data)
 	elseif (topic == (mqttPrefix .. "/cmd/temp")) then
 	    if ( data == "" ) then
-		    dispTemp = nil
+		    tw=nil
+		    tcol=nil
 	    else
-		    dispTemp = tonumber(data)
+		    -- generate the temperatur to display, once as it will not change
+		    local dispTemp = tonumber(data)
+		    collectgarbage()
+		    mydofile("wordclock")
+		    if (wc ~= nil) then
+			tw, tcol  = wc.temp(dw, rgbBuffer, invertRows)
+			wc = nil
+		    else
+			print("MQTT | wordclock failed")
+		    end
+
 	    end
         else
             -- Handle here the /cmd/# sublevel
