@@ -117,10 +117,11 @@ function registerMqtt()
         print(data)
         if (topic == (mqttPrefix .. "/cmd/single")) then
             handleSingleCommand(client, topic, data)
-	elseif (topic == (mqttPrefix .. "/cmd/temp")) then
-	    if ( data == "" ) then
-		    tw=nil
-		    tcol=nil
+        elseif (topic == (mqttPrefix .. "/cmd/temp")) then
+	    if (( data == "" ) or (data == nil)) then
+		tw=nil
+	        tcol=nil
+		print("MQTT | wordclock failed")
 	    else
 		    -- generate the temperatur to display, once as it will not change
 		    local dispTemp = tonumber(data)
@@ -129,10 +130,10 @@ function registerMqtt()
 		    if (wc ~= nil) then
 			tw, tcol  = wc.temp(dw, rgbBuffer, invertRows)
 			wc = nil
+			print("MQTT | generated words for: " + tostring(dispTemp))
 		    else
 			print("MQTT | wordclock failed")
 		    end
-
 	    end
         else
             -- Handle here the /cmd/# sublevel
