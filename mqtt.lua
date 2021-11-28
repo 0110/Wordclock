@@ -65,14 +65,14 @@ function parseBgColor(data, row, per)
   end
 end
 
-function readTemp()
-  if (t ~= nil) then
-    addrs=t.addrs()
+function readTemp(ds18b20)
+  if (ds18b20 ~= nil) then
+    addrs=ds18b20.addrs()
     -- Total DS18B20 numbers
     sensors=table.getn(addrs)
     local temp1=0
     if (sensors >= 1) then
-        temp1=t.read(addrs[0])
+        temp1=ds18b20.read(addrs[0])
     else
         print("No sensor DS18B20 found")
     end
@@ -92,7 +92,7 @@ function reConnectMqtt()
       -- subscribe topic with qos = 0
       m:subscribe(mqttPrefix .. "/cmd/#", 0)
       local tmr1 = tmr.create()
-      tmr1:register(1000, tmr.ALARM_SINGLE, function (t)
+      tmr1:register(1000, tmr.ALARM_SINGLE, function (dummyTemp)
 	  -- publish a message with data = hello, QoS = 0, retain = 0
 	  m:publish(mqttPrefix .. "/ip", tostring(wifi.sta.getip()), 0, 0)
           local red = string.byte(colorBg,2)
@@ -205,9 +205,7 @@ function startMqttClient()
 	local dstimer = tmr.create()
 	dstimer:register(123, tmr.ALARM_SINGLE, function (kTemp)
 		if (file.open("ds18b20_diet.lc")) then
-		  t=require("ds18b20_diet")
-		  t.setup(2) -- GPIO4
-		  readTemp() -- read once, to setup chip
+		  t=true
 		  print "Setup temperature"
 		end
 	end)
@@ -215,20 +213,29 @@ function startMqttClient()
     local oldBrightness=0
     oldTemp=0
 	local mqtttimer = tmr.create()
-	mqtttimer:register(5001, tmr.ALARM_AUTO, function (kTemp)
+	mqtttimer:register(6001, tmr.ALARM_AUTO, function (kTemp)
             if (mqttConnected) then
                 local temperatur = nil
-                if (t ~= nil) then
-                    temperatur=readTemp()
-                end
                 if (oldBrightness ~= briPer) then
                  m:publish(mqttPrefix .. "/brightness", tostring(briPer), 0, 0)
                  oldBrightness = briPer
-                elseif (temperatur ~= nil and temperatur ~= oldTemp) then
-                  oldTemp = temperatur
-                  m:publish(mqttPrefix .. "/temp", tostring(temperatur/100).."."..tostring(temperatur%100), 0, 0)
                 else
-                 m:publish(mqttPrefix .. "/heap", tostring(node.heap()), 0, 0)
+                  if (t ~= nil) then
+		     local ds18b20=require("ds18b20_diet")
+		     ds18b20.setup(2) -- GPIO4
+		     readTemp(ds18b20) -- read once, to setup chip		     
+                    temperatur=readTemp(ds18b20)
+                    if (temperatur == 85) then
+                     temperatur=nil
+                    end
+		     ds18b20=nil
+                  end
+                  if (temperatur ~= nil and temperatur ~= oldTemp) then
+                    oldTemp = temperatur
+                    m:publish(mqttPrefix .. "/temp", tostring(temperatur/100).."."..tostring(temperatur%100), 0, 0)
+                  else
+                    m:publish(mqttPrefix .. "/heap", tostring(node.heap()), 0, 0)
+                  end
                 end
             end
         end)
