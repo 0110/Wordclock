@@ -73,9 +73,12 @@ function readTemp()
     local temp1=0
     if (sensors >= 1) then
         temp1=t.read(addrs[0])
+    else
+        print("No sensor DS18B20 found")
     end
     return temp1
   else
+    print("No DS18B20 lib")
     return nil
   end
 end
@@ -200,7 +203,7 @@ function startMqttClient()
         registerMqtt()
         print "Started MQTT client"
 	local dstimer = tmr.create()
-	dstimer:register(123, tmr.ALARM_SINGLE, function (t)
+	dstimer:register(123, tmr.ALARM_SINGLE, function (kTemp)
 		if (file.open("ds18b20_diet.lc")) then
 		  t=require("ds18b20_diet")
 		  t.setup(2) -- GPIO4
@@ -208,24 +211,25 @@ function startMqttClient()
 		  print "Setup temperature"
 		end
 	end)
-        local oldBrightness=0
-        oldTemp=0
+    dstimer:start()
+    local oldBrightness=0
+    oldTemp=0
 	local mqtttimer = tmr.create()
-	mqtttimer:register(5001, tmr.ALARM_AUTO, function (t)
+	mqtttimer:register(5001, tmr.ALARM_AUTO, function (kTemp)
             if (mqttConnected) then
-                local temp = nil
+                local temperatur = nil
                 if (t ~= nil) then
-                    temp=readTemp()
+                    temperatur=readTemp()
                 end
                 if (oldBrightness ~= briPer) then
                  m:publish(mqttPrefix .. "/brightness", tostring(briPer), 0, 0)
-                elseif (temp ~= nil and temp ~= oldTemp) then
-                  oldTemp = temp
-                  m:publish(mqttPrefix .. "/temp", tostring(temp/100).."."..tostring(temp%100), 0, 0)
+                 oldBrightness = briPer
+                elseif (temperatur ~= nil and temperatur ~= oldTemp) then
+                  oldTemp = temperatur
+                  m:publish(mqttPrefix .. "/temp", tostring(temperatur/100).."."..tostring(temperatur%100), 0, 0)
                 else
                  m:publish(mqttPrefix .. "/heap", tostring(node.heap()), 0, 0)
                 end
-                oldBrightness = briPer
             end
         end)
 	mqtttimer:start()

@@ -67,7 +67,6 @@ function displayTime()
      end
      dw = nil
      collectgarbage()
-     print("dw: " .. tostring(node.heap()))
     
      -- cleanup
      i=nil
