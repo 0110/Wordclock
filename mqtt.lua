@@ -215,12 +215,13 @@ function startMqttClient()
 	local mqtttimer = tmr.create()
 	mqtttimer:register(6001, tmr.ALARM_AUTO, function (kTemp)
             if (mqttConnected) then
+                local heapusage = node.heap()
                 local temperatur = nil
                 if (oldBrightness ~= briPer) then
                  m:publish(mqttPrefix .. "/brightness", tostring(briPer), 0, 0)
                  oldBrightness = briPer
                 else
-                  if (t ~= nil) then
+                  if ((t ~= nil) and (heapusage > 12000)) then
 		     local ds18b20=require("ds18b20_diet")
 		     ds18b20.setup(2) -- GPIO4
 		     readTemp(ds18b20) -- read once, to setup chip		     
@@ -234,7 +235,7 @@ function startMqttClient()
                     oldTemp = temperatur
                     m:publish(mqttPrefix .. "/temp", tostring(temperatur/100).."."..tostring(temperatur%100), 0, 0)
                   else
-                    m:publish(mqttPrefix .. "/heap", tostring(node.heap()), 0, 0)
+                    m:publish(mqttPrefix .. "/heap", tostring(heapusage), 0, 0)
                   end
                 end
             end
