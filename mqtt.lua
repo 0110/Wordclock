@@ -206,7 +206,7 @@ function startMqttClient()
 	dstimer:register(123, tmr.ALARM_SINGLE, function (kTemp)
 		if (file.open("ds18b20_diet.lc")) then
 		  t=true
-		  print "Setup temperature"
+		  print "Setup temperatur"
 		end
 	end)
     dstimer:start()
@@ -224,16 +224,18 @@ function startMqttClient()
                   if ((t ~= nil) and (heapusage > 12000)) then
 		     local ds18b20=require("ds18b20_diet")
 		     ds18b20.setup(2) -- GPIO4
-		     readTemp(ds18b20) -- read once, to setup chip		     
+		     readTemp(ds18b20) -- read once, to setup chip	     
                     temperatur=readTemp(ds18b20)
-                    if (temperatur == 85) then
+                    if (temperatur == 8500) then
                      temperatur=nil
                     end
 		     ds18b20=nil
+		   else	   
+	             collectgarbage()
                   end
                   if (temperatur ~= nil and temperatur ~= oldTemp) then
                     oldTemp = temperatur
-                    m:publish(mqttPrefix .. "/temp", tostring(temperatur/100).."."..tostring(temperatur%100), 0, 0)
+                    m:publish(mqttPrefix .. "/temp", tostring(temperatur/100)..".".. tostring(temperatur%100), 0, 0)
                   else
                     m:publish(mqttPrefix .. "/heap", tostring(heapusage), 0, 0)
                   end
