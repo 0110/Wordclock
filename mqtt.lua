@@ -1,18 +1,21 @@
--- Global variable
-local m=nil
-local mqttConnected = false
--- Temp:
-local t=nil
-local tw=nil
-local tcol=nil
+-- Global Variables
+-- Display Temp
+tw=nil
+tcol=nil
+-- Module Variables
+-- Mqtt variable
+local mMqttClient=nil
+local mMqttConnected = false
+-- Read Temp
+local mOldTemp=nil
 
 function handleSingleCommand(client, topic, data)
     if (data == "ON") then
       briPer=100
-      m:publish(mqttPrefix .. "/clock", "ON", 0, 0)
+      mMqttClient:publish(mqttPrefix .. "/clock", "ON", 0, 0)
     elseif (data == "OFF") then
       briPer=0
-      m:publish(mqttPrefix .. "/clock", "OFF", 0, 0)
+      mMqttClient:publish(mqttPrefix .. "/clock", "OFF", 0, 0)
     elseif ((data:sub(1,1) == "#" and data:len() == 7) or (string.match(data, "%d+,%d+,%d+"))) then
       local red=0
       local green=0
@@ -26,11 +29,11 @@ function handleSingleCommand(client, topic, data)
       end
       colorBg=string.char(green * briPer / 100, red * briPer / 100, blue * briPer / 100)
       print("Updated BG: " .. tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue) )
-      m:publish(mqttPrefix .. "/background", tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue), 0, 0)
+      mMqttClient:publish(mqttPrefix .. "/background", tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue), 0, 0)
     else
       if (tonumber(data) >= 0 and tonumber(data) <= 100) then
         briPer=tonumber(data)
-        m:publish(mqttPrefix .. "/clock", tostring(data), 0, 0)
+        mMqttClient:publish(mqttPrefix .. "/clock", tostring(data), 0, 0)
       else
         print "Unknown MQTT command"
       end
@@ -54,7 +57,7 @@ function parseBgColor(data, row, per)
     red, green, blue = string.match(data, "(%d+),(%d+),(%d+)")
   end
   if ((red ~= nil) and (green ~= nil) and (blue ~= nil) ) then
-    m:publish(mqttPrefix .. "/"..row, tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue), 0, 0)
+    mMqttClient:publish(mqttPrefix .. "/"..row, tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue), 0, 0)
     if (per ~= nil) then
       return string.char(green * per / 100, red * per / 100, blue * per / 100)
     else
@@ -67,9 +70,9 @@ end
 
 function readTemp(ds18b20)
   if (ds18b20 ~= nil) then
-    addrs=ds18b20.addrs()
+    local addrs=ds18b20.addrs()
     -- Total DS18B20 numbers
-    sensors=table.getn(addrs)
+    local sensors=table.getn(addrs)
     local temp1=0
     if (sensors >= 1) then
         temp1=ds18b20.read(addrs[0])
@@ -85,39 +88,47 @@ end
 
 -- Connect or reconnect to mqtt server
 function reConnectMqtt()
- if (not mqttConnected) then
-    m:connect(mqttServer, 1883, false, function(c)
+ if (not mMqttConnected) then
+    mMqttClient:connect(mqttServer, 1883, false, function(c)
       print("MQTT is connected")
-      mqttConnected = true
+      mMqttConnected = true
       -- subscribe topic with qos = 0
-      m:subscribe(mqttPrefix .. "/cmd/#", 0)
+      mMqttClient:subscribe(mqttPrefix .. "/cmd/#", 0)
       local tmr1 = tmr.create()
       tmr1:register(1000, tmr.ALARM_SINGLE, function (dummyTemp)
 	  -- publish a message with data = hello, QoS = 0, retain = 0
-	  m:publish(mqttPrefix .. "/ip", tostring(wifi.sta.getip()), 0, 0)
+	  mMqttClient:publish(mqttPrefix .. "/ip", tostring(wifi.sta.getip()), 0, 0)
           local red = string.byte(colorBg,2)
           local green = string.byte(colorBg,1)
           local blue = string.byte(colorBg,3)
-          m:publish(mqttPrefix .. "/background", tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue), 0, 0)
+          mMqttClient:publish(mqttPrefix .. "/background", tostring(red) .. "," .. tostring(green) .. "," .. tostring(blue), 0, 0)
 	  tmr1:unregister()
+	  tmr1=nil
       end)
       tmr1:start()
     end,
     function(client, reason)
       print("failed reason: " .. reason)
-      mqttConnected = false
+      mMqttConnected = false
     end)
  end
 end
 
 -- MQTT extension
 function registerMqtt()
-    m = mqtt.Client("wordclock", 120)
+    mMqttClient = mqtt.Client("wordclock", 120)
     -- on publish message receive event
-    m:on("message", function(client, topic, data)
-      print("MQTT " .. topic .. ":" )
+    mMqttClient:on("message", function(client, topic, data)
+      collectgarbage()
       if data ~= nil then
-        print(data)
+        local heapusage = node.heap()
+        if (heapusage < 12000) then        
+          print("Skip " .. topic .. ":" .. data .. "; heap:" .. heapusage)
+          heapusage=nil
+      	  return
+        end
+        heapusage=nil
+        print("MQTT " .. topic .. ":" .. data)
         if (topic == (mqttPrefix .. "/cmd/single")) then
             handleSingleCommand(client, topic, data)
         elseif (topic == (mqttPrefix .. "/cmd/temp")) then
@@ -146,7 +157,7 @@ function registerMqtt()
                 print("Stop Mqtt and Temp")
                 m=nil
                 t=nil
-                mqttConnected = false
+                mMqttConnected = false
 		if (mlt ~= nil) then
 	          mlt:unregister()
 		else
@@ -178,7 +189,6 @@ function registerMqtt()
              for i=1,10,1 do
               if (string.match(topic, "row".. tostring(i) .."$")) then
                 rowbgColor[i] = parseBgColor(data, "row" .. tostring(i), briPer)
-                print("Updated row" .. tostring(i) )
                 return
               end
              end
@@ -186,40 +196,45 @@ function registerMqtt()
         end
       end
     end)
-    m:on("offline", function(client)
+    -- do something
+    mMqttClient:on("offline", function(client)
 	print("MQTT Disconnected")
-	mqttConnected = false
-    end
-    )
+	mMqttConnected = false
+        collectgarbage()
+    end)
     reConnectMqtt()
 end
 
 function connectedMqtt()
-  return mqttConnected
+  return mMqttConnected
 end
 
 function startMqttClient()
     if (mqttServer ~= nil and mqttPrefix ~= nil) then
         registerMqtt()
         print "Started MQTT client"
-	local dstimer = tmr.create()
-	dstimer:register(123, tmr.ALARM_SINGLE, function (kTemp)
+	local lSetupTimer = tmr.create()
+	lSetupTimer:register(123, tmr.ALARM_SINGLE, function (kTemp)
 		if (file.open("ds18b20_diet.lc")) then
 		  t=true
 		  print "Setup temperatur"
 		end
 	end)
-    dstimer:start()
-    local oldBrightness=0
-    oldTemp=0
-	local mqtttimer = tmr.create()
-	mqtttimer:register(6001, tmr.ALARM_AUTO, function (kTemp)
-            if (mqttConnected) then
+    	lSetupTimer:start()
+	local loldBrightness=0
+    	mOldTemp=0
+	local lMqttTimer = tmr.create()
+	-- Check every 12 seconds
+	lMqttTimer:register(12321, tmr.ALARM_AUTO, function (kTemp)
+            if (mMqttConnected) then
+            	-- Cleanup the initialization stuff
+            	lSetupTimer=nil
+            	-- Do the action
                 local heapusage = node.heap()
                 local temperatur = nil
-                if (oldBrightness ~= briPer) then
-                 m:publish(mqttPrefix .. "/brightness", tostring(briPer), 0, 0)
-                 oldBrightness = briPer
+                if (loldBrightness ~= briPer) then
+                 mMqttClient:publish(mqttPrefix .. "/brightness", tostring(briPer), 0, 0)
+                 loldBrightness = briPer
                 else
                   if ((t ~= nil) and (heapusage > 12000)) then
 		     local ds18b20=require("ds18b20_diet")
@@ -233,16 +248,18 @@ function startMqttClient()
 		   else	   
 	             collectgarbage()
                   end
-                  if (temperatur ~= nil and temperatur ~= oldTemp) then
-                    oldTemp = temperatur
-                    m:publish(mqttPrefix .. "/temp", tostring(temperatur/100)..".".. tostring(temperatur%100), 0, 0)
+                  if (temperatur ~= nil and temperatur ~= mOldTemp) then
+                    mOldTemp = temperatur
+                    mMqttClient:publish(mqttPrefix .. "/temp", tostring(temperatur/100)..".".. tostring(temperatur%100), 0, 0)
                   else
-                    m:publish(mqttPrefix .. "/heap", tostring(heapusage), 0, 0)
+                    mMqttClient:publish(mqttPrefix .. "/heap", tostring(heapusage), 0, 0)
                   end
                 end
+                heapusage=nil
+                temperatur=nil
             end
         end)
-	mqtttimer:start()
+	lMqttTimer:start()
     end
 end
 

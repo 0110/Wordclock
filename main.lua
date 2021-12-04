@@ -11,7 +11,6 @@ function syncTimeFromInternet()
     syncRunning=true
     sntp.sync(sntpserverhostname,
      function(sec,usec,server)
-      print('sync', sec, usec, server)
       syncRunning=nil
      end,
      function()
@@ -129,10 +128,13 @@ function normalOperation()
         end
         setupCounter=setupCounter-1
       elseif ( (alive % 120) == 0) then
-	    -- sync the time every 5 minutes
-    	syncTimeFromInternet()
+        -- sync the time every 5 minutes
+      	local heapusage = node.heap()
+      	if (heapusage > 12000) then
+		syncTimeFromInternet()
+	end
+    	heapusage=nil
         alive = alive + 1
-        collectgarbage()
       else
        displayTime()
        alive = alive + 1
@@ -158,6 +160,7 @@ function normalOperation()
 	  ws2812.write(rgbBuffer)
 	  print("Fallback no time displayed")
       end
+      collectgarbage()
       -- Feed the system watchdog.
       tmr.wdclr()
     end)
