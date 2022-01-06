@@ -62,9 +62,14 @@ if [ $? -ne 0 ]; then
  echo "Entered Wordclock address: $MQTTPREFIX on $MQTTSERVER is NOT online"
  exit 2
 fi
-echo "Activate Telnet server"
-mosquitto_pub -h $MQTTSERVER -t "$MQTTPREFIX/cmd/telnet" -m "a"
-TELNETIP=$(mosquitto_sub -h $MQTTSERVER -t "$MQTTPREFIX/telnet" -C 1)
+echo "Activate Telnet server ..."
+TELNETIP="empty"
+while [ "$TELNETIP" = "empty" ]; do
+ date
+ mosquitto_pub -h $MQTTSERVER -t "$MQTTPREFIX/cmd/telnet" -m "a"
+ TELNETIP=$(mosquitto_sub -h $MQTTSERVER -t "$MQTTPREFIX/telnet" -C 1 -W 30)
+done
+
 echo "Upgrading $MQTTPREFIX via telenet on $TELNETIP ..."
 sleep 1
 echo "if (mlt ~= nil) then mlt:unregister() end" > $UPGRADEPREP
