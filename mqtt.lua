@@ -122,7 +122,7 @@ function registerMqtt()
       collectgarbage()
       if data ~= nil then
         local heapusage = node.heap()
-        if (heapusage < 12000) then        
+        if (heapusage < 11000) then        
           print("Skip " .. topic .. ":" .. data .. "; heap:" .. heapusage)
           heapusage=nil
       	  return
@@ -236,7 +236,7 @@ function startMqttClient()
                  mMqttClient:publish(mqttPrefix .. "/brightness", tostring(briPer), 0, 0)
                  loldBrightness = briPer
                 else
-                  if ((t ~= nil) and (heapusage > 12000)) then
+                  if ((t ~= nil) and (heapusage > 11900)) then
 		     local ds18b20=require("ds18b20_diet")
 		     ds18b20.setup(2) -- GPIO4
 		     readTemp(ds18b20) -- read once, to setup chip	     
@@ -245,7 +245,7 @@ function startMqttClient()
                      temperatur=nil
                     end
 		     ds18b20=nil
-		   else	   
+		  else	   
 	             collectgarbage()
                   end
                   if (temperatur ~= nil and temperatur ~= mOldTemp) then
