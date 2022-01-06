@@ -236,7 +236,7 @@ function startMqttClient()
                  mMqttClient:publish(mqttPrefix .. "/brightness", tostring(briPer), 0, 0)
                  loldBrightness = briPer
                 else
-                  if ((t ~= nil) and (heapusage > 11900)) then
+                  if ((t ~= nil) and (heapusage > 12000)) then
 		     local ds18b20=require("ds18b20_diet")
 		     ds18b20.setup(2) -- GPIO4
 		     readTemp(ds18b20) -- read once, to setup chip	     
