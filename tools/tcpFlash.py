@@ -78,9 +78,8 @@ def main(nodeip, luafile, volatile=None, outfile=None):
                     outfile=luafile
                 else:
                     print "Flashing " + luafile + " as " + outfile
-                sendCmd(s, "file.remove(\"" + outfile +"\");", True)
                 sendCmd(s, "w= file.writeline", True)
-                sendCmd(s, "file.open(\"" + outfile + "\",\"w+\");", True)
+                sendCmd(s, "file.open(\"temp.lua\",\"w+\");", True)
             else:
                 print "Executing " + luafile + " on nodemcu"
 
@@ -114,6 +113,11 @@ def main(nodeip, luafile, volatile=None, outfile=None):
                 if (not sendCmd(s, "file.close();")):
                     print "Cannot close the file"
                     sys.exit(4)
+
+                sendCmd(s, "file.remove(\"" + outfile +"\");", True)
+                if (not sendCmd(s, "file.rename(\"temp.lua\",\""+ outfile + "\")")):
+                    print "Cannot move temporary file to " + outfile
+
                 
                 # Check if the file exists:
                 if (not sendRecv(s, "=file.exists(\"" + outfile + "\")", "true")):
