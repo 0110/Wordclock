@@ -224,6 +224,7 @@ function startMqttClient()
 	local loldBrightness=0
     	mOldTemp=0
 	local lMqttTimer = tmr.create()
+	local tempCounter=0
 	-- Check every 12 seconds
 	lMqttTimer:register(12321, tmr.ALARM_AUTO, function (kTemp)
             if (mMqttConnected) then
@@ -236,7 +237,7 @@ function startMqttClient()
                  mMqttClient:publish(mqttPrefix .. "/brightness", tostring(briPer), 0, 0)
                  loldBrightness = briPer
                 else
-                  if ((t ~= nil) and (heapusage > 12000)) then
+                  if ((t ~= nil) and (heapusage > 11900) and (tempCounter > 10)) then
 		     local ds18b20=require("ds18b20_diet")
 		     ds18b20.setup(2) -- GPIO4
 		     readTemp(ds18b20) -- read once, to setup chip	     
@@ -245,14 +246,17 @@ function startMqttClient()
                      temperatur=nil
                     end
 		     ds18b20=nil
-		  else	   
-	             collectgarbage()
-                  end
+		     tempCounter = 0
+		  else
+		     tempCounter = tempCounter + 1
+	          end	   
+	          collectgarbage()
                   if (temperatur ~= nil and temperatur ~= mOldTemp) then
                     mOldTemp = temperatur
                     mMqttClient:publish(mqttPrefix .. "/temp", tostring(temperatur/100)..".".. tostring(temperatur%100), 0, 0)
                   else
                     mMqttClient:publish(mqttPrefix .. "/heap", tostring(heapusage), 0, 0)
+	            collectgarbage()
                   end
                 end
                 heapusage=nil
