@@ -6,8 +6,6 @@ tcol=nil
 -- Mqtt variable
 local mMqttClient=nil
 local mMqttConnected = false
--- Read Temp
-local mOldTemp=nil
 
 function handleSingleCommand(client, topic, data)
     if (data == "ON") then
@@ -222,7 +220,6 @@ function startMqttClient()
 	end)
     	lSetupTimer:start()
 	local loldBrightness=0
-    	mOldTemp=0
 	local lMqttTimer = tmr.create()
 	local tempCounter=0
 	-- Check every 12 seconds
@@ -253,8 +250,7 @@ function startMqttClient()
 		     tempCounter = tempCounter + 1
 	          end	   
 	          collectgarbage()
-                  if (temperatur ~= nil and temperatur ~= mOldTemp) then
-                    mOldTemp = temperatur
+                  if (temperatur ~= nil) then
                     mMqttClient:publish(mqttPrefix .. "/temp", tostring(temperatur/100)..".".. tostring(temperatur%100), 0, 0)
                   else
                     mMqttClient:publish(mqttPrefix .. "/heap", tostring(heapusage), 0, 0)
