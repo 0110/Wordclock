@@ -226,7 +226,7 @@ function startMqttClient()
 	local lMqttTimer = tmr.create()
 	local tempCounter=0
 	-- Check every 12 seconds
-	lMqttTimer:register(12321, tmr.ALARM_AUTO, function (kTemp)
+	lMqttTimer:register(6321, tmr.ALARM_AUTO, function (kTemp)
             if (mMqttConnected) then
             	-- Cleanup the initialization stuff
             	lSetupTimer=nil
