@@ -246,6 +246,8 @@ function startMqttClient()
                      temperatur=nil
                     end
 		     ds18b20=nil
+		     ds18b20_diet=nil
+		     package.loaded["ds18b20_diet"]=nil
 		     tempCounter = 0
 		  else
 		     tempCounter = tempCounter + 1
