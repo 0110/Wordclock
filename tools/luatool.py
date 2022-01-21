@@ -16,6 +16,9 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, write to the Free Software Foundation, Inc., 51 Franklin
 # Street, Fifth Floor, Boston, MA 02110-1301 USA.
+# version 0.6.4 based version
+# Version 0.8.0 upgraded to python3
+
 
 import sys
 import serial
@@ -25,7 +28,7 @@ import argparse
 from os.path import basename
 
 
-version = "0.6.4"
+version = "0.8.0"
 
 
 class TransportError(Exception):
@@ -51,15 +54,19 @@ class AbstractTransport:
     def writer(self, data):
         self.writeln("file.writeline([==[" + data + "]==])\r")
 
+    def execute(self, data):
+        self.writeln(data + "\r")
+
     def performcheck(self, expected):
         line = ''
         char = ''
         i = -1
-        while char != chr(62):  # '>'
+        while (len(char) == 0) or (ord(char) != 62):  # '>'
             char = self.read(1)
+            #print(ord(char))
             if char == '':
                 raise Exception('No proper answer from MCU')
-            if char == chr(13) or char == chr(10):  # LF or CR
+            if ord(char) == 13 or ord(char) == 10:  # LF or CR
                 if line != '':
                     line = line.strip()
                     if line+'\r' == expected:
@@ -78,8 +85,8 @@ class AbstractTransport:
                             raise Exception('Error sending data to MCU\r\n\r\n')
                     line = ''
             else:
-                line += char
-                if char == chr(62) and expected[i] == char:
+                line += char.decode("utf-8")
+                if ord(char) == 62 and expected[i] == char:
                     char = ''
                 i += 1
 
@@ -105,7 +112,7 @@ class SerialTransport(AbstractTransport):
         if len(data) > 0:
             sys.stdout.write("\r\n->")
             sys.stdout.write(data.split("\r")[0])
-        self.serial.write(data)
+        self.serial.write(str.encode(data))
         sleep(self.delay)
         if check > 0:
             self.performcheck(data)
@@ -142,7 +149,7 @@ class TcpSocketTransport(AbstractTransport):
         if len(data) > 0:
             sys.stdout.write("\r\n->")
             sys.stdout.write(data.split("\r")[0])
-        self.socket.sendall(data)
+        self.socket.sendall(str.encode(data))
         if check > 0:
             self.performcheck(data)
         else:
@@ -186,6 +193,7 @@ if __name__ == '__main__':
     parser.add_argument('-e', '--echo',    action='store_true',    help='Echo output of MCU until script is terminated.')
     parser.add_argument('--delay',         default=0.3,            help='Delay in seconds between each write.', type=float)
     parser.add_argument('--delete',        default=None,           help='Delete a lua/lc file from device.')
+    parser.add_argument('--volatile',      action='store_true',    help='Volatile (nothing stored on ESP)')
     parser.add_argument('--ip',            default=None,           help='Connect to a telnet server on the device (--ip IP[:port])')
     args = parser.parse_args()
 
@@ -197,7 +205,7 @@ if __name__ == '__main__':
             char = transport.read(1)
             if char == '' or char == chr(62):
                 break
-            sys.stdout.write(char)
+            sys.stdout.write(str.encode(char))
         sys.exit(0)
 
     if args.id:
@@ -208,7 +216,7 @@ if __name__ == '__main__':
             if char == '' or char == chr(62):
                 break
             if char.isdigit():
-                id += char
+                id += char.decode("utf-8")
         print("\n"+id)
         sys.exit(0)
 
@@ -218,10 +226,10 @@ if __name__ == '__main__':
         fn = ""
         while True:
             char = transport.read(1)
-            if char == '' or char == chr(62):
+            if char == '' or len(char) == 0 or ord(char) == 62:
                 break
             if char not in ['\r', '\n']:
-                fn += char
+                fn += str(char)
             else:
                 if fn:
                     file_list.append(fn.strip())
@@ -266,7 +274,7 @@ if __name__ == '__main__':
         sys.stderr.write("Upload starting\r\n")
 
     # remove existing file on device
-    if args.append==False:
+    if args.append==False and not args.volatile:
         if args.verbose:
             sys.stderr.write("Stage 1. Deleting old file from flash memory")
         transport.writeln("file.open(\"" + args.dest + "\", \"w\")\r")
@@ -280,23 +288,31 @@ if __name__ == '__main__':
     # read source file line by line and write to device
     if args.verbose:
         sys.stderr.write("\r\nStage 2. Creating file in flash memory and write first line")
-    if args.append:
-        transport.writeln("file.open(\"" + args.dest + "\", \"a+\")\r")
+    if not args.volatile:
+        if args.append:
+            transport.writeln("file.open(\"" + args.dest + "\", \"a+\")\r")
+        else:
+            transport.writeln("file.open(\"" + args.dest + "\", \"w+\")\r")
     else:
-        transport.writeln("file.open(\"" + args.dest + "\", \"w+\")\r")
+        if args.verbose:
+            sys.stderr.write("\r\nStage 2. Directly execute the script...")
     line = f.readline()
     if args.verbose:
         sys.stderr.write("\r\nStage 3. Start writing data to flash memory...")
     while line != '':
-        transport.writer(line.strip())
+        if args.volatile:
+            transport.execute(line.strip())
+        else:
+            transport.writer(line.strip())
         line = f.readline()
 
     # close both files
     f.close()
     if args.verbose:
         sys.stderr.write("\r\nStage 4. Flush data and closing file")
-    transport.writeln("file.flush()\r")
-    transport.writeln("file.close()\r")
+    if not args.volatile:
+        transport.writeln("file.flush()\r")
+        transport.writeln("file.close()\r")
 
     # compile?
     if args.compile:
@@ -315,7 +331,8 @@ if __name__ == '__main__':
         if args.verbose:
             sys.stderr.write("\r\nEchoing MCU output, press Ctrl-C to exit")
         while True:
-            sys.stdout.write(transport.read(1))
+            data = transport.read(1)
+            sys.stdout.write( data.decode("ascii") )
 
     # close serial port
     transport.close()

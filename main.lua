@@ -1,93 +1,75 @@
 -- Main Module
-
-function startSetupMode()
-    tmr.stop(0)
-    tmr.stop(1)
-    -- start the webserver module 
-    mydofile("webserver")
-    
-    wifi.setmode(wifi.SOFTAP)
-    cfg={}
-    cfg.ssid="wordclock"
-    cfg.pwd="wordclock"
-    wifi.ap.config(cfg)
-
-    -- Write the buffer to the LEDs
-    local color=string.char(0,128,0)
-    local white=string.char(0,0,0)
-    local ledBuf= white:rep(6) .. color .. white:rep(7) .. color:rep(3) .. white:rep(44) .. color:rep(3) .. white:rep(50)
-    ws2812.write(ledBuf)
-    color=nil
-    white=nil
-    ledBuf=nil
-    
-    print("Waiting in access point >wordclock< for Clients")
-    print("Please visit 192.168.4.1")
-    startWebServer()
-    collectgarbage()
-end
-
+mlt = tmr.create() -- Main loop timer
+rowbgColor= {}
+-- Buffer of the clock
+rgbBuffer = ws2812.newBuffer(114, 3) 
+-- 110 Character plus one LED for each minute, 
+-- that cannot be displayed, as the clock as only a resolution of 5 minutes
 
 function syncTimeFromInternet()
---ptbtime1.ptb.de
+  if (syncRunning == nil) then
+    syncRunning=true
     sntp.sync(sntpserverhostname,
      function(sec,usec,server)
-      print('sync', sec, usec, server)
-      displayTime()
+      syncRunning=nil
      end,
      function()
-       print('failed!')
+       print('NTP failed!')
+       syncRunning=nil
      end
    )
+  end
 end
-briPercent = 50
+
 function displayTime()
+    collectgarbage()
      local sec, usec = rtctime.get()
      -- Handle lazy programmer:
      if (timezoneoffset == nil) then
         timezoneoffset=0
      end
-     local time = getTime(sec, timezoneoffset)
-     local words = display_timestat(time.hour, time.minute)
-     if ((dim ~= nil) and (dim == "on")) then
-        words.briPercent=briPercent
-     else
-        words.briPercent=nil
+     mydofile("timecore")
+     if (tc == nil) then
+     	return
      end
-     dp = dofile("displayword.lc")
-     if (dp ~= nil) then
-        ledBuf = dp.generateLEDs(words, color, color1, color2, color3, color4)
-        print("Local time : " .. time.year .. "-" .. time.month .. "-" .. time.day .. " " .. time.hour .. ":" .. time.minute .. ":" .. time.second .. " char: " .. tostring(displayword.data.drawnCharacters))
+     local time = tc.getTime(sec, timezoneoffset)
+     tc = nil
+     collectgarbage()
+     mydofile("wordclock")
+     if (wc ~= nil) then
+       words = wc.timestat(time.hour, time.minute)
+       if ((dim ~= nil) and (dim == "on")) then
+        words.briPer=briPer
+        if (words.briPer ~= nil and words.briPer < 3) then
+          words.briPer=3
+        end
+       else
+        words.briPer=nil
+       end
      end
-     dp = nil
-     if (ledBuf ~= nil) then
-     --if lines 4 to 6 are inverted due to hardware-fuckup, unfuck it here
-	  if ((inv46 ~= nil) and (inv46 == "on")) then
-		  tempstring = ledBuf:sub(1,99) -- first 33 leds
-		  rowend = {44,55,66}
-		  for _, startled  in ipairs(rowend) do
-		      for i = 0,10 do
-			      tempstring = tempstring .. ledBuf:sub((startled-i)*3-2,(startled-i)*3)
-		      end
-        end		  
-	     tempstring = tempstring .. ledBuf:sub((67*3)-2,ledBuf:len())
-     	  ws2812.write(tempstring)
-		  tempstring=nil	
-	  else
-		  ws2812.write(ledBuf)
-		  ledBuf=nil
-	  end
-	end
-     -- Used for debugging
-     if (clockdebug ~= nil) then
-         for key,value in pairs(words) do 
-            if (value > 0) then
-              print(key,value) 
-            end
-         end
+     wc = nil
+     collectgarbage()
+     print("wc: " .. tostring(node.heap()))
+     mydofile("displayword")
+     if (dw ~= nil) then
+        --if lines 4 to 6 are inverted due to hardware-fuckup, unfuck it here
+        local invertRows=false
+        if ((inv46 ~= nil) and (inv46 == "on")) then
+            invertRows=true
+        end
+        local c = dw.countChars(words)
+        dw.generateLEDs(rgbBuffer, words, colorBg, color, color1, color2, color3, color4, invertRows, c)
      end
+     if ( (tw ~= nil) and (tcol ~= nil) ) then
+	  local c1 = dw.countChars(tw)
+          dw.generateLEDs(rgbBuffer, tw, nil, tcol, nil, nil, nil, nil, invertRows, c1)
+     end
+     dw = nil
+     collectgarbage()
+    
      -- cleanup
-     briPercent=words.briPercent
+     i=nil
+     briPer=words.briPer
      words=nil
      time=nil
      collectgarbage()
@@ -99,106 +81,157 @@ function normalOperation()
         -- Color is defined as GREEN, RED, BLUE
         color=string.char(0,0,250)
     end
-   
-    connect_counter=0
+    print("start: " , node.heap())
+    -------------------------------------------------------------
+    -- Define the main loop
+    local setupCounter=5
+    local alive=0
+    mlt:register(1000, tmr.ALARM_AUTO, function (lt)
+      if (setupCounter > 4) then
+	if (colorBg ~= nil) then
+	  rgbBuffer:fill(string.byte(colorBg,1), string.byte(colorBg,2), string.byte(colorBg,3)) -- disable all LEDs
+	else
+	  rgbBuffer:fill(0,0,0) -- disable all LEDs
+	end
+        syncTimeFromInternet()
+        setupCounter=setupCounter-1
+        alive = 1
+	rgbBuffer:set(19, color) -- N
+	rgbBuffer:set(31, color) -- T
+        if ((inv46 ~= nil) and (inv46 == "on")) then
+	   rgbBuffer:set(45, color) -- P
+        else
+	   rgbBuffer:set(55, color) -- P
+	end
+      elseif (setupCounter > 3) then
+        -- Here the WLAN is found, and something is done
+        mydofile("mqtt")
+	rgbBuffer:fill(0,0,0) -- disable all LEDs
+        if (startMqttClient ~= nil) then
+	 if ((inv46 ~= nil) and (inv46 == "on")) then
+	   rgbBuffer:set(34, color) -- M
+         else
+	   rgbBuffer:set(44, color) -- M
+	 end
+	 rgbBuffer:set(82, color) -- T
+         startMqttClient()
+        else
+	    print("NO Mqtt found")
+	    mydofile("telnet")
+        end
+        setupCounter=setupCounter-1
+      elseif (setupCounter > 2) then
+        if (startTelnetServer ~= nil) then
+	    startTelnetServer()
+        else
+	    displayTime()
+        end
+        setupCounter=setupCounter-1
+      elseif ( (alive % 120) == 0) then
+        -- sync the time every 5 minutes
+      	local heapusage = node.heap()
+      	if (heapusage > 12000) then
+		syncTimeFromInternet()
+	end
+    	heapusage=nil
+        alive = alive + 1
+      else
+       displayTime()
+       alive = alive + 1
+      end
+      if (rgbBuffer ~= nil) then
+	  -- show Mqtt status
+	  if (startMqttClient ~= nil) then
+		if (not	connectedMqtt()) then
+		 rgbBuffer:set(103, 0, 64,0)
+		 -- check every thirty seconds, if reconnecting is necessary
+		 if (((tmr.now() / 1000000) % 100) == 30) then
+		   print("MQTT reconnecting... ")
+		   reConnectMqtt()
+	         end
+		end
+          end
+     	  ws2812.write(rgbBuffer)
+      else
+	  -- set FG to fix value: RED
+	  local color = string.char(255,0,0)
+	  rgbBuffer:fill(0,0,0) -- disable all LEDs
+	  for i=108,110, 1 do rgbBuffer:set(i, color) end
+	  ws2812.write(rgbBuffer)
+	  print("Fallback no time displayed")
+      end
+      collectgarbage()
+      -- Feed the system watchdog.
+      tmr.wdclr()
+    end)
+    
+    -------------------------------------------------------------
+    -- Connect to Wifi
+    local connect_counter=0
     -- Wait to be connect to the WiFi access point. 
-    tmr.alarm(0, 500, 1, function()
+    local wifitimer = tmr.create()
+    wifitimer:register(500, tmr.ALARM_AUTO, function (timer)
       connect_counter=connect_counter+1
       if wifi.sta.status() ~= 5 then
          print(connect_counter ..  "/60 Connecting to AP...")
+         rgbBuffer:fill(0,0,0) -- clear all LEDs
          if (connect_counter % 5 ~= 4) then
             local wlanColor=string.char((connect_counter % 6)*20,(connect_counter % 5)*20,(connect_counter % 3)*20)
-            local space=string.char(0,0,0)
-            local buf=space:rep(6)
             if ((connect_counter % 5) >= 1) then
-                buf = buf .. wlanColor
-            else
-                buf = buf .. space
+		rgbBuffer:set(7, wlanColor)
             end
-            buf = buf .. space:rep(4)
-            buf= buf .. space:rep(3) 
             if ((connect_counter % 5) >= 3) then
-                buf = buf .. wlanColor
-            else
-                buf = buf .. space
+		rgbBuffer:set(15, wlanColor)
             end
             if ((connect_counter % 5) >= 2) then
-                buf = buf .. wlanColor
-            else
-                buf = buf .. space
+		rgbBuffer:set(16, wlanColor)
             end
             if ((connect_counter % 5) >= 0) then
-                buf = buf .. wlanColor
-            else
-                buf = buf .. space
+		rgbBuffer:set(17, wlanColor)
             end
-            buf = buf .. space:rep(100)
-            ws2812.write(buf)
-         else
-           ws2812.write(string.char(0,0,0):rep(114))
          end
+	 ws2812.write(rgbBuffer)
       else
-        tmr.stop(0)
-        print('IP: ',wifi.sta.getip())
-        -- Here the WLAN is found, and something is done
-        print("Solving dependencies")
-        local dependModules = { "timecore" , "wordclock" }
-        for _,mod in pairs(dependModules) do
-            print("Loading " .. mod)
-            mydofile(mod)
-        end
-        
-        tmr.alarm(2, 500, 0 ,function()
-            syncTimeFromInternet()
-        end)
-        tmr.alarm(3, 2000, 0 ,function()
-            print("Start webserver...")
-            mydofile("webserver")
-            startWebServer()
-        end)
-        displayTime()
-        -- Start the time Thread
-        tmr.alarm(1, 10000, 1 ,function()
-             displayTime()
-             collectgarbage()
-         end)
-        
-      end
-      -- when no wifi available, open an accesspoint and ask the user
-      if (connect_counter >= 60) then -- 300 is 30 sec in 100ms cycle
-        startSetupMode()
+        wifitimer:unregister()
+        wifitimer=nil
+        connect_counter=nil
+        print('IP: ',wifi.sta.getip(), " heap: ", node.heap())
+         rgbBuffer:fill(0,0,0) -- clear all LEDs
+	 rgbBuffer:set(13, color) -- I
+         if ((inv46 ~= nil) and (inv46 == "on")) then
+	   rgbBuffer:set(45, color) -- P
+         else
+	   rgbBuffer:set(55, color) -- P
+	 end
+	 ws2812.write(rgbBuffer)
+        mlt:start()
       end
     end)
-    
+    wifitimer:start()
     
 end
 
 -------------------main program -----------------------------
+briPer = 50   -- Default brightness is set to 50%
 ws2812.init() -- WS2812 LEDs initialized on GPIO2
 
-if ( file.open("config.lua") ) then
-    --- Normal operation
-    wifi.setmode(wifi.STATION)
-    dofile("config.lua")
-    normalOperation()
-else
-    -- Logic for inital setup
-    startSetupMode()
-end
 ----------- button ---------
 gpio.mode(3, gpio.INPUT)
-btnCounter=0
--- Start the time Thread
-tmr.alarm(4, 500, 1 ,function()
+local btnCounter=0
+-- Start the time Thread handling the button
+local btntimer = tmr.create()
+btntimer:register(5000, tmr.ALARM_AUTO, function (t)
      if (gpio.read(3) == 0) then
-        tmr.stop(1) -- stop the LED thread
+	mlt:unregister()
         print("Button pressed " .. tostring(btnCounter))
         btnCounter = btnCounter + 5
-        local ledBuf= string.char(128,0,0):rep(btnCounter) .. string.char(0,0,0):rep(110 - btnCounter)
-        ws2812.write(ledBuf)
+	for i=1,btnCounter do rgbBuffer:set(i, 128, 0, 0) end
+	ws2812.write(rgbBuffer)
         if (btnCounter >= 110) then
             file.remove("config.lua")
+            file.remove("config.lc")
             node.restart()
         end
      end
 end)
+btntimer:start()

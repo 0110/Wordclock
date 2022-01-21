@@ -1,8 +1,7 @@
---TODO:
-configFile="config.lua"
-
-httpSending=false
-sentBytes=0
+-- Webserver
+local configFile="config.lua"
+local httpSending=false
+local sentBytes=0
 function sendPage(conn, nameOfFile, replaceMap)
   collectgarbage()
   print("Sending " .. nameOfFile .. " " .. sentBytes .. "B already; " .. node.heap() .. "B in heap")
@@ -65,43 +64,26 @@ function sendPage(conn, nameOfFile, replaceMap)
     --reset amount of sent bytes, as we reached the end
     sentBytes=0
     -- send the rest
-    conn:send(buf)
-    print("Sent rest")
+    if (string.len(buf) > 0) then
+        conn:send(buf)
+        print("Sent rest")
+    end
   end
 end
 
 function fillDynamicMap()    
     replaceMap = {}
     ssid, _ = wifi.sta.getconfig()
-
-    if (ssid == nil) then
-        ssid="Not set"
-    end
-    if (sntpserverhostname == nil) then
-        sntpserverhostname="ptbtime1.ptb.de"
-    end
-    if (timezoneoffset == nil) then
-        timezoneoffset=1
-    end
+    if (ssid == nil) then return replaceMap end
+    if (sntpserverhostname == nil) then sntpserverhostname="ptbtime1.ptb.de" end
+    if (timezoneoffset == nil) then timezoneoffset=1 end
     -- Set the default color, if nothing is set
-    if (color == nil) then
-        color=string.char(0,0,250)
-    end
-    if (color1 == nil) then
-        color1=color
-    end
-    if (color2 == nil) then
-        color2=color
-    end
-    if (color3 == nil) then
-        color3=color
-    end
-    if (color4 == nil) then
-        color4=color
-    end
-    if (colorBg == nil) then
-        colorBg=string.char(0,0,0) -- black is the default background color
-    end
+    if (color == nil) then color=string.char(0,0,250) end
+    if (color1 == nil) then color1=color end
+    if (color2 == nil) then color2=color end
+    if (color3 == nil) then color3=color end
+    if (color4 == nil) then color4=color end
+    if (colorBg == nil) then colorBg=string.char(0,0,0) end
     local hexColor = "#" .. string.format("%02x",string.byte(color,2)) .. string.format("%02x",string.byte(color,1)) .. string.format("%02x",string.byte(color,3))
     local hexColor1 = "#" .. string.format("%02x",string.byte(color1,2)) .. string.format("%02x",string.byte(color1,1)) .. string.format("%02x",string.byte(color1,3))
     local hexColor2 = "#" .. string.format("%02x",string.byte(color2,2)) .. string.format("%02x",string.byte(color2,1)) .. string.format("%02x",string.byte(color2,3))
@@ -125,23 +107,6 @@ function fillDynamicMap()
     return replaceMap   
 end
 
-function stopWordclock()
-    print("Stop all Wordclock")
-    -- Stop all
-    for i=0,5 do tmr.stop(i) end
-    -- unload all other functions 
-    -- grep function *.lua | grep -v webserver | grep -v init.lua | grep -v main.lua | cut -f 2 -d ':' | grep "^function" | sed "s/function //g" | grep -o "^[a-zA-Z0-9\_]*"
-    updateColor = nil
-    drawLEDs = nil
-    round = nil
-    generateLEDs = nil
-    isSummerTime = nil
-    getUTCtime = nil
-    getTime = nil
-    display_timestat = nil
-    collectgarbage()
-end
-
 function startWebServer()
  srv=net.createServer(net.TCP)
  srv:listen(80,function(conn)
@@ -152,20 +117,10 @@ function startWebServer()
    end
    if (payload:find("GET /") ~= nil) then
     httpSending=true
-    stopWordclock()
+   if (color == nil) then
+        color=string.char(0,128,0)
+    end
     ws2812.write(string.char(0,0,0):rep(56) .. color:rep(2) .. string.char(0,0,0):rep(4) .. color:rep(2) .. string.char(0,0,0):rep(48))
-    -- Start Time after 3 minute
-    tmr.alarm(5, 180000, 0 ,function()
-        dependModules = { "timecore" , "wordclock", "displayword" }
-        for _,mod in pairs(dependModules) do
-            print("Loading " .. mod)
-            mydofile(mod)
-        end
-        -- Start the time Thread again
-        tmr.alarm(1, 20000, 1 ,function()
-             displayTime()
-         end)
-    end)
     if (sendPage ~= nil) then
        print("Sending webpage.html (" .. tostring(node.heap()) .. "B free) ...")
        -- Load the sendPagewebcontent
@@ -280,18 +235,24 @@ function startWebServer()
         print("Rename config")
         if (file.rename(configFile .. ".new", configFile)) then
             print("Successfully")
-            tmr.alarm(3, 20, 0 ,function()
+	    local mytimer = tmr.create()
+	    mytimer:register(50, tmr.ALARM_SINGLE, function (t)
                 replaceMap=fillDynamicMap()
                 replaceMap["$ADDITIONAL_LINE"]="<h2><font color=\"green\">New configuration saved</font></h2>"
                 print("Send success to client")
                 sendPage(conn, "webpage.html", replaceMap)
+		t:unregister()
             end)
+	    mytimer:start()
         else
-            tmr.alarm(3, 20, 0 ,function()
+	    local mytimer = tmr.create()
+	    mytimer:register(50, tmr.ALARM_SINGLE, function (t)
                 replaceMap=fillDynamicMap()
                 replaceMap["$ADDITIONAL_LINE"]="<h2><font color=\"red\">ERROR</font></h2>"
                 sendPage(conn, "webpage.html", replaceMap)
+		t:unregister()
             end)
+	    mytimer:start()
         end
   else
       replaceMap=fillDynamicMap()
@@ -329,4 +290,26 @@ function startWebServer()
  end)
 
 end
---FileView done.
+
+
+-- start the webserver module 
+collectgarbage()
+wifi.setmode(wifi.SOFTAP)
+cfg={}
+cfg.ssid="wordclock"
+cfg.pwd="wordclock"
+wifi.ap.config(cfg)
+
+-- Write the buffer to the LEDs
+local color=string.char(0,128,0)
+local white=string.char(0,0,0)
+local ledBuf= white:rep(6) .. color .. white:rep(7) .. color:rep(3) .. white:rep(44) .. color:rep(3) .. white:rep(50)
+ws2812.write(ledBuf)
+color=nil
+white=nil
+ledBuf=nil
+
+print("Waiting in access point >wordclock< for Clients")
+print("Please visit 192.168.4.1")
+startWebServer()
+collectgarbage()

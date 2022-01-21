@@ -288,6 +288,10 @@ public class WS2812Layout extends JFrame {
 			this.setForeground(new Color(red, green, blue));
 			this.repaint();
 		}
+		
+		public Color getColor() {
+			return this.getForeground();
+		}
 
 		@Override
 		public String toString() {
@@ -316,6 +320,41 @@ public class WS2812Layout extends JFrame {
 			if ((i < mElements.length) && (j < mElements[i].length) && (mElements[i][j] != null)) {
 				Element curlbl = mElements[i][j];
 				curlbl.setColor(r, g, b);
+			}
+		}
+	}
+	
+	public Element getLED(int index) {
+		if (mElements != null) {
+			int i = (index / mColumn);
+			int j = (index % mColumn);
+			if (i % 2 == 1) {
+				j = (mColumn-1) - j;
+			}
+			if (i < 0 || j < 0) {
+				System.err.println("LED index" + index + " results in " + i + "x" + j + " coordinate");
+				return null;
+			}
+			
+			if ((i < mElements.length) && (j < mElements[i].length) && (mElements[i][j] != null)) {
+				return mElements[i][j];
+			} else {
+				return null;
+			}
+		} else {
+			return null;
+		}
+	}
+	
+	public void fillLEDs(int r, int g, int b) {
+		if (mElements != null) {
+			for(int i=0;(i < mElements.length); i++) {
+				for (int j=0; (j < mElements[i].length); j++) {
+					if  (mElements[i][j] != null) {
+						Element curlbl = mElements[i][j];
+						curlbl.setColor(r, g, b);
+					}
+				}
 			}
 		}
 	}

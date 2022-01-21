@@ -26,15 +26,19 @@ public class DoFileFunction extends OneArgFunction {
     public LuaValue call(LuaValue luaFilename) {
         String filename = luaFilename.checkjstring();
         
-        //System.out.println("[Nodemcu] dofile " + filename);
-        
         File f = new File(workingDir.getAbsolutePath() + File.separator + filename);
-        
-        if (f.exists()) {
-            LuaValue chunk = this.globals.loadfile(f.getAbsolutePath());
-            return chunk.call();
-        } else {
-            return LuaValue.valueOf(false);
+        try {
+	        if (f.exists()) {
+	            LuaValue chunk = this.globals.loadfile(f.getAbsolutePath());
+	            chunk.call();
+	            return LuaValue.valueOf(true);
+	        } else {
+	            return LuaValue.valueOf(false);
+	        }
+        } catch (Exception e) {
+        	System.err.println("Cannot load " + f.getName());
+        	e.printStackTrace();
+        	return LuaValue.valueOf(false);
         }
     }
 

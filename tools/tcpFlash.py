@@ -43,13 +43,13 @@ def sendCmd(s, message, cleaningEnter=False):
         print "ERROR, received : " + reply
         return False
 
-def main(nodeip, luafile, volatile=None):
+def main(nodeip, luafile, volatile=None, outfile=None):
     if ( not os.path.isfile(luafile) ):
         print "The file " + luafile + " is not available"
     else:
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect((nodeip, 80))
+            s.connect((nodeip, 23))
 	    time.sleep(0.050)
             s.sendall("\n")
             # Receive the hello Message of answer of the ESP
@@ -71,14 +71,15 @@ def main(nodeip, luafile, volatile=None):
                 print "NOT communicating with an ESP8266 running LUA (nodemcu) firmware"
                 s.close()
                 sys.exit(3)
-    
-            sendCmd(s, "for i=0,5 do tmr.stop(i) end")
-            sendCmd(s, "collectgarbage()")
+             
             if (volatile is None):
-                print "Flashing " + luafile
-                sendCmd(s, "file.remove(\"" + luafile+"\");", True)
+                if (outfile is None):
+                    print "Flashing " + luafile
+                    outfile=luafile
+                else:
+                    print "Flashing " + luafile + " as " + outfile
                 sendCmd(s, "w= file.writeline", True)
-                sendCmd(s, "file.open(\"" + luafile + "\",\"w+\");", True)
+                sendCmd(s, "file.open(\"temp.lua\",\"w+\");", True)
             else:
                 print "Executing " + luafile + " on nodemcu"
 
@@ -94,7 +95,7 @@ def main(nodeip, luafile, volatile=None):
 			print "add a space at the end"
 
                     if (volatile is None):
-                        if (not sendCmd(s, "w([[" + l + "]]);")):
+                        if (not sendCmd(s, "w([==[" + l + "]==]);")):
                             print "Cannot write line " + str(i)
                             s.close()
                             sys.exit(4)
@@ -112,13 +113,18 @@ def main(nodeip, luafile, volatile=None):
                 if (not sendCmd(s, "file.close();")):
                     print "Cannot close the file"
                     sys.exit(4)
+
+                sendCmd(s, "file.remove(\"" + outfile +"\");", True)
+                if (not sendCmd(s, "file.rename(\"temp.lua\",\""+ outfile + "\")")):
+                    print "Cannot move temporary file to " + outfile
+
                 
                 # Check if the file exists:
-                if (not sendRecv(s, "=file.exists(\"" + luafile + "\")", "true")):
-                    print("Cannot send " + luafile + " to the ESP")
+                if (not sendRecv(s, "=file.exists(\"" + outfile + "\")", "true")):
+                    print("Cannot send " + outfile + " to the ESP")
                     sys.exit(4)
                 else:
-                    print("Updated " + luafile + " successfully")
+                    print("Updated " + outfile + " successfully")
             else:
                 print("Send " + luafile + " successfully")
 
@@ -133,12 +139,16 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-t', '--target', help='IP address or dns of the ESP to flash')
     parser.add_argument('-f', '--file', help='LUA file, that should be updated')
+    parser.add_argument('-o', '--outfile', help='LUA file name on the microcontroller (default: same name as on host)')
     parser.add_argument('-v', '--volatile', help='File is executed at the commandline', action='store_const', const=1)
 
     args = parser.parse_args()
-
-    if (args.target and args.file and args.volatile):
-        main(args.target, args.file, args.volatile)
+    if (args.target and args.file and args.volatile and args.outfile):
+        main(args.target, args.file, args.volatile, args.outfile)
+    elif (args.target and args.file and args.outfile):
+         main(args.target, args.file, None, args.outfile)
+    elif (args.target and args.file and args.volatile):
+       main(args.target, args.file, args.volatile)
     elif (args.target and args.file):
         main(args.target, args.file)
     else:

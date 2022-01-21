@@ -1,21 +1,25 @@
 -- Revese engeeniered code of display_wc_ger.c by Vlad Tepesch
--- See https://www.mikrocontroller.net/articles/Word_Clock_Variante_1#Download
+-- See https://www.mikrocontroller.net/articles/Word_cl_Variante_1#Download
+local M
+do
 
--- @fn display_timestat
+-- @fn wc_timestat
 -- Return the leds to use the granuality is 5 minutes
 -- @param hours the current hours (0-23)
 -- @param minutes the current minute (0-59)
 -- @param longmode (optional parameter) 0: no long mode, 1: long mode (itis will be set)
-function display_timestat(hours, minutes, longmode)
+local timestat=function (hours, minutes, longmode)
  if (longmode == nil) then
    longmode=0
  end
 
  -- generate an empty return type
- local ret = { it=0, is=0, fiveMin=0, tenMin=0, after=0, before=0, threeHour=0, quater=0, threequater=0, half=0, s=0, 
-               one=0, oneLong=0, two=0, three=0, four=0, five=0, six=0, seven=0, eight=0, nine=0, ten=0, eleven=0, twelve=0,
-               twenty=0, 
-               clock=0, sr_nc=0, min1=0, min2=0, min3=0, min4=0 }
+ -- Values: it, is, 5 minutes, 10 minutes, afer, before, three hour, quarter, dreiviertel, half, s
+ --  hours: one, one Long, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve
+ -- Special ones: twenty, clock, minute 1 flag, minute 2 flag, minute 3 flag, minute 4 flag
+ local ret = { it=0, is=0, m5=0, m10=0, ha=0, hb=0, h3=0, hq=0, h3q=0, half=0, s=0, 
+               h1=0, h1l=0, h2=0, h3=0, h4=0, h5=0, h6=0, h7=0, h8=0, h9=0, h10=0, h11=0, h12=0,
+               m20=0, cl=0, m1=0, m2=0, m3=0, m4=0 }
 
  -- return black screen if there is no real time given
  if (hours == nil or minutes == nil) then
@@ -38,61 +42,61 @@ function display_timestat(hours, minutes, longmode)
  -- Handle minutes
  if (minutes > 0) then
    if (minutes==1) then
-    ret.fiveMin=1
-    ret.after=1
+    ret.m5=1
+    ret.ha=1
    elseif (minutes==2) then
-    ret.tenMin=1
-    ret.after=1
+    ret.m10=1
+    ret.ha=1
    elseif (minutes==3) then
-    ret.quater=1
-    ret.after=1
+    ret.hq=1
+    ret.ha=1
    elseif (minutes==4) then
-    ret.twenty=1
-    ret.after=1
+    ret.m20=1
+    ret.ha=1
    elseif (minutes==5) then
-    ret.fiveMin=1
+    ret.m5=1
     ret.half=1
-    ret.before=1
+    ret.hb=1
    elseif (minutes==6) then 
     ret.half=1
    elseif (minutes==7) then 
-    ret.fiveMin=1
+    ret.m5=1
     ret.half=1
-    ret.after=1
+    ret.ha=1
    elseif (minutes==8) then 
-    ret.twenty=1
-    ret.before=1
+    ret.m20=1
+    ret.hb=1
    elseif (minutes==9) then
     -- Hande if three quater or quater before is displayed
-    if (threequater ~= nil) then
-        ret.threequater=1
+    if ((threequater ~= nil) and (threequater==true or threequater=="on")) then
+        ret.h3q=1
     else
-        ret.quater = 1
-        ret.before = 1
+        ret.hq = 1
+        ret.hb = 1
     end
    elseif (minutes==10) then 
-    ret.tenMin=1
-    ret.before=1
+    ret.m10=1
+    ret.hb=1
    elseif (minutes==11) then 
-    ret.fiveMin=1
-    ret.before=1
+    ret.m5=1
+    ret.hb=1
    end
 
    if (minutes > 4) then
     hours=hours+1
    end
  else
-   ret.clock=1
+   ret.cl=1
  end
- -- Display the minutes as as extra gimmic on min1 to min 4 to display the cut number  
+ -- Display the minutes as as extra gimmic on m1 to min 4 to display the cut number  
  if (minutesLeds==1) then
-  ret.min1=1
+  ret.m1=1
  elseif (minutesLeds==2) then
-  ret.min2=1
+  ret.m2=1
  elseif (minutesLeds==3) then
-  ret.min3=1
+  ret.m3=1
  elseif (minutesLeds==4) then
-  ret.min4=1
+  ret.m4=1
  end
 
  -- handle hours
@@ -106,33 +110,90 @@ function display_timestat(hours, minutes, longmode)
  
  if (hours == 1) then
   if ((ret.it == 1) and (ret.half == 0) ) then
-    ret.one=1
+    ret.h1=1
   else
-    ret.oneLong=1
+    ret.h1l=1
   end
  elseif (hours == 2) then
-  ret.two=1
+  ret.h2=1
  elseif (hours == 3) then
-  ret.three=1
+  ret.h3=1
  elseif (hours == 4) then
-  ret.four=1
+  ret.h4=1
  elseif (hours == 5) then
-  ret.five=1
+  ret.h5=1
  elseif (hours == 6) then
-  ret.six=1
+  ret.h6=1
  elseif (hours == 7) then
-  ret.seven=1 
+  ret.h7=1 
  elseif (hours == 8) then
-  ret.eight=1 
+  ret.h8=1 
  elseif (hours == 9) then
-  ret.nine=1 
+  ret.h9=1 
  elseif (hours == 10) then
-  ret.ten=1  
+  ret.h10=1  
  elseif (hours == 11) then
-  ret.eleven=1 
+  ret.h11=1 
  elseif (hours == 12) then
-  ret.twelve=1 
+  ret.h12=1 
  end
  collectgarbage()
  return ret
 end
+
+
+-- Logic to display Mqtt
+function temp(dw, rgbBuffer, invertRows, dispTemp)
+if (dispTemp ~= nil) then
+   -- Values: it, is, 5 minutes, 10 minutes, afer, before, three hour, quarter, dreiviertel, half, s
+   --  hours: one, one Long, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve
+   -- Special ones: twenty, clock, minute 1 flag, minute 2 flag, minute 3 flag, minute 4 flag
+   local ret = { it=0, is=0, m5=0, m10=0, ha=0, hb=0, h3=0, hq=0, h3q=0, half=0, s=0, 
+               h1=0, h1l=0, h2=0, h3=0, h4=0, h5=0, h6=0, h7=0, h8=0, h9=0, h10=0, h11=0, h12=0,
+               m20=0, cl=0, m1=0, m2=0, m3=0, m4=0 }
+
+   print("Mqtt Display of temperature: " .. tostring(dispTemp) )
+   if (dispTemp == 1) or (dispTemp == -1) then
+     ret.h1=1
+   elseif (dispTemp == 2) or (dispTemp == -2) then
+     ret.h2=1
+   elseif (dispTemp == 3) or (dispTemp == -3) then
+     ret.h3=1
+   elseif (dispTemp == 4) or (dispTemp == -4) then
+     ret.h4=1
+   elseif (dispTemp == 5) or (dispTemp == -5) then
+     ret.h5=1
+   elseif (dispTemp == 6) or (dispTemp == -6) then
+     ret.h6=1
+   elseif (dispTemp == 7) or (dispTemp == -7) then
+     ret.h7=1
+   elseif (dispTemp == 8) or (dispTemp == -8) then
+     ret.h8=1
+   elseif (dispTemp == 9) or (dispTemp == -9) then
+     ret.h9=1
+   elseif (dispTemp == 10) or (dispTemp == -10) then
+     ret.h10=1
+   elseif (dispTemp == 11) or (dispTemp == -11) then
+     ret.h11=1
+   elseif (dispTemp == 12) or (dispTemp == -12) then
+     ret.h12=1
+   else
+       -- over or under temperature
+   end
+   local col=string.char(128,0,0) -- red; positive degrees
+   if (dispTemp < 0) then
+    col=string.char(0,0,128) -- blue; negative degrees
+   end
+   return ret, col
+else
+   return nil, nil
+end
+
+end
+-- Pack everything into a module
+M = {
+    timestat = timestat,
+    temp = temp
+}
+end
+wc = M

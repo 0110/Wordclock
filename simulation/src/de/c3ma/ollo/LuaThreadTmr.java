@@ -18,7 +18,7 @@ public class LuaThreadTmr extends Thread {
 
     private LuaValue code;
 
-    private final int delay;
+    private int delay;
 
     private final int timerNumber;
     
@@ -28,7 +28,7 @@ public class LuaThreadTmr extends Thread {
         this.delay = delay;
         this.timerNumber = timerNumber;
     }
-
+    
     @Override
     public void run() {
         try {

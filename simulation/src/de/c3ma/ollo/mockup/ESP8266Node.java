@@ -34,6 +34,7 @@ public class ESP8266Node extends TwoArgFunction {
         final LuaTable node = new LuaTable();
         node.set("compile", new CompileFunction());
         node.set("restart", new RestartFunction());
+        node.set("heap", new HeapFunction());
         env.set("node", node);
         env.get("package").get("loaded").set("node", node);        
         return node;
@@ -72,6 +73,18 @@ public class ESP8266Node extends TwoArgFunction {
         }
         
     }
+    
+    private class HeapFunction extends ZeroArgFunction {
+
+        @Override
+        public LuaValue call() {
+            System.out.println("[Node] Heap");            
+            return LuaValue.valueOf(Runtime.getRuntime().freeMemory());
+        }
+        
+    }
+    
+
     
     public void setWorkingDirectory(File workingDir) {
         this.workingDir = workingDir;        
