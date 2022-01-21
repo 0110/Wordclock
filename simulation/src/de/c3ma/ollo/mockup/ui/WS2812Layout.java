@@ -2,6 +2,7 @@ package de.c3ma.ollo.mockup.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -17,18 +18,23 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.DefaultCaret;
 
 import de.c3ma.ollo.LuaSimulation;
+import de.c3ma.ollo.mockup.Printable;
 
 /**
  * created at 02.01.2018 - 12:57:02<br />
@@ -38,7 +44,7 @@ import de.c3ma.ollo.LuaSimulation;
  * 
  * @author ollo<br />
  */
-public class WS2812Layout extends JFrame {
+public class WS2812Layout extends JFrame implements Printable {
 
 	/**
 	 * 
@@ -56,6 +62,7 @@ public class WS2812Layout extends JFrame {
 	private int mColumn = 0;
 	private int mRow = 0;
 	private Element[][] mElements;
+	private JTextArea mConsole = null;
 
     private LuaSimulation nodemcuSimu;
 
@@ -128,6 +135,8 @@ public class WS2812Layout extends JFrame {
 		
 		contentPane.add(adc, BorderLayout.EAST);
 		
+		JPanel bottomShell = new JPanel();
+		bottomShell.setLayout(new javax.swing.BoxLayout(bottomShell, BoxLayout.Y_AXIS));
 		JPanel bottomPanel = new JPanel();
 				
 		final JTextField dateTime = new JTextField("yyyy-mm-dd HH:MM:SS");
@@ -225,9 +234,20 @@ public class WS2812Layout extends JFrame {
 			}
 		});
 		bottomPanel.add(btnReboot);
-		
-		contentPane.add(bottomPanel, BorderLayout.SOUTH);
+		bottomShell.add(bottomPanel);
 
+		mConsole = new JTextArea("Test");
+		mConsole.setEditable(false);
+		mConsole.setMinimumSize(new Dimension(200, 220));
+		mConsole.setMaximumSize(new Dimension(800, 200));
+		mConsole.setDoubleBuffered(true);
+		JScrollPane scrollPane = new JScrollPane(mConsole);
+		//scrollPane.setSize(100, 200);
+		scrollPane.setMinimumSize(new Dimension(800, 200));
+		bottomShell.add(scrollPane);
+		
+		contentPane.add(bottomShell, BorderLayout.SOUTH);
+		
 		setContentPane(contentPane);
 		pack();
 		setLocationByPlatform(true);
@@ -356,6 +376,14 @@ public class WS2812Layout extends JFrame {
 					}
 				}
 			}
+		}
+	}
+	
+	public void printConsole(String line) {
+		if (mConsole != null) {
+			mConsole.append(line);
+			mConsole.append("\r\n");		
+			mConsole.getCaret().setDot( Integer.MAX_VALUE );
 		}
 	}
 

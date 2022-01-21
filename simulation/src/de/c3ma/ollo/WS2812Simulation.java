@@ -23,6 +23,8 @@ import de.c3ma.ollo.mockup.ESP8266Tmr;
 import de.c3ma.ollo.mockup.ESP8266Uart;
 import de.c3ma.ollo.mockup.ESP8266Wifi;
 import de.c3ma.ollo.mockup.ESP8266Ws2812;
+import de.c3ma.ollo.mockup.PrintFunction;
+import de.c3ma.ollo.mockup.ui.WS2812Layout;
 
 /**
  * created at 28.12.2017 - 13:19:32<br />
@@ -43,6 +45,7 @@ public class WS2812Simulation implements LuaSimulation {
 	private ESP8266Gpio gpio = new ESP8266Gpio();
 	private ESP8266Mqtt mqtt = new ESP8266Mqtt();
 	private ESP8266Adc adc = new ESP8266Adc();
+	private PrintFunction print = new PrintFunction();
 	private String scriptName;
 
 	public WS2812Simulation(File sourceFolder) {
@@ -59,6 +62,7 @@ public class WS2812Simulation implements LuaSimulation {
 		globals.load(new ESP8266Net());
 		globals.load(new ESP8266Time());
 		globals.set("dofile", doFile);
+		globals.set("print", print);
 		adc.setADC(50);
 
 		try {
@@ -146,7 +150,8 @@ public class WS2812Simulation implements LuaSimulation {
 
 	private void setWS2812Layout(File file) {
 		if (file.exists()) {
-			ws2812.setLayout(file, this);
+			WS2812Layout ledLayout = ws2812.setLayout(file, this);
+			print.setPrinter(ledLayout);
 		} else {
 			throw new RuntimeException("WS2812 Layout: " + file.getAbsolutePath() + " does not exists");
 		}

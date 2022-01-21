@@ -89,10 +89,11 @@ public class ESP8266Ws2812 extends TwoArgFunction {
 		}
 	}
 
-	public void setLayout(File file, LuaSimulation nodemcuSimu) {
+	public WS2812Layout setLayout(File file, LuaSimulation nodemcuSimu) {
 		if (ESP8266Ws2812.layout == null) {
 			ESP8266Ws2812.layout = WS2812Layout.parse(file, nodemcuSimu);
 		}
+		return ESP8266Ws2812.layout;
 	}
 	
 	private class newBuffer extends VarArgFunction {
