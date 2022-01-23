@@ -78,7 +78,7 @@ public class ESP8266Node extends TwoArgFunction {
 
         @Override
         public LuaValue call() {
-            System.out.println("[Node] Heap");            
+            //System.out.println("[Node] Heap");      
             return LuaValue.valueOf(Runtime.getRuntime().freeMemory());
         }
         

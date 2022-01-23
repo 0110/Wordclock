@@ -17,6 +17,8 @@ import org.luaj.vm2.Varargs;
 import org.luaj.vm2.lib.TwoArgFunction;
 import org.luaj.vm2.lib.VarArgFunction;
 
+import de.c3ma.ollo.LuaThreadTmr;
+
 /**
  * 
  * @author ollo
@@ -72,7 +74,7 @@ public class ESP8266Mqtt extends TwoArgFunction implements IMqttMessageListener 
         		final LuaTable table = varargs.arg(1).checktable();
         		final String callback = varargs.arg(2).toString().toString();
         		final LuaValue code = varargs.arg(3);
-        		System.out.println("[MQTT] On " + this.client + " " + callback);        		
+        		System.out.println("[MQTT] on_" + callback + " " + this.client);        		
         		onMqtt.set(ON_PREFIX + callback, code);
         	} else {
         		for(int i=0; i <= varargs.narg(); i++) {
@@ -123,7 +125,7 @@ public class ESP8266Mqtt extends TwoArgFunction implements IMqttMessageListener 
 	private class SubscribeMqtt extends VarArgFunction {
 		
         public LuaValue invoke(Varargs varargs) {
-            final LuaTable onMqtt = new LuaTable();
+            final LuaTable subMqtt = new LuaTable();
             final int numberArg = varargs.narg();
         	if (numberArg  == 3) {
         		final String topic = varargs.arg(2).toString().toString();
@@ -151,7 +153,7 @@ public class ESP8266Mqtt extends TwoArgFunction implements IMqttMessageListener 
 				}
         		return LuaValue.NIL;
         	}
-        	return onMqtt;
+        	return subMqtt;
         }
 	}
 	
@@ -197,9 +199,9 @@ public class ESP8266Mqtt extends TwoArgFunction implements IMqttMessageListener 
 	public void messageArrived(String topic, MqttMessage message) throws Exception {
 		LuaValue messageCallback = onMqtt.get(ON_PREFIX + MESSAGE);
 		if (messageCallback != null) {
-			LuaValue call2 = messageCallback.call(LuaValue.NIL,
-					LuaValue.valueOf(topic), 
-					LuaValue.valueOf(message.getPayload()));
+			LuaThreadTmr exec = new LuaThreadTmr(messageCallback, LuaValue.NIL, LuaValue.valueOf(topic), LuaValue.valueOf(message.getPayload()));
+			exec.start();
+			System.out.println("[MQTT] message "+ topic + " : " + message + " received");
 			//FIXME call the LUA code
 		} else {
 			System.err.println("[MQTT] message "+ topic + " : " + message + " without callback");

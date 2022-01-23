@@ -1,5 +1,6 @@
 package de.c3ma.ollo;
 
+import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaValue;
 
 /**
@@ -11,6 +12,7 @@ import org.luaj.vm2.LuaValue;
  */
 public class LuaThreadTmr extends Thread {
     
+	private final int NO_TIMER = -2342;
     
     private boolean running = true;
     
@@ -22,11 +24,24 @@ public class LuaThreadTmr extends Thread {
 
     private final int timerNumber;
     
+    private LuaValue[] arguments;
+    
     public LuaThreadTmr(int timerNumber, LuaValue code, boolean endlessloop, int delay) {
         this.code = code;
         this.running = endlessloop;
         this.delay = delay;
         this.timerNumber = timerNumber;
+    }
+    
+    public LuaThreadTmr(LuaValue code, LuaValue arg1, LuaValue arg2, LuaValue arg3) {
+    	this.code = code;
+        this.running = false;
+        this.delay = 1;
+        this.timerNumber = NO_TIMER;
+        arguments = new LuaValue[3];
+        arguments[0] = arg1;
+        arguments[1] = arg2;
+        arguments[2] = arg3;
     }
     
     @Override
@@ -35,9 +50,25 @@ public class LuaThreadTmr extends Thread {
             do {
                 Thread.sleep(delay);
                 if (code != null) {
-                    code.call();
+                	if (arguments == null) {
+                		code.call();
+                	} else {
+                		switch (arguments.length) {
+                		case 1:
+                			code.call(arguments[0]);
+                			break;
+                		case 2:
+                			code.call(arguments[0], arguments[1]);
+                			break;
+                		case 3:
+                    		code.call(arguments[0], arguments[1], arguments[2]);
+                			break;
+                		}
+                	}
                 }
             } while(running);
+        } catch (LuaError le) {
+        	System.err.println("[TMR] Timer" + timerNumber + " interrupted, due:" + le.getMessage());
         } catch(InterruptedException ie) {
             System.err.println("[TMR] Timer" + timerNumber + " interrupted");
         }

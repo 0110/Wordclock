@@ -133,7 +133,7 @@ public class ESP8266Tmr extends TwoArgFunction {
     private class watchDog extends ZeroArgFunction {
     	
         public LuaValue call() {
-            System.out.println("[TMR] Watchdog fed");
+            //System.out.println("[TMR] Watchdog fed");
             return LuaValue.valueOf(true);   
             
         }
