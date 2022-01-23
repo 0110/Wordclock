@@ -145,7 +145,7 @@ public class ESP8266Ws2812 extends TwoArgFunction {
 						}
                 	});
 				}
-                System.out.println("[WS2812] buffer fill with " + red + "," + green + "," +  blue);
+                //System.out.println("[WS2812] buffer fill with " + red + "," + green + "," +  blue);
                 return LuaValue.valueOf(true);
             } else if (varargs.isstring(2)) {
             	final LuaString color = varargs.arg(2).checkstring();
