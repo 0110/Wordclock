@@ -129,10 +129,9 @@ function registerMqtt()
         print("MQTT " .. topic .. ":" .. data)
         if (topic == (mqttPrefix .. "/cmd/single")) then
             handleSingleCommand(client, topic, data)
-        elseif (topic == (mqttPrefix .. "/cmd/temp")) then
+        elseif (topic == (mqttPrefix .. "/cmd/num/val")) then
 	    if (( data == "" ) or (data == nil)) then
 		tw=nil
-	        tcol=nil
 		print("MQTT | wordclock failed")
 	    else
 		    -- generate the temperatur to display, once as it will not change
@@ -140,14 +139,22 @@ function registerMqtt()
 		    collectgarbage()
 		    mydofile("wordclock")
 		    if (wc ~= nil) then
-			tw, tcol  = wc.temp(dw, rgbBuffer, invertRows)
+			tw  = wc.showText(dw, rgbBuffer, invertRows, dispTemp)
 			wc = nil
-			print("MQTT | generated words for: " + tostring(dispTemp))
+			print("MQTT | generated words for: " .. tostring(dispTemp))
 		    else
 			print("MQTT | wordclock failed")
 		    end
 	    end
-        else
+       elseif (topic == (mqttPrefix .. "/cmd/num/col")) then
+	    -- Set number of the color to display
+	    if (( data ~= "" ) and (data ~= nil)) then
+	        tcol = parseBgColor(data, "num/col")
+	    else
+	        tcol = nil
+		print("MQTT | Hide number")
+	    end
+       else
             -- Handle here the /cmd/# sublevel
             if (string.match(topic, "telnet$")) then
                 client:publish(mqttPrefix .. "/telnet", tostring(wifi.sta.getip()), 0, 0)
