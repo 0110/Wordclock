@@ -75,6 +75,13 @@ public class WS2812Simulation implements LuaSimulation {
 			// Copy all files into the temporary folder
 			for (File f : sourceFolder.listFiles()) {
 				Files.copy(f.toPath(), new File(tempDir.getAbsolutePath() + File.separator + f.getName()).toPath());
+				// create a diet one
+				if (f.isFile() && 
+						(f.getName().endsWith(".lua") && 
+						(!f.getName().equals("config.lua")))) {
+					String dietName = f.getName().replace(".lua", "_diet.lc");
+					Files.copy(f.toPath(), new File(tempDir.getAbsolutePath() + File.separator + dietName).toPath());
+				}
 			}
 
 			espFile.setWorkingDirectory(tempDir);
