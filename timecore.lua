@@ -146,4 +146,4 @@ M = {
     getTime = getTime
 }
 end
-tc = M
+return M

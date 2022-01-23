@@ -369,4 +369,4 @@ M = {
     countChars   = countChars
 }
 end
-dw = M
+return M

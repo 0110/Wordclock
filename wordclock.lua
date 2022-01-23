@@ -192,4 +192,4 @@ M = {
     showText = showText
 }
 end
-wc = M
+return M

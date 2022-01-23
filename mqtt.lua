@@ -137,13 +137,19 @@ function registerMqtt()
 		    -- generate the temperatur to display, once as it will not change
 		    local dispTemp = tonumber(data)
 		    collectgarbage()
-		    mydofile("wordclock")
+		    if (dispTemp > 0) then
+		    local wc = require("wordclock_diet")
 		    if (wc ~= nil) then
 			tw  = wc.showText(dw, rgbBuffer, invertRows, dispTemp)
-			wc = nil
 			print("MQTT | generated words for: " .. tostring(dispTemp))
 		    else
 			print("MQTT | wordclock failed")
+		    end
+		    wc = nil
+		    wordclock_diet=nil
+                    package.loaded["wordclock_diet"]=nil
+		    else
+		      tw=nil
 		    end
 	    end
        elseif (topic == (mqttPrefix .. "/cmd/num/col")) then

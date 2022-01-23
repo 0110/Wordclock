@@ -28,14 +28,17 @@ function displayTime()
      if (timezoneoffset == nil) then
         timezoneoffset=0
      end
-     mydofile("timecore")
+     local tc = require("timecore_diet")
      if (tc == nil) then
      	return
      end
      local time = tc.getTime(sec, timezoneoffset)
      tc = nil
+     timecore_diet=nil
+     package.loaded["timecore_diet"]=nil
+
      collectgarbage()
-     mydofile("wordclock")
+     local wc = require("wordclock_diet")
      if (wc ~= nil) then
        words = wc.timestat(time.hour, time.minute)
        if ((dim ~= nil) and (dim == "on")) then
@@ -48,9 +51,12 @@ function displayTime()
        end
      end
      wc = nil
+     wordclock_diet=nil
+     package.loaded["wordclock_diet"]=nil
+
      collectgarbage()
      print("wc: " .. tostring(node.heap()))
-     mydofile("displayword")
+     local dw = require("displayword_diet")
      if (dw ~= nil) then
         --if lines 4 to 6 are inverted due to hardware-fuckup, unfuck it here
         local invertRows=false
@@ -66,6 +72,9 @@ function displayTime()
 	  print("Show number")
      end
      dw = nil
+     displayword_diet=nil
+     package.loaded["displayword_diet"]=nil
+
      collectgarbage()
     
      -- cleanup
