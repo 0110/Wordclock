@@ -1,7 +1,3 @@
--- Global Variables
--- Display other numbers, e.g. Temperatur
-tw=nil
-tcol=nil
 -- Module Variables
 -- Mqtt variable
 local mMqttClient=nil
@@ -129,32 +125,7 @@ function registerMqtt()
         print("MQTT " .. topic .. ":" .. data)
         if (topic == (mqttPrefix .. "/cmd/single")) then
             handleSingleCommand(client, topic, data)
-        elseif (topic == (mqttPrefix .. "/cmd/num/val")) then
-	    if (( data == "" ) or (data == nil)) then
-		tw=nil
-		print("MQTT | wordclock failed")
-	    else
-		    -- generate the temperatur to display, once as it will not change
-		    local dispTemp = tonumber(data)
-		    collectgarbage()
-		    mydofile("wordclock")
-		    if (wc ~= nil) then
-			tw  = wc.showText(dw, rgbBuffer, invertRows, dispTemp)
-			wc = nil
-			print("MQTT | generated words for: " .. tostring(dispTemp))
-		    else
-			print("MQTT | wordclock failed")
-		    end
-	    end
-       elseif (topic == (mqttPrefix .. "/cmd/num/col")) then
-	    -- Set number of the color to display
-	    if (( data ~= "" ) and (data ~= nil)) then
-	        tcol = parseBgColor(data, "num/col")
-	    else
-	        tcol = nil
-		print("MQTT | Hide number")
-	    end
-       else
+        else
             -- Handle here the /cmd/# sublevel
             if (string.match(topic, "telnet$")) then
                 client:publish(mqttPrefix .. "/telnet", tostring(wifi.sta.getip()), 0, 0)
@@ -190,6 +161,7 @@ function registerMqtt()
            elseif (string.match(topic, "color4$")) then
 	        color4 = parseBgColor(data, "color4")
                 print("Updated color4" )
+		--FIXME load here the mqtt2 file
            else
              for i=1,10,1 do
               if (string.match(topic, "row".. tostring(i) .."$")) then

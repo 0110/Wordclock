@@ -25,6 +25,7 @@ Then disconnect the serial terminal and copy the required files to the microcont
 Install the optional packages:
 <pre>
 ./tools/initialDietFlash.sh /dev/ttyUSB0 mqtt.lua
+./tools/initialDietFlash.sh /dev/ttyUSB0 mqtt2.lua
 ./tools/initialDietFlash.sh /dev/ttyUSB0 ds18b20.lua
 </pre>
 
