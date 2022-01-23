@@ -63,6 +63,7 @@ function displayTime()
      if ( (tw ~= nil) and (tcol ~= nil) ) then
 	  local c1 = dw.countChars(tw)
           dw.generateLEDs(rgbBuffer, tw, nil, tcol, nil, nil, nil, nil, invertRows, c1)
+	  print("Show number")
      end
      dw = nil
      collectgarbage()
