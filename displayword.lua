@@ -17,7 +17,7 @@ local round = function(num)
     end
 end
 
--- @fn generateLEDs
+-- @fn updateColor
 -- Module displaying of the words
 -- @param data		struct with the following paramter:
 -- 	aoC 		amount of characters for the complete message

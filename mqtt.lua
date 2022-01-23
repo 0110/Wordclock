@@ -1,5 +1,5 @@
 -- Global Variables
--- Display Temp
+-- Display other numbers, e.g. Temperatur
 tw=nil
 tcol=nil
 -- Module Variables
