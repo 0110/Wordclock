@@ -1,7 +1,3 @@
--- Global Variables
--- Display other numbers, e.g. Temperatur
-tw=nil
-tcol=nil
 -- Module Variables
 -- Mqtt variable
 local mMqttClient=nil
@@ -196,6 +192,7 @@ function registerMqtt()
            elseif (string.match(topic, "color4$")) then
 	        color4 = parseBgColor(data, "color4")
                 print("Updated color4" )
+		--FIXME load here the mqtt2 file
            else
              for i=1,10,1 do
               if (string.match(topic, "row".. tostring(i) .."$")) then
