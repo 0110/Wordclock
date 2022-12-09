@@ -126,8 +126,7 @@ function normalOperation()
 	    mydofile("telnet")
         end
        else
-	    -- start the webserver module
-            mydofile("webserver")
+	    print("webserver prepared")
        end
         setupCounter=setupCounter-1
       elseif (setupCounter > 2) then
@@ -235,12 +234,20 @@ btntimer:register(500, tmr.ALARM_AUTO, function (t)
 	mlt:unregister()
         print("Button pressed " .. tostring(btnCounter))
         btnCounter = btnCounter + 5
-	for i=1,btnCounter do rgbBuffer:set(i, 0, 128, 0) end
+	
+	if ((web ~= nil) and (btnCounter < 50)) then
+  	  for i=1,btnCounter do rgbBuffer:set(i, 128, 0, 0) end
+	else
+  	  for i=1,btnCounter do rgbBuffer:set(i, 0, 128, 0) end
+	end
 	ws2812.write(rgbBuffer)
         if (btnCounter >= 110) then
             file.remove("config.lua")
             file.remove("config.lc")
             node.restart()
+	elseif (btnCounter == 10) then
+	    -- start the webserver module
+	    mydofile("webserver")
         end
      end
 end)
