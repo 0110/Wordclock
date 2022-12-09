@@ -32,6 +32,9 @@ function sendPage(conn, nameOfFile, replaceMap)
     local line = file.readline()
     
     while (line ~= nil) do
+         -- increase the amount of sent bytes
+        sentBytes=sentBytes+string.len(line)
+
         -- all placeholder begin with a $, so search for it in the current line
         if (line:find("$") ~= nil) then
             -- Replace the placeholder with the dynamic content
@@ -42,10 +45,6 @@ function sendPage(conn, nameOfFile, replaceMap)
                 end
             end
         end
-
-        
-        -- increase the amount of sent bytes
-        sentBytes=sentBytes+string.len(line)
         
         buf = buf .. line
         
@@ -131,7 +130,7 @@ function startWebServer()
     ws2812.write(string.char(0,0,0):rep(56) .. color:rep(2) .. string.char(0,0,0):rep(4) .. color:rep(2) .. string.char(0,0,0):rep(48))
     if (sendPage ~= nil) then
        print("Sending webpage.html (" .. tostring(node.heap()) .. "B free) ...")
-       mydofile("config.lua")
+       mydofile("config")
        -- Load the sendPagewebcontent
        replaceMap=fillDynamicMap()
        sendPage(conn, "webpage.html", replaceMap)
@@ -220,6 +219,7 @@ function startWebServer()
             print("Successfully")
 	    local mytimer = tmr.create()
 	    mytimer:register(50, tmr.ALARM_SINGLE, function (t)
+		mydofile("config")
                 replaceMap=fillDynamicMap()
                 replaceMap["$ADDITIONAL_LINE"]="<h2><font color=\"green\">New configuration saved</font></h2>"
                 print("Send success to client")
