@@ -107,6 +107,14 @@ function fillDynamicMap()
     return replaceMap   
 end
 
+function readHex(source, variable)
+	local hexColor=string.sub(source, 4)
+	local red = tonumber(string.sub(hexColor, 1, 2), 16)
+	local green = tonumber(string.sub(hexColor, 3, 4), 16)
+	local blue = tonumber(string.sub(hexColor, 5, 6), 16)
+	file.write(variable.."=string.char(" .. green .. "," .. red .. "," .. blue .. ")\n")
+end
+
 function startWebServer()
  srv=net.createServer(net.TCP)
  srv:listen(80,function(conn)
@@ -162,62 +170,36 @@ function startWebServer()
         if ( _POST.fcolor ~= nil) then
             -- color=string.char(_POST.green, _POST.red, _POST.blue)  
             print ("Got fcolor: " .. _POST.fcolor)
-            local hexColor=string.sub(_POST.fcolor, 4)
-            local red = tonumber(string.sub(hexColor, 1, 2), 16)
-            local green = tonumber(string.sub(hexColor, 3, 4), 16)
-            local blue = tonumber(string.sub(hexColor, 5, 6), 16)
-            file.write("color=string.char(" .. green .. "," .. red .. "," .. blue .. ")\n")
-            -- fill the current values
-            color=string.char(green, red, blue)
+	    readHex(_POST.fcolor, "color")
         end
-        if ( _POST.colorMin1  ~= nil) then
-            local hexColor=string.sub(_POST.colorMin1, 4)
-            local red = tonumber(string.sub(hexColor, 1, 2), 16)
-            local green = tonumber(string.sub(hexColor, 3, 4), 16)
-            local blue = tonumber(string.sub(hexColor, 5, 6), 16)
-            file.write("color1=string.char(" .. green .. "," .. red .. "," .. blue .. ")\n")
-            -- fill the current values
-            color1=string.char(green, red, blue)
+        if ( _POST.mcolor1  ~= nil) then
+	    readHex(_POST.mcolor1, "color1")
         end
-        if ( _POST.colorMin2  ~= nil) then
-            local hexColor=string.sub(_POST.colorMin2, 4)
-            local red = tonumber(string.sub(hexColor, 1, 2), 16)
-            local green = tonumber(string.sub(hexColor, 3, 4), 16)
-            local blue = tonumber(string.sub(hexColor, 5, 6), 16)
-            file.write("color2=string.char(" .. green .. "," .. red .. "," .. blue .. ")\n")
-            -- fill the current values
-            color2=string.char(green, red, blue)
+        if ( _POST.mcolor2  ~= nil) then
+	    readHex(_POST.mcolor2, "color2")
         end
-        if ( _POST.colorMin3  ~= nil) then
-            local hexColor=string.sub(_POST.colorMin3, 4)
-            local red = tonumber(string.sub(hexColor, 1, 2), 16)
-            local green = tonumber(string.sub(hexColor, 3, 4), 16)
-            local blue = tonumber(string.sub(hexColor, 5, 6), 16)
-            file.write("color3=string.char(" .. green .. "," .. red .. "," .. blue .. ")\n")
-            -- fill the current values
-            color3=string.char(green, red, blue)
+        if ( _POST.mcolor3  ~= nil) then
+	    readHex(_POST.mcolor3, "color3")
         end
-        if ( _POST.colorMin4  ~= nil) then
-            local hexColor=string.sub(_POST.colorMin4, 4)
-            local red = tonumber(string.sub(hexColor, 1, 2), 16)
-            local green = tonumber(string.sub(hexColor, 3, 4), 16)
-            local blue = tonumber(string.sub(hexColor, 5, 6), 16)
-            file.write("color4=string.char(" .. green .. "," .. red .. "," .. blue .. ")\n")
-            -- fill the current values
-            color4=string.char(green, red, blue)
+        if ( _POST.mcolor4  ~= nil) then
+	    readHex(_POST.mcolor4, "color4")
         end
         if ( _POST.bcolor  ~= nil) then
             local hexColor=string.sub(_POST.bcolor, 4)
-            local red = tonumber(string.sub(hexColor, 1, 2), 16)
-            local green = tonumber(string.sub(hexColor, 3, 4), 16)
-            local blue = tonumber(string.sub(hexColor, 5, 6), 16)
-            file.write("colorBg=string.char(" .. green .. "," .. red .. "," .. blue .. ")\n")
-            -- fill the current values
-            colorBg=string.char(green, red, blue)
+	    readHex(_POST.bcolor, "colorBg")
         end
         if (getTime ~= nil) then
             time = getTime(sec, timezoneoffset)
             file.write("print(\"Config from " .. time.year .. "-" .. time.month .. "-" .. time.day .. " " .. time.hour .. ":" .. time.minute .. ":" .. time.second .. "\")\n")
+        end
+	if (_POST.web ~= nil) then
+            file.write("web=true\n")
+            -- fill the current values
+            web=true
+        else
+            file.write("web=nil\n") -- use webserver instead of mqtt or telnet
+            -- fill the current values
+            web=nil
         end
         if (_POST.threequater ~= nil) then
             file.write("threequater=true\n")

@@ -17,6 +17,7 @@ end)
 bootledtimer:start()
 
 function mydofile(mod)
+    print("load:" .. mod)
     if (file.open(mod ..  ".lua")) then
       dofile( mod .. ".lua")
     elseif (file.open(mod ..  "_diet.lua")) then
@@ -36,7 +37,7 @@ initTimer:register(5000, tmr.ALARM_SINGLE, function (t)
     initTimer:unregister()
     initTimer=nil
     bootledtimer=nil
-    local modlist = { "timecore" , "displayword", "ds18b20", "mqtt", "main" }
+    local modlist = { "timecore" , "displayword", "ds18b20", "mqtt", "main", "webserver" }
     for i,mod in pairs(modlist) do
         if (file.open(mod .. "_diet.lua")) then
             file.remove(mod .. "_diet.lc")

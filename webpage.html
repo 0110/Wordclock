@@ -47,7 +47,13 @@ Please note that all settings are mandatory<br /><br />
 <tr><th>WIFI-Password</th><td><input id="password" name="password"></td><td>Password of the wireless network</td></tr>
 <tr><th>SNTP Server</th><td><input id="sntpserver" name="sntpserver" value="$SNTPSERVER"></td><td>Server to sync the time with. Only one ntp server is allowed.</td></tr> 
 <tr><th>Offset to UTC time</th><td><input id="timezoneoffset" name="timezoneoffset" value="$TIMEOFFSET"></td><td>Define the offset to UTC time in hours. For example +1 hour for Germany</td></tr>
-<tr><th>Foreground Color</th><td><input type="color" name="fcolor" value="$HEXCOLORFG"></td><td>LED Color for all minutes, divisible by five</td></tr>
+<tr><th>General Foreground Color</th><td><input type="color" name="fcolor" value="$HEXCOLORFG"></td><td>LED Color for all minutes, divisible by five</td></tr>
+<tr><th>Foreground Color Minute1</th><td><input type="color" name="mcolor1" value="$HEXCOLORFG"></td><td>LED Color for first single minute</td></tr>
+<tr><th>Foreground Color Minute2</th><td><input type="color" name="mcolor2" value="$HEXCOLORFG"></td><td>LED Color for first single minute</td></tr>
+<tr><th>Foreground Color Minute3</th><td><input type="color" name="mcolor3" value="$HEXCOLORFG"></td><td>LED Color for first single minute</td></tr>
+<tr><th>Foreground Color Minute4</th><td><input type="color" name="mcolor4" value="$HEXCOLORFG"></td><td>LED Color for first single minute</td></tr>
+<tr><th>Threequarter</th><td><input type="checkbox" name="threequarter"></td><td>3/4 instead of 1/4 before</td></tr>
+<tr><th>Webserver</th><td><input type="checkbox" name="web"></td><td>Activate Webserver</td></tr>
 <tr><td colspan="3"><div align="center"><input type="submit" value="Save Configuration" onclick="this.value='Submitting ..';this.disabled='disabled'; this.form.submit();"></div></td></tr>
 <tr><td colspan="3"><div align="center"><input type="submit" name="action" value="Reboot"></div></td></tr>
 </table>
