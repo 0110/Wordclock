@@ -60,6 +60,25 @@ initTimer:register(5000, tmr.ALARM_SINGLE, function (t)
         normalOperation()
     else
         -- Logic for inital setup
+	collectgarbage()
+	wifi.setmode(wifi.SOFTAP)
+	cfg={}
+	cfg.ssid="wordclock"
+	cfg.pwd="wordclock"
+	wifi.ap.config(cfg)
+
+	-- Write the buffer to the LEDs
+	local color=string.char(0,128,0)
+	local white=string.char(0,0,0)
+	local ledBuf= white:rep(6) .. color .. white:rep(7) .. color:rep(3) .. white:rep(44) .. color:rep(3) .. white:rep(50)
+	ws2812.write(ledBuf)
+	color=nil
+	white=nil
+	ledBuf=nil
+
+	print("Waiting in access point >wordclock< for Clients")
+	print("Please visit 192.168.4.1")
+	-- start the webserver module 
         mydofile("webserver")
     end
 end)

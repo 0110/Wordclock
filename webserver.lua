@@ -131,6 +131,7 @@ function startWebServer()
     ws2812.write(string.char(0,0,0):rep(56) .. color:rep(2) .. string.char(0,0,0):rep(4) .. color:rep(2) .. string.char(0,0,0):rep(48))
     if (sendPage ~= nil) then
        print("Sending webpage.html (" .. tostring(node.heap()) .. "B free) ...")
+       mydofile("config.lua")
        -- Load the sendPagewebcontent
        replaceMap=fillDynamicMap()
        sendPage(conn, "webpage.html", replaceMap)
@@ -273,25 +274,5 @@ function startWebServer()
 
 end
 
-
--- start the webserver module 
-collectgarbage()
-wifi.setmode(wifi.SOFTAP)
-cfg={}
-cfg.ssid="wordclock"
-cfg.pwd="wordclock"
-wifi.ap.config(cfg)
-
--- Write the buffer to the LEDs
-local color=string.char(0,128,0)
-local white=string.char(0,0,0)
-local ledBuf= white:rep(6) .. color .. white:rep(7) .. color:rep(3) .. white:rep(44) .. color:rep(3) .. white:rep(50)
-ws2812.write(ledBuf)
-color=nil
-white=nil
-ledBuf=nil
-
-print("Waiting in access point >wordclock< for Clients")
-print("Please visit 192.168.4.1")
 startWebServer()
 collectgarbage()

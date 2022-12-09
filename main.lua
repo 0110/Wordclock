@@ -109,6 +109,7 @@ function normalOperation()
 	   rgbBuffer:set(55, color) -- P
 	end
       elseif (setupCounter > 3) then
+       if (web == nil) then
         -- Here the WLAN is found, and something is done
         mydofile("mqtt")
 	rgbBuffer:fill(0,0,0) -- disable all LEDs
@@ -124,6 +125,10 @@ function normalOperation()
 	    print("NO Mqtt found")
 	    mydofile("telnet")
         end
+       else
+	    -- start the webserver module
+            mydofile("webserver")
+       end
         setupCounter=setupCounter-1
       elseif (setupCounter > 2) then
         if (startTelnetServer ~= nil) then
