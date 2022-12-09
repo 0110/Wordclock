@@ -145,6 +145,11 @@ function normalOperation()
     	heapusage=nil
         alive = alive + 1
       else
+	if (colorBg ~= nil) then
+	  rgbBuffer:fill(string.byte(colorBg,1), string.byte(colorBg,2), string.byte(colorBg,3)) -- disable all LEDs
+	else
+	  rgbBuffer:fill(0,0,0) -- disable all LEDs
+	end
        displayTime()
        alive = alive + 1
       end
