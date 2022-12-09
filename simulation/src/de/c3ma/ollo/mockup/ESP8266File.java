@@ -1,7 +1,8 @@
 package de.c3ma.ollo.mockup;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.io.IOException;
+import java.nio.file.Files;
 
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
@@ -20,6 +21,8 @@ public class ESP8266File extends TwoArgFunction {
     private File workingDir = null;
     
     private File openedFile = null;
+    
+    private String SHRINKED_FILE_POSTFIX = "_diet";
     
     @Override
     public LuaValue call(LuaValue modname, LuaValue env) {
@@ -59,9 +62,25 @@ public class ESP8266File extends TwoArgFunction {
             
             final String codeFileName = fileName.checkjstring();
             final File f = new File( workingDir.getAbsolutePath() + File.separator + codeFileName);
-            //System.out.println("[FILE] Loading " + codeFileName);
+            // Check if the file exists as it
             if (f.exists()) {
                 ESP8266File.this.openedFile = f;
+            } else {
+            	if (codeFileName.contains(SHRINKED_FILE_POSTFIX)) {
+                	File fShrinked = new File( workingDir.getAbsolutePath() + File.separator + codeFileName.replace(SHRINKED_FILE_POSTFIX, ""));
+                	File fShrinkedLC = new File(fShrinked.getAbsolutePath().replace(".lua", ".lc"));
+                	if (!fShrinkedLC.exists()) {
+	                	try {
+	                		System.out.println("[FILE] Generate " + codeFileName);
+	                    	Files.copy(fShrinked.toPath(), f.toPath());
+						} catch (IOException e) {
+							System.err.println("[FILE] Generate " + codeFileName + " failed: " + e.getMessage());
+						}
+                	} else {
+                		System.out.println("[FILE] Already found " + fShrinkedLC.getName());
+                		return LuaValue.valueOf(true);
+                	}
+            	}
             }
             
             return LuaValue.valueOf((f.exists()));

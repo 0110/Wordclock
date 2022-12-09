@@ -11,7 +11,7 @@ bootledtimer:register(75, tmr.ALARM_AUTO, function (timer)
     spaceLeds = math.max(MAXLEDS - (counter1*2), 0)
     ws2812.write(string.char(16,0,0):rep(counter1) .. string.char(0,0,0):rep(spaceLeds) .. string.char(0,0,8):rep(counter1))
     if ((counter1*2) > 114) then
-        timer:unregister()
+        bootledtimer:unregister()
     end
 end)
 bootledtimer:start()
