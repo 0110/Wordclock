@@ -225,12 +225,12 @@ gpio.mode(3, gpio.INPUT)
 local btnCounter=0
 -- Start the time Thread handling the button
 local btntimer = tmr.create()
-btntimer:register(5000, tmr.ALARM_AUTO, function (t)
+btntimer:register(500, tmr.ALARM_AUTO, function (t)
      if (gpio.read(3) == 0) then
 	mlt:unregister()
         print("Button pressed " .. tostring(btnCounter))
         btnCounter = btnCounter + 5
-	for i=1,btnCounter do rgbBuffer:set(i, 128, 0, 0) end
+	for i=1,btnCounter do rgbBuffer:set(i, 0, 128, 0) end
 	ws2812.write(rgbBuffer)
         if (btnCounter >= 110) then
             file.remove("config.lua")
