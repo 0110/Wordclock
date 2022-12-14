@@ -240,7 +240,11 @@ local btnCounter=0
 local btntimer = tmr.create()
 btntimer:register(500, tmr.ALARM_AUTO, function (t)
      if (gpio.read(3) == 0) then
-	mlt:unregister()
+	-- stop the main loop
+	if (mlt ~= nil) then
+	    mlt:unregister()
+	    mlt = nil
+	end
         print("Button pressed " .. tostring(btnCounter))
         btnCounter = btnCounter + 5
 	
@@ -255,8 +259,9 @@ btntimer:register(500, tmr.ALARM_AUTO, function (t)
             file.remove("config.lc")
             node.restart()
 	elseif (btnCounter == 10) then
-	    -- start the webserver module
+	    collectgarbage()
 	    mydofile("webserver")
+	    -- start the webserver module
         end
      end
 end)
