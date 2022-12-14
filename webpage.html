@@ -54,7 +54,7 @@ Please note that all settings are mandatory<br /><br />
 <tr><th>Foreground Color Minute4</th><td><input type="color" name="mcolor4" value="$HEXCOLORFG"></td><td>LED Color for first single minute</td></tr>
 <tr><th>Threequarter</th><td><input type="checkbox" name="threequarter" $THREEQUATER></td><td>3/4 instead of 1/4 before</td></tr>
 <tr><th>Adjust brightness</th><td><input type="checkbox" name="dim" $AUTODIM></td><td>Dim brightness automatically</td></tr>
-<tr><th>Webserver</th><td><input type="checkbox" name="web"></td><td>Activate Webserver</td></tr>
+<input type="hidden" value="true" name="web" /><!-- Activate Webserver only -->
 <tr><td colspan="3"><div align="center"><input type="submit" value="Save Configuration" onclick="this.value='Submitting ..';this.disabled='disabled'; this.form.submit();"></div></td></tr>
 <tr><td colspan="3"><div align="center"><input type="submit" name="action" value="Reboot"></div></td></tr>
 </table>

@@ -130,11 +130,15 @@ function normalOperation()
        end
         setupCounter=setupCounter-1
       elseif (setupCounter > 2) then
+       if (web == nil) then
         if (startTelnetServer ~= nil) then
 	    startTelnetServer()
         else
 	    displayTime()
         end
+       else
+	    print("webserver supplant telnet")
+       end
         setupCounter=setupCounter-1
       elseif ( (alive % 120) == 0) then
         -- sync the time every 5 minutes
