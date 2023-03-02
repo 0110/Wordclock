@@ -55,7 +55,6 @@ function displayTime()
      package.loaded["wordclock_diet"]=nil
 
      collectgarbage()
-     print("wc: " .. tostring(node.heap()))
      local dw = require("displayword_diet")
      if (dw ~= nil) then
         --if lines 4 to 6 are inverted due to hardware-fuckup, unfuck it here
