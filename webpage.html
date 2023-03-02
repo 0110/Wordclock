@@ -48,10 +48,10 @@ Please note that all settings are mandatory<br /><br />
 <tr><th>SNTP Server</th><td><input id="sntpserver" name="sntpserver" value="$SNTPSERVER"></td><td>Server to sync the time with. Only one ntp server is allowed.</td></tr> 
 <tr><th>Offset to UTC time</th><td><input id="timezoneoffset" name="timezoneoffset" value="$TIMEOFFSET"></td><td>Define the offset to UTC time in hours. For example +1 hour for Germany</td></tr>
 <tr><th>General Foreground Color</th><td><input type="color" name="fcolor" value="$HEXCOLORFG"></td><td>LED Color for all minutes, divisible by five</td></tr>
-<tr><th>Foreground Color Minute1</th><td><input type="color" name="mcolor1" value="$HEXCOLORFG"></td><td>LED Color for first single minute</td></tr>
-<tr><th>Foreground Color Minute2</th><td><input type="color" name="mcolor2" value="$HEXCOLORFG"></td><td>LED Color for first single minute</td></tr>
-<tr><th>Foreground Color Minute3</th><td><input type="color" name="mcolor3" value="$HEXCOLORFG"></td><td>LED Color for first single minute</td></tr>
-<tr><th>Foreground Color Minute4</th><td><input type="color" name="mcolor4" value="$HEXCOLORFG"></td><td>LED Color for first single minute</td></tr>
+<tr><th>Foreground Color Minute1</th><td><input type="color" name="mcolor1" value="$HEXCOLOR1"></td><td>LED Color for first single minute</td></tr>
+<tr><th>Foreground Color Minute2</th><td><input type="color" name="mcolor2" value="$HEXCOLOR2"></td><td>LED Color for second single minute</td></tr>
+<tr><th>Foreground Color Minute3</th><td><input type="color" name="mcolor3" value="$HEXCOLOR3"></td><td>LED Color for third single minute</td></tr>
+<tr><th>Foreground Color Minute4</th><td><input type="color" name="mcolor4" value="$HEXCOLOR4"></td><td>LED Color for fourth single minute</td></tr>
 <tr><th>Threequarter</th><td><input type="checkbox" name="threequarter" $THREEQUATER></td><td>3/4 instead of 1/4 before</td></tr>
 <tr><th>Adjust brightness</th><td><input type="checkbox" name="dim" $AUTODIM></td><td>Dim brightness automatically</td></tr>
 <input type="hidden" value="true" name="web" /><!-- Activate Webserver only -->
