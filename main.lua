@@ -8,6 +8,7 @@ rgbBuffer = ws2812.newBuffer(114, 3)
 
 function syncTimeFromInternet()
   if (syncRunning == nil) then
+    print("NTP: " .. tostring(sntpserverhostname))
     syncRunning=true
     sntp.sync(sntpserverhostname,
      function(sec,usec,server)
