@@ -48,6 +48,10 @@ if [ "$FILES" != "config.lua" ]; then
 			echo "Compress $f ..."
 			out=$(echo "$f" | sed 's/.lua/_diet.lua/g')
 			$DIET ../$f -o ../diet/$out
+			if [ $? -ne 0 ]; then
+				echo "Failed to generate file"
+				exit $?
+			fi
 			OUTFILES="$OUTFILES diet/$out"
 		else
 			OUTFILES="$OUTFILES $f"
