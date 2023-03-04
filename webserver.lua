@@ -5,6 +5,15 @@ local sentBytes=0
 function sendPage(conn, nameOfFile, replaceMap)
   collectgarbage()
   print("Sending " .. nameOfFile .. " " .. sentBytes .. "B already; " .. node.heap() .. "B in heap")
+  if (sentBytes == 0) then
+    -- print status status
+    local statusColor=string.char(0,128,0)
+    if ((inv46 ~= nil) and (inv46 == "on")) then
+        ws2812.write(string.char(0,0,0):rep(55) .. statusColor:rep(2) .. string.char(0,0,0):rep(5) .. statusColor .. string.char(0,0,0):rep(49))
+    else
+        ws2812.write(string.char(0,0,0):rep(57) .. statusColor .. string.char(0,0,0):rep(5) .. statusColor:rep(2) .. string.char(0,0,0):rep(49))
+    end
+  end
   conn:on("sent", function(conn) 
     if (sentBytes == 0) then
         conn:close() 
@@ -66,6 +75,13 @@ function sendPage(conn, nameOfFile, replaceMap)
     if (string.len(buf) > 0) then
         conn:send(buf)
         print("Sent rest")
+        -- print status status
+        local statusColor=string.char(128,0,0)
+        if ((inv46 ~= nil) and (inv46 == "on")) then
+            ws2812.write(string.char(0,0,0):rep(55) .. statusColor:rep(2) .. string.char(0,0,0):rep(5) .. statusColor .. string.char(0,0,0):rep(49))
+        else
+            ws2812.write(string.char(0,0,0):rep(57) .. statusColor .. string.char(0,0,0):rep(5) .. statusColor:rep(2) .. string.char(0,0,0):rep(49))
+        end
     end
   end
 end
@@ -126,8 +142,7 @@ function startWebServer()
     httpSending=true
    if (color == nil) then
         color=string.char(0,128,0)
-    end
-    ws2812.write(string.char(0,0,0):rep(56) .. color:rep(2) .. string.char(0,0,0):rep(4) .. color:rep(2) .. string.char(0,0,0):rep(48))
+    end    
     if (sendPage ~= nil) then
        print("Sending webpage.html (" .. tostring(node.heap()) .. "B free) ...")
        mydofile("config")
@@ -165,7 +180,7 @@ function startWebServer()
         sec, _ = rtctime.get()
         file.open(configFile.. ".new", "w+")
           file.write("-- Config\n" .. "station_cfg={}\nstation_cfg.ssid=\"" .. _POST.ssid .. "\"\nstation_cfg.pwd=\"" .. _POST.password .. "\"\nstation_cfg.save=false\nwifi.sta.config(station_cfg)\n")
-          file.write("sntpserverhostname=\"" .. _POST.sntpserver .. "\"\n" .. "timezoneoffset=\"" .. _POST.timezoneoffset .. "\"\n".. "inv46=on\n" .. "dim=" .. tostring(_POST.dim) .. "\n")
+          file.write("sntpserverhostname=\"" .. _POST.sntpserver .. "\"\n" .. "timezoneoffset=\"" .. _POST.timezoneoffset .. "\"\n".. "inv46=nil\n")
         
         if ( _POST.fcolor ~= nil) then
             -- color=string.char(_POST.green, _POST.red, _POST.blue)  
@@ -192,7 +207,7 @@ function startWebServer()
             time = getTime(sec, timezoneoffset)
             file.write("print(\"Config from " .. time.year .. "-" .. time.month .. "-" .. time.day .. " " .. time.hour .. ":" .. time.minute .. ":" .. time.second .. "\")\n")
         end
-	if (_POST.web ~= nil) then
+	    if (_POST.web ~= nil) then
             file.write("web=true\n")
             -- fill the current values
             web=true
@@ -200,6 +215,11 @@ function startWebServer()
             file.write("web=nil\n") -- use webserver instead of mqtt or telnet
             -- fill the current values
             web=nil
+        end
+        if (_POST.dim ~= nil) then
+            file.write("dim=\"" .. tostring(_POST.dim) .. "\"\n")
+        else
+            file.write("dim=nil\n") -- unset dimming functionality
         end
         if (_POST.threequater ~= nil) then
             file.write("threequater=true\n")
