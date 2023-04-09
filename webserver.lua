@@ -2,6 +2,16 @@
 local configFile="config.lua"
 local httpSending=false
 local sentBytes=0
+
+-- Source https://stackoverflow.com/questions/28916182/parse-parameters-out-of-url-in-lua#28921280
+function urldecode(s)
+  s = s:gsub('+', ' ')
+       :gsub('%%(%x%x)', function(h)
+                           return string.char(tonumber(h, 16))
+                         end)
+  return s
+end
+
 function sendPage(conn, nameOfFile, replaceMap)
   collectgarbage()
   print("Sending " .. nameOfFile .. " " .. sentBytes .. "B already; " .. node.heap() .. "B in heap")
@@ -179,7 +189,7 @@ function startWebServer()
         file.remove(configFile .. ".new")
         sec, _ = rtctime.get()
         file.open(configFile.. ".new", "w+")
-          file.write("-- Config\n" .. "station_cfg={}\nstation_cfg.ssid=\"" .. _POST.ssid .. "\"\nstation_cfg.pwd=\"" .. _POST.password .. "\"\nstation_cfg.save=false\nwifi.sta.config(station_cfg)\n")
+          file.write("-- Config\n" .. "station_cfg={}\nstation_cfg.ssid='" .. urldecode(_POST.ssid) .. "'\nstation_cfg.pwd='" .. urldecode(_POST.password) .. "'\nstation_cfg.save=false\nwifi.sta.config(station_cfg)\n")
           file.write("sntpserverhostname=\"" .. _POST.sntpserver .. "\"\n" .. "timezoneoffset=\"" .. _POST.timezoneoffset .. "\"\n".. "inv46=nil\n")
         
         if ( _POST.fcolor ~= nil) then
