@@ -160,6 +160,11 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
   rgbBuffer:fill(string.byte(colorBg,1), string.byte(colorBg,2), string.byte(colorBg,3)) -- draw the background
  end
 
+ -- Stop in  Darkmode (only background is set)
+ if (words.briPer < 0) then
+  return
+ end
+
  local lineIdx=1
  -- line 1----------------------------------------------
  if (rowbgColor[1] ~= nil) then
