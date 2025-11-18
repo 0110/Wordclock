@@ -18,12 +18,6 @@ if [ ! -f $LUATOOL ]; then
  exit 1
 fi
 
-# check the serial connection
-
-if [ ! -c $DEVICE ]; then
- echo "Serial target: $DEVICE does not exist"
- exit 1
-fi
 
 if [ $# -eq 0 ]; then
     echo ""
@@ -55,6 +49,12 @@ if [ "$FILES" != "config.lua" ]; then
 	done
 	FILES=$OUTFILES
 	cd $ROOTDIR
+fi
+# check the serial connection
+
+if [ ! -c $DEVICE ]; then
+ echo "Serial target: $DEVICE does not exist"
+ exit 1
 fi
 echo "Reboot ESP and stop init timer"
 if [ ! -f $LUASCRIPT_STOP ]; then
