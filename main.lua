@@ -200,7 +200,7 @@ function normalOperation()
 end
 
 -------------------main program -----------------------------
-briPer = 50 -- Default brightness is set to 50%
+briPer = 20 -- Default brightness is set to 50%
 ws2812.init() -- WS2812 LEDs initialized on GPIO2
 
 ----------- button ---------
