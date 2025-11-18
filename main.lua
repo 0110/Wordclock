@@ -40,7 +40,7 @@ function displayTime()
        words = wc.timestat(time.hour, time.minute)
        if ((dim ~= nil) and (dim == "on")) then
         words.briPer=briPer
-        if (words.briPer ~= nil and words.briPer < 3) then
+        if (words.briPer ~= nil and words.briPer > 0 and words.briPer < 3) then
           words.briPer=3
         end
        else

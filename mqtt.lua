@@ -210,7 +210,12 @@ function startMqttClient()
                 local heapusage = node.heap()
                 local temperatur = nil
                 if (loldBrightness ~= briPer) then
-                 mMqttClient:publish(mqttPrefix .. "/brightness", tostring(briPer), 0, 0)
+                  local lPercent = briPer
+                  -- Negative percent is a disabled clock (only brightness sensor is working)
+                  if (briPer < 0) then
+                    lPercent = -briPer
+                  end
+                 mMqttClient:publish(mqttPrefix .. "/brightness", tostring(lPercent), 0, 0)
                  loldBrightness = briPer
                 else
                   if ((t ~= nil) and (heapusage > 11900) and (tempCounter > 10)) then
