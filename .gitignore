@@ -3,4 +3,5 @@ config.lua
 simulation.config.lua
 *.swp
 unit/testTimesMarchOctoberWithAllSeconds.lua
-diet/*
+diet/*.lua
+tools/changeBaudrate.lua
