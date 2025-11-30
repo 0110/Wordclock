@@ -293,12 +293,13 @@ if __name__ == '__main__':
             transport.writeln("file.open(\"" + args.dest + "\", \"a+\")\r")
         else:
             transport.writeln("file.open(\"" + args.dest + "\", \"w+\")\r")
+        if args.verbose:
+            sys.stderr.write("\r\nStage 3. Start writing data to flash memory...")
     else:
         if args.verbose:
             sys.stderr.write("\r\nStage 2. Directly execute the script...")
+    # Always read script, line by line    
     line = f.readline()
-    if args.verbose:
-        sys.stderr.write("\r\nStage 3. Start writing data to flash memory...")
     while line != '':
         if args.volatile:
             transport.execute(line.strip())

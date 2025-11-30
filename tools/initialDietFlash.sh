@@ -9,7 +9,10 @@ DIET=bin/luasrcdiet
 DEVICE=$1
 BAUD=115200
 
+FLASHBAUD=4800
+
 LUASCRIPT_STOP=${TOOLDIR}/stopController.lua
+LUASCRIPT_CHANGEBAUD=${TOOLDIR}/changeBaudrate.lua
 
 # check environment
 if [ ! -f $LUATOOL ]; then
@@ -20,15 +23,22 @@ fi
 
 
 if [ $# -eq 0 ]; then
-    echo ""
-    echo "e.g. usage $0 <device> [<files to upoad>]"
+    echo "e.g. usage $0 <device> [<files to upoad>] [continue flag]"
+	echo ""
+	echo -e "files\t\tTo upload could be anly lua file, stored in this directory"
+	echo -e "continue\tmay be andy number or string"
     exit 1
 fi
 
 if [ $# -eq 1 ]; then
-	FILES="displayword.lua main.lua timecore.lua webpage.html webserver.lua telnet.lua wordclock.lua init.lua"
+	FILES="displayword.lua main.lua timecore.lua webserver.lua telnet.lua wordclock.lua init.lua"
+	echo "webpage.html must be transmitted manually!"
 else
 	FILES=$2
+fi
+
+if [ $# -ge 3 ]; then
+	echo "Continue flashing $FILES"
 fi
 
 # Convert files, if necessary
@@ -50,12 +60,14 @@ if [ "$FILES" != "config.lua" ]; then
 	FILES=$OUTFILES
 	cd $ROOTDIR
 fi
-# check the serial connection
 
+# check the serial connection
 if [ ! -c $DEVICE ]; then
  echo "Serial target: $DEVICE does not exist"
  exit 1
 fi
+
+if [ $# -lt 3 ]; then
 echo "Reboot ESP and stop init timer"
 if [ ! -f $LUASCRIPT_STOP ]; then
 	echo "Cannot find $LUASCRIPT_STOP"
@@ -77,6 +89,18 @@ if [ $# -eq 1 ]; then
 	fi
 fi
 
+
+echo "Change Baudrate"
+echo "uart.setup(0, $FLASHBAUD, 8, 0, 1, 1 )" >> $DEVICE
+echo 'if (initTimer ~= nil) then initTimer:unregister() end' > $LUASCRIPT_CHANGEBAUD
+python3 $LUATOOL -p $DEVICE -f $LUASCRIPT_CHANGEBAUD -b $FLASHBAUD --volatile --delay 2
+if [ $? -ne 0 ]; then
+   echo "Could not change baudrate"
+   exit 1
+fi
+
+fi
+
 echo "Start Flasing ..."
 for f in $FILES; do
     if [ ! -f $f ]; then
@@ -87,7 +111,7 @@ for f in $FILES; do
 
     espFile=$(echo "$f" | sed 's;diet/;;g')
     echo "------------- $espFile ------------"
-    python3 $LUATOOL -p $DEVICE -f $f -b $BAUD -t $espFile
+    python3 $LUATOOL -p $DEVICE -f $f -b $FLASHBAUD -t $espFile
     if [ $? -ne 0 ]; then
         echo "STOOOOP"
         exit 1
