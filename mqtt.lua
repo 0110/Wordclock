@@ -71,18 +71,25 @@ function readTemp(ds18b20)
     if (sensors >= 1) then
         temp1=ds18b20.read(addrs[0])
     else
-        print("No sensor DS18B20 found")
+        print("DS18B20 no sensor")
     end
     return temp1
   else
-    print("No DS18B20 lib")
+    print("DS18B20 no lib")
     return nil
   end
 end
 
 -- Connect or reconnect to mqtt server
 function reConnectMqtt()
- if (not mMqttConnected) then
+  if (not mMqttConnected) then
+    local heapusage = node.heap()
+    if (heapusage < 12000) then
+      print("MQTT missing mem")
+      collectgarbage()
+      return
+    end
+
     mMqttClient:connect(mqttServer, 1883, false, function(c)
       print("MQTT is connected")
       mMqttConnected = true
@@ -102,10 +109,11 @@ function reConnectMqtt()
       tmr1:start()
     end,
     function(client, reason)
-      print("failed reason: " .. reason)
+      -- Reason, why MQTT failed
+      print("MQTT freason: " .. reason)
       mMqttConnected = false
     end)
- end
+  end
 end
 
 -- MQTT extension
@@ -165,7 +173,7 @@ function registerMqtt()
            else
              for i=1,10,1 do
               if (string.match(topic, "row".. tostring(i) .."$")) then
-                rowbgColor[i] = parseBgColor(data, "row" .. tostring(i), briPer)
+                rbgColor[i] = parseBgColor(data, "row" .. tostring(i), briPer)
                 return
               end
              end
@@ -191,7 +199,7 @@ function startMqttClient()
         registerMqtt()
         print "Started MQTT client"
 	local lSetupTimer = tmr.create()
-	lSetupTimer:register(123, tmr.ALARM_SINGLE, function (kTemp)
+	lSetupTimer:register(500, tmr.ALARM_SINGLE, function (kTemp)
 		if (file.open("ds18b20_diet.lc")) then
 		  t=true
 		  print "Setup temperatur"

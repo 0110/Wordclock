@@ -15,7 +15,7 @@ function parseMqttSub(client, topic, data)
 		    collectgarbage()
 		    mydofile("wordclock")
 		    if (wc ~= nil) then
-			tw  = wc.showText(dw, rgbBuffer, invertRows, dispTemp)
+			tw  = wc.showText(dw, rgbMem, invertRows, dispTemp)
 			wc = nil
 			print("MQTT | generated words for: " .. tostring(dispTemp))
 		    else

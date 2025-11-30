@@ -1,8 +1,10 @@
 -- Main Module
 mlt = tmr.create() -- Main loop timer
-rowbgColor = {}
+
+-- Background color for each row
+rbgColor = {}
 -- Buffer of the clock
-rgbBuffer = ws2812.newBuffer(114, 3)
+rgbMem = ws2812.newBuffer(114, 3)
 -- 110 Character plus one LED for each minute, 
 -- that cannot be displayed, as the clock as only a resolution of 5 minutes
 
@@ -48,7 +50,7 @@ function displayTime()
         local invertRows = false
         if ((inv46 ~= nil) and (inv46 == "on")) then invertRows = true end
         local c = dw.countChars(words)
-        dw.generateLEDs(rgbBuffer, words, colorBg, color, color1, color2,
+        dw.generateLEDs(rgbMem, words, colorBg, color, color1, color2,
                         color3, color4, invertRows, c)
     end
     dw = nil
@@ -76,32 +78,32 @@ function normalOperation()
     mlt:register(1000, tmr.ALARM_AUTO, function(lt)
         if (setupCounter > 4) then
             if (colorBg ~= nil) then
-                rgbBuffer:fill(string.byte(colorBg, 1), string.byte(colorBg, 2),
+                rgbMem:fill(string.byte(colorBg, 1), string.byte(colorBg, 2),
                                string.byte(colorBg, 3)) -- disable all LEDs
             else
-                rgbBuffer:fill(0, 0, 0) -- disable all LEDs
+                rgbMem:fill(0, 0, 0) -- disable all LEDs
             end
             syncTimeFromInternet()
             setupCounter = setupCounter - 1
             alive = 1
-            rgbBuffer:set(19, color) -- N
-            rgbBuffer:set(31, color) -- T
+            rgbMem:set(19, color) -- N
+            rgbMem:set(31, color) -- T
             if ((inv46 ~= nil) and (inv46 == "on")) then
-                rgbBuffer:set(45, color) -- P
+                rgbMem:set(45, color) -- P
             else
-                rgbBuffer:set(55, color) -- P
+                rgbMem:set(55, color) -- P
             end
         elseif (setupCounter > 3) then
             -- Here the WLAN is found, and something is done
             mydofile("mqtt")
-            rgbBuffer:fill(0, 0, 0) -- disable all LEDs
+            rgbMem:fill(0, 0, 0) -- disable all LEDs
             if (startMqttClient ~= nil) then
                 if ((inv46 ~= nil) and (inv46 == "on")) then
-                    rgbBuffer:set(34, color) -- M
+                    rgbMem:set(34, color) -- M
                 else
-                    rgbBuffer:set(44, color) -- M
+                    rgbMem:set(44, color) -- M
                 end
-                rgbBuffer:set(82, color) -- T
+                rgbMem:set(82, color) -- T
                 startMqttClient()
             else
                 print("NO Mqtt found")
@@ -125,25 +127,25 @@ function normalOperation()
             displayTime()
             alive = alive + 1
         end
-        if (rgbBuffer ~= nil) then
+        if (rgbMem ~= nil) then
             -- show Mqtt status
             if (startMqttClient ~= nil) then
                 if (not connectedMqtt()) then
-                    rgbBuffer:set(103, 0, 64, 0)
-                    -- check every thirty seconds, if reconnecting is necessary
-                    if (((tmr.now() / 1000000) % 100) == 30) then
+                    rgbMem:set(103, 0, 64, 0)
+                    -- check every 2 minutes, if reconnecting is necessary
+                    if (((tmr.now() / 1000000) % 1000) == 120) then
                         print("MQTT reconnecting... ")
                         reConnectMqtt()
                     end
                 end
             end
-            ws2812.write(rgbBuffer)
+            ws2812.write(rgbMem)
         else
             -- set FG to fix value: RED
             local color = string.char(255, 0, 0)
-            rgbBuffer:fill(0, 0, 0) -- disable all LEDs
-            for i = 108, 110, 1 do rgbBuffer:set(i, color) end
-            ws2812.write(rgbBuffer)
+            rgbMem:fill(0, 0, 0) -- disable all LEDs
+            for i = 108, 110, 1 do rgbMem:set(i, color) end
+            ws2812.write(rgbMem)
             print("Fallback no time displayed")
         end
         collectgarbage()
@@ -160,38 +162,38 @@ function normalOperation()
         connect_counter = connect_counter + 1
         if wifi.sta.status() ~= 5 then
             print(connect_counter .. "/60 Connecting to AP...")
-            rgbBuffer:fill(0, 0, 0) -- clear all LEDs
+            rgbMem:fill(0, 0, 0) -- clear all LEDs
             if (connect_counter % 5 ~= 4) then
                 local wlanColor = string.char((connect_counter % 6) * 20,
                                               (connect_counter % 5) * 20,
                                               (connect_counter % 3) * 20)
                 if ((connect_counter % 5) >= 1) then
-                    rgbBuffer:set(7, wlanColor)
+                    rgbMem:set(7, wlanColor)
                 end
                 if ((connect_counter % 5) >= 3) then
-                    rgbBuffer:set(15, wlanColor)
+                    rgbMem:set(15, wlanColor)
                 end
                 if ((connect_counter % 5) >= 2) then
-                    rgbBuffer:set(16, wlanColor)
+                    rgbMem:set(16, wlanColor)
                 end
                 if ((connect_counter % 5) >= 0) then
-                    rgbBuffer:set(17, wlanColor)
+                    rgbMem:set(17, wlanColor)
                 end
             end
-            ws2812.write(rgbBuffer)
+            ws2812.write(rgbMem)
         else
             wifitimer:unregister()
             wifitimer = nil
             connect_counter = nil
             print('IP: ', wifi.sta.getip(), " heap: ", node.heap())
-            rgbBuffer:fill(0, 0, 0) -- clear all LEDs
-            rgbBuffer:set(13, color) -- I
+            rgbMem:fill(0, 0, 0) -- clear all LEDs
+            rgbMem:set(13, color) -- I
             if ((inv46 ~= nil) and (inv46 == "on")) then
-                rgbBuffer:set(45, color) -- P
+                rgbMem:set(45, color) -- P
             else
-                rgbBuffer:set(55, color) -- P
+                rgbMem:set(55, color) -- P
             end
-            ws2812.write(rgbBuffer)
+            ws2812.write(rgbMem)
             mlt:start()
         end
     end)
@@ -213,8 +215,8 @@ btntimer:register(5000, tmr.ALARM_AUTO, function(t)
         mlt:unregister()
         print("Button pressed " .. tostring(btnCounter))
         btnCounter = btnCounter + 5
-        for i = 1, btnCounter do rgbBuffer:set(i, 128, 0, 0) end
-        ws2812.write(rgbBuffer)
+        for i = 1, btnCounter do rgbMem:set(i, 128, 0, 0) end
+        ws2812.write(rgbMem)
         if (btnCounter >= 110) then
             file.remove("config.lua")
             file.remove("config.lc")

@@ -6,10 +6,10 @@ local data={}
 
 -- Utility function for round
 local round = function(num)
-    under = math.floor(num)
-    upper = math.floor(num) + 1
-    underV = -(under - num)
-    upperV = upper - num
+    local under = math.floor(num)
+    local upper = math.floor(num) + 1
+    local underV = -(under - num)
+    local upperV = upper - num
     if (upperV > underV) then
         return under
     else
@@ -32,20 +32,20 @@ local updateColor = function (data)
 	  specialChar = 0
 	end
     	if (specialChar < 1) then
-    	    return data.colorFg
+    	    return data.cFg
     	elseif (specialChar < 2) then 
-    	    return data.colorM1
+    	    return data.cM1
     	elseif (specialChar < 3) then 
-    	    return data.colorM2
+    	    return data.cM2
     	elseif (specialChar < 4) then 
-    	    return data.colorM3
+    	    return data.cM3
     	elseif (specialChar < 5) then 
-    	    return data.colorM4
+    	    return data.cM4
     	else
-    	    return data.colorFg
+    	    return data.cFg
     	end
     else
-	    return data.colorFg
+	    return data.cFg
     end
 end
 
@@ -53,47 +53,47 @@ local drawLEDs = function(data, offset, numberNewChars)
     if (numberNewChars == nil) then
         numberNewChars=0
     end
-    if (data.rgbBuffer == nil) then
+    if (data.rgbMem == nil) then
     	return
     end
     for i=1,numberNewChars do
         data.dC=data.dC+1
-        data.rgbBuffer:set(tonumber(offset + i - 1), updateColor(data))
+        data.rgbMem:set(tonumber(offset + i - 1), updateColor(data))
     end
 end
 
 -- @fn swapLine
 -- @param lineOffset  offset (starting at 1) where the line is located to be swapped
--- works on the rgbBuffer, defined in data struct
+-- works on the rgbMem, defined in data struct
 -- @return <code>false</code> on errors, else <code>true</code>
 local swapLine = function(data, lineOffset)
- if (data.rgbBuffer == nil) then
+ if (data.rgbMem == nil) then
    return false
  end
  for i = 0,4 do
    local num=tonumber(lineOffset)+i
    local num2=tonumber(tonumber(lineOffset)+10-i)
-   local tmpC1, tmpC2, tmpC3=data.rgbBuffer:get(num)
-   local c1, c2, c3 =data.rgbBuffer:get(num2)
-   data.rgbBuffer:set(num, c1, c2, c3)
-   data.rgbBuffer:set(num2, tmpC1, tmpC2, tmpC3)
+   local tmpC1, tmpC2, tmpC3=data.rgbMem:get(num)
+   local c1, c2, c3 =data.rgbMem:get(num2)
+   data.rgbMem:set(num, c1, c2, c3)
+   data.rgbMem:set(num2, tmpC1, tmpC2, tmpC3)
  end
  return true
 end
 
 -- @fn generateLEDs
 -- Module displaying of the words
--- @param rgbBuffer	 OutputBuffer with 114 LEDs
+-- @param rgbMem	 OutputBuffer with 114 LEDs
 -- @param words
 -- @param colorBg 	 background color
--- @param colorFg 	 foreground color
--- @param colorM1 	 foreground color if one minute after a displayable time is present
--- @param colorM2 	 foreground color if two minutes after a displayable time is present
--- @param colorM3 	 foreground color if three minutes after a displayable time is present
--- @param colorM4 	 foreground color if four minutes after a displayable time is present
+-- @param cFg 	 foreground color
+-- @param cM1 	 foreground color if one minute after a displayable time is present
+-- @param cM2 	 foreground color if two minutes after a displayable time is present
+-- @param cM3 	 foreground color if three minutes after a displayable time is present
+-- @param cM4 	 foreground color if four minutes after a displayable time is present
 -- @param invertRows	 wheather line 4,5 and 6 shall be inverted or not
 -- @param aoC 		 Amount of characters to be displayed
-local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, colorM2, colorM3, colorM4, invertRows, aoC)
+local generateLEDs = function(rgbMem, words, colorBg, cFg, cM1, cM2, cM3, cM4, invertRows, aoC)
  -- Set the local variables needed for the colored progress bar
  if (words == nil) then
    return nil
@@ -113,8 +113,8 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
    minutes = minutes + 4
  end
  -- always set a foreground value
- if (colorFg == nil) then
-	colorFg = string.char(255,255,255)
+ if (cFg == nil) then
+	cFg = string.char(255,255,255)
  end
 
  if (aoC ~= nil) then
@@ -123,41 +123,41 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
  else
    data.aoC = 0
  end
- data.rgbBuffer = rgbBuffer
+ data.rgbMem = rgbMem
 
  if ( (adc ~= nil) and (words.briPer ~= nil) ) then
     local per = math.floor(100*adc.read(0)/1000)
     if (words.briPer > 0) then
       words.briPer = tonumber( ((words.briPer * 4) +  per) / 5)
-      print("Minutes : " .. tostring(minutes) .. " bright: " .. tostring(words.briPer) .. "% current: " .. tostring(per) .. "%")
-      data.colorFg   = string.char(string.byte(colorFg,1) * briPer / 100, string.byte(colorFg,2) * briPer / 100, string.byte(colorFg,3) * briPer / 100) 
-      data.colorM1 = string.char(string.byte(colorM1,1) * briPer / 100, string.byte(colorM1,2) * briPer / 100, string.byte(colorM1,3) * briPer / 100)
-      data.colorM2 = string.char(string.byte(colorM2,1) * briPer / 100, string.byte(colorM2,2) * briPer / 100, string.byte(colorM2,3) * briPer / 100)
-      data.colorM3 = string.char(string.byte(colorM3,1) * briPer / 100, string.byte(colorM3,2) * briPer / 100, string.byte(colorM3,3) * briPer / 100)
-      data.colorM4 = string.char(string.byte(colorM4,1) * briPer / 100, string.byte(colorM4,2) * briPer / 100, string.byte(colorM4,3) * briPer / 100)
+      print("Bright: " .. tostring(words.briPer) .. "% " .. tostring(per) .. "%")
+      data.cFg   = string.char(string.byte(cFg,1) * briPer / 100, string.byte(cFg,2) * briPer / 100, string.byte(cFg,3) * briPer / 100) 
+      data.cM1 = string.char(string.byte(cM1,1) * briPer / 100, string.byte(cM1,2) * briPer / 100, string.byte(cM1,3) * briPer / 100)
+      data.cM2 = string.char(string.byte(cM2,1) * briPer / 100, string.byte(cM2,2) * briPer / 100, string.byte(cM2,3) * briPer / 100)
+      data.cM3 = string.char(string.byte(cM3,1) * briPer / 100, string.byte(cM3,2) * briPer / 100, string.byte(cM3,3) * briPer / 100)
+      data.cM4 = string.char(string.byte(cM4,1) * briPer / 100, string.byte(cM4,2) * briPer / 100, string.byte(cM4,3) * briPer / 100)
     else
-      print("Minutes (Darkmode) bright: " .. tostring(words.briPer) .. "% current: " .. tostring(per) .. "%")
-      data.colorFg = string.char(0,0,0)
-      data.colorM1= string.char(0, 0, 0)
-      data.colorM2= string.char(0, 0, 0)
-      data.colorM3= string.char(0, 0, 0)
-      data.colorM4= string.char(0, 0, 0)
+      print("Dark: " .. tostring(words.briPer) .. "% " .. tostring(per) .. "%")
+      data.cFg = string.char(0,0,0)
+      data.cM1= string.char(0, 0, 0)
+      data.cM2= string.char(0, 0, 0)
+      data.cM3= string.char(0, 0, 0)
+      data.cM4= string.char(0, 0, 0)
       words.briPer = -per
     end
  else
     -- devide by five (Minute 0, Minute 1 to Minute 4 takes the last chars)
-    data.colorFg=colorFg
-    data.colorM1=colorM1
-    data.colorM2=colorM2
-    data.colorM3=colorM3
-    data.colorM4=colorM4
+    data.cFg=cFg
+    data.cM1=cM1
+    data.cM2=cM2
+    data.cM3=cM3
+    data.cM4=cM4
  end
  data.dC=0 -- drawn characters
  local charsPerLine=11
  
  -- Background color must always be set
  if (colorBg ~= nil) then
-  rgbBuffer:fill(string.byte(colorBg,1), string.byte(colorBg,2), string.byte(colorBg,3)) -- draw the background
+  rgbMem:fill(string.byte(colorBg,1), string.byte(colorBg,2), string.byte(colorBg,3)) -- draw the background
  end
 
  -- Stop in  Darkmode (only background is set)
@@ -167,8 +167,8 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
 
  local lineIdx=1
  -- line 1----------------------------------------------
- if (rowbgColor[1] ~= nil) then
-    for i=lineIdx,lineIdx+10, 1 do data.rgbBuffer:set(i, rowbgColor[1]) end
+ if (rbgColor[1] ~= nil) then
+    for i=lineIdx,lineIdx+10, 1 do data.rgbMem:set(i, rbgColor[1]) end
  end
  if (words.it==1) then
     drawLEDs(data, lineIdx, 2) -- ES
@@ -183,8 +183,8 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
  end
  -- line 2-- even row (so inverted) --------------------
  lineIdx=12
-  if (rowbgColor[2] ~= nil) then
-     for i=lineIdx,lineIdx+10, 1 do data.rgbBuffer:set(i, rowbgColor[2]) end
+  if (rbgColor[2] ~= nil) then
+     for i=lineIdx,lineIdx+10, 1 do data.rgbMem:set(i, rbgColor[2]) end
   end
  if (words.m10 == 1) then
     drawLEDs(data, lineIdx, 4) -- ZEHN
@@ -196,8 +196,8 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
  swapLine(data,lineIdx)
  -- line3----------------------------------------------
  lineIdx=23
-  if (rowbgColor[3] ~= nil) then
-     for i=lineIdx,lineIdx+10, 1 do data.rgbBuffer:set(i, rowbgColor[3]) end
+  if (rbgColor[3] ~= nil) then
+     for i=lineIdx,lineIdx+10, 1 do data.rgbMem:set(i, rbgColor[3]) end
   end
  if (words.h3q == 1) then
     drawLEDs(data,lineIdx, 11) -- DREIVIERTEL
@@ -206,8 +206,8 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
  end
  --line 4-------- even row (so inverted) -------------
  lineIdx=34
- if (rowbgColor[4] ~= nil) then
-     for i=lineIdx,lineIdx+10, 1 do data.rgbBuffer:set(i, rowbgColor[4]) end
+ if (rbgColor[4] ~= nil) then
+     for i=lineIdx,lineIdx+10, 1 do data.rgbMem:set(i, rbgColor[4]) end
   end
  if (words.ha == 1) then
     -- TG
@@ -221,8 +221,8 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
  end
  -- line 5 ----------------------------------------------
  lineIdx=45
- if (rowbgColor[5] ~= nil) then
-     for i=lineIdx,lineIdx+10, 1 do data.rgbBuffer:set(i, rowbgColor[5]) end
+ if (rbgColor[5] ~= nil) then
+     for i=lineIdx,lineIdx+10, 1 do data.rgbMem:set(i, rbgColor[5]) end
   end
  if (words.half == 1) then
     drawLEDs(data, lineIdx, 4) -- HALB
@@ -237,8 +237,8 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
  end
  ------------even row (so inverted) ---------------------
  lineIdx=56
- if (rowbgColor[6] ~= nil) then
-    for i=lineIdx,lineIdx+10, 1 do data.rgbBuffer:set(i, rowbgColor[6]) end
+ if (rbgColor[6] ~= nil) then
+    for i=lineIdx,lineIdx+10, 1 do data.rgbMem:set(i, rbgColor[6]) end
   end
  if (words.h7 == 1) then
     drawLEDs(data, lineIdx + 5, 6) -- SIEBEN
@@ -254,8 +254,8 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
  end
  ------------------------------------------------
  lineIdx=67
- if (rowbgColor[7] ~= nil) then
-    for i=lineIdx,lineIdx+10, 1 do data.rgbBuffer:set(i, rowbgColor[7]) end
+ if (rbgColor[7] ~= nil) then
+    for i=lineIdx,lineIdx+10, 1 do data.rgbMem:set(i, rbgColor[7]) end
   end
  if (words.h3 == 1) then
     drawLEDs(data, lineIdx + 1,4) -- DREI
@@ -264,8 +264,8 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
  end
  ------------even row (so inverted) ---------------------
  lineIdx=78
- if (rowbgColor[8] ~= nil) then
-    for i=lineIdx,lineIdx+10, 1 do data.rgbBuffer:set(i, rowbgColor[8]) end
+ if (rbgColor[8] ~= nil) then
+    for i=lineIdx,lineIdx+10, 1 do data.rgbMem:set(i, rbgColor[8]) end
   end
  if (words.h4 == 1) then
     drawLEDs(data, lineIdx + 7, 4) -- VIER
@@ -277,8 +277,8 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
  swapLine(data,lineIdx)
  ------------------------------------------------
  lineIdx=89
- if (rowbgColor[9] ~= nil) then
-    for i=lineIdx,lineIdx+10, 1 do data.rgbBuffer:set(i, rowbgColor[9]) end
+ if (rbgColor[9] ~= nil) then
+    for i=lineIdx,lineIdx+10, 1 do data.rgbMem:set(i, rbgColor[9]) end
   end
  if (words.h8 == 1) then
     drawLEDs(data, lineIdx + 1, 4) -- ACHT
@@ -288,8 +288,8 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
 
  ------------even row (so inverted) ---------------------
  lineIdx=100
- if (rowbgColor[10] ~= nil) then
-    for i=lineIdx,lineIdx+10, 1 do data.rgbBuffer:set(i, rowbgColor[10]) end
+ if (rbgColor[10] ~= nil) then
+    for i=lineIdx,lineIdx+10, 1 do data.rgbMem:set(i, rbgColor[10]) end
   end
  if (words.h6 == 1) then
     drawLEDs(data, lineIdx + 1, 5) -- SECHS
@@ -300,16 +300,16 @@ local generateLEDs = function(rgbBuffer, words, colorBg, colorFg, colorM1, color
  swapLine(data,lineIdx)
 ------ Minutes -----------
  if (words.m1 == 1) then
-    data.rgbBuffer:set(111, colorFg)
+    data.rgbMem:set(111, cFg)
  end
  if (words.m2 == 1) then
-    data.rgbBuffer:set(112, colorFg)
+    data.rgbMem:set(112, cFg)
   end
  if (words.m3 == 1) then
-    data.rgbBuffer:set(113, colorFg)
+    data.rgbMem:set(113, cFg)
   end
  if (words.m4 == 1) then
-    data.rgbBuffer:set(114, colorFg)
+    data.rgbMem:set(114, cFg)
   end
   collectgarbage()
 end

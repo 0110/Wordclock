@@ -96,7 +96,7 @@ function fillDynamicMap()
     replaceMap["$TIMEOFFSET"]=timezoneoffset
     replaceMap["$THREEQUATER"]=(threequater and "checked" or "")
     replaceMap["$ADDITIONAL_LINE"]=""
-    replaceMap["$HEXCOLORFG"]=hexColor
+    replaceMap["$HEXcFg"]=hexColor
     replaceMap["$HEXCOLOR1"]=hexColor1
     replaceMap["$HEXCOLOR2"]=hexColor2
     replaceMap["$HEXCOLOR3"]=hexColor3

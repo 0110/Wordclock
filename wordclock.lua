@@ -143,7 +143,7 @@ end
 
 
 -- Logic to display number from Mqtt as text
-function showText(dw, rgbBuffer, invertRows, dispNumber)
+function showText(dw, rgbMem, invertRows, dispNumber)
 if (dispNumber ~= nil) then
    -- Values: it, is, 5 minutes, 10 minutes, afer, before, three hour, quarter, dreiviertel, half, s
    --  hours: one, one Long, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve
