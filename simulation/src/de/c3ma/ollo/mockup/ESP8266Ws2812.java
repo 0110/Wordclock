@@ -102,16 +102,16 @@ public class ESP8266Ws2812 extends TwoArgFunction {
             if (varargs.narg() == 2) {
                 final int leds = varargs.arg(1).toint();
                 final int bytesPerLeds = varargs.arg(2).toint();
-                final LuaTable rgbBuffer = new LuaTable();
+                final LuaTable rgbMem = new LuaTable();
                 ArrayList<Color> ledList = new ArrayList<Color>();
                 for(int i=0; i < leds; i++) {
                 	ledList.add(new Color(0,0,0));
                 }
-                rgbBuffer.set("fill", new bufferFill(ledList));
-                rgbBuffer.set("set", new bufferWrite(ledList));
-                rgbBuffer.set("get", new bufferRead(ledList));
+                rgbMem.set("fill", new bufferFill(ledList));
+                rgbMem.set("set", new bufferWrite(ledList));
+                rgbMem.set("get", new bufferRead(ledList));
                 System.out.println("[WS2812] " + leds + "leds (" + bytesPerLeds + "bytes per led)");                
-                return rgbBuffer;
+                return rgbMem;
             } else {
             	return LuaValue.NIL;
             }

@@ -22,45 +22,45 @@ end
 function displayTime()
     collectgarbage()
     local sec, usec = rtctime.get()
-    -- Handle lazy programmer:
-    if (timezoneoffset == nil) then timezoneoffset = 0 end
-    mydofile("timecore")
-    if (tc == nil) then return end
-    local time = tc.getTime(sec, timezoneoffset)
-    tc = nil
-    collectgarbage()
-    mydofile("wordclock")
-    if (wc ~= nil) then
-        words = wc.timestat(time.hour, time.minute)
-        if ((dim ~= nil) and (dim == "on")) then
-            words.briPer = briPer
-            if (words.briPer ~= nil and words.briPer > 0 and words.briPer < 3) then
-                words.briPer = 3
+    if (node.heap() > 12000) then
+        mydofile("timecore")
+        if (tc == nil) then return end
+        local time = tc.getTime(sec, timezoneoffset)
+        tc = nil
+        collectgarbage()
+        mydofile("wordclock")
+        if (wc ~= nil) then
+            words = wc.timestat(time.hour, time.minute)
+            if ((dim ~= nil) and (dim == "on")) then
+                words.briPer = briPer
+                if (words.briPer ~= nil and words.briPer > 0 and words.briPer < 3) then
+                    words.briPer = 3
+                end
+            else
+                words.briPer = nil
             end
-        else
-            words.briPer = nil
         end
-    end
-    wc = nil
-    collectgarbage()
-    print("wc: " .. tostring(node.heap()))
-    mydofile("displayword")
-    if (dw ~= nil) then
-        -- if lines 4 to 6 are inverted due to hardware-fuckup, unfuck it here
-        local invertRows = false
-        if ((inv46 ~= nil) and (inv46 == "on")) then invertRows = true end
-        local c = dw.countChars(words)
-        dw.generateLEDs(rgbMem, words, colorBg, color, color1, color2,
-                        color3, color4, invertRows, c)
-    end
-    dw = nil
-    collectgarbage()
+        wc = nil
+        collectgarbage()
+        print("wc: " .. tostring(node.heap()))
+        mydofile("displayword")
+        if (dw ~= nil) then
+            -- if lines 4 to 6 are inverted due to hardware-fuckup, unfuck it here
+            local invertRows = false
+            if ((inv46 ~= nil) and (inv46 == "on")) then invertRows = true end
+            local c = dw.countChars(words)
+            dw.generateLEDs(rgbMem, words, colorBg, color, color1, color2,
+                            color3, color4, invertRows, c)
+        end
+        dw = nil
+        collectgarbage()
 
-    -- cleanup
-    i = nil
-    briPer = words.briPer
-    words = nil
-    time = nil
+        -- cleanup
+        i = nil
+        briPer = words.briPer
+        words = nil
+        time = nil
+    end
     collectgarbage()
 end
 
@@ -111,6 +111,9 @@ function normalOperation()
             end
             setupCounter = setupCounter - 1
         elseif (setupCounter > 2) then
+            -- Handle lazy programmer:
+            if (timezoneoffset == nil) then timezoneoffset = 0 end
+            -- Telnet Server
             if (startTelnetServer ~= nil) then
                 startTelnetServer()
             else
