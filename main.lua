@@ -1,8 +1,6 @@
 -- Main Module
 mlt = tmr.create() -- Main loop timer
 
--- Background color for each row
-rbgColor = {}
 -- Buffer of the clock
 rgbMem = ws2812.newBuffer(114, 3)
 -- 110 Character plus one LED for each minute, 

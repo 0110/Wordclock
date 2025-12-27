@@ -167,9 +167,6 @@ local generateLEDs = function(rgbMem, words, colorBg, cFg, cM1, cM2, cM3, cM4, i
 
  local lineIdx=1
  -- line 1----------------------------------------------
- if (rbgColor[1] ~= nil) then
-    for i=lineIdx,lineIdx+10, 1 do data.rgbMem:set(i, rbgColor[1]) end
- end
  if (words.it==1) then
     drawLEDs(data, lineIdx, 2) -- ES
  end
@@ -183,9 +180,6 @@ local generateLEDs = function(rgbMem, words, colorBg, cFg, cM1, cM2, cM3, cM4, i
  end
  -- line 2-- even row (so inverted) --------------------
  lineIdx=12
-  if (rbgColor[2] ~= nil) then
-     for i=lineIdx,lineIdx+10, 1 do data.rgbMem:set(i, rbgColor[2]) end
-  end
  if (words.m10 == 1) then
     drawLEDs(data, lineIdx, 4) -- ZEHN
  end
@@ -196,9 +190,6 @@ local generateLEDs = function(rgbMem, words, colorBg, cFg, cM1, cM2, cM3, cM4, i
  swapLine(data,lineIdx)
  -- line3----------------------------------------------
  lineIdx=23
-  if (rbgColor[3] ~= nil) then
-     for i=lineIdx,lineIdx+10, 1 do data.rgbMem:set(i, rbgColor[3]) end
-  end
  if (words.h3q == 1) then
     drawLEDs(data,lineIdx, 11) -- DREIVIERTEL
   elseif (words.hq == 1) then
@@ -206,9 +197,6 @@ local generateLEDs = function(rgbMem, words, colorBg, cFg, cM1, cM2, cM3, cM4, i
  end
  --line 4-------- even row (so inverted) -------------
  lineIdx=34
- if (rbgColor[4] ~= nil) then
-     for i=lineIdx,lineIdx+10, 1 do data.rgbMem:set(i, rbgColor[4]) end
-  end
  if (words.ha == 1) then
     -- TG
     drawLEDs(data, lineIdx + 2, 4) -- NACH
@@ -221,9 +209,6 @@ local generateLEDs = function(rgbMem, words, colorBg, cFg, cM1, cM2, cM3, cM4, i
  end
  -- line 5 ----------------------------------------------
  lineIdx=45
- if (rbgColor[5] ~= nil) then
-     for i=lineIdx,lineIdx+10, 1 do data.rgbMem:set(i, rbgColor[5]) end
-  end
  if (words.half == 1) then
     drawLEDs(data, lineIdx, 4) -- HALB
      -- X
@@ -237,9 +222,6 @@ local generateLEDs = function(rgbMem, words, colorBg, cFg, cM1, cM2, cM3, cM4, i
  end
  ------------even row (so inverted) ---------------------
  lineIdx=56
- if (rbgColor[6] ~= nil) then
-    for i=lineIdx,lineIdx+10, 1 do data.rgbMem:set(i, rbgColor[6]) end
-  end
  if (words.h7 == 1) then
     drawLEDs(data, lineIdx + 5, 6) -- SIEBEN
  elseif (words.h1l == 1) then
@@ -254,9 +236,6 @@ local generateLEDs = function(rgbMem, words, colorBg, cFg, cM1, cM2, cM3, cM4, i
  end
  ------------------------------------------------
  lineIdx=67
- if (rbgColor[7] ~= nil) then
-    for i=lineIdx,lineIdx+10, 1 do data.rgbMem:set(i, rbgColor[7]) end
-  end
  if (words.h3 == 1) then
     drawLEDs(data, lineIdx + 1,4) -- DREI
  elseif (words.h5 == 1) then
@@ -264,9 +243,6 @@ local generateLEDs = function(rgbMem, words, colorBg, cFg, cM1, cM2, cM3, cM4, i
  end
  ------------even row (so inverted) ---------------------
  lineIdx=78
- if (rbgColor[8] ~= nil) then
-    for i=lineIdx,lineIdx+10, 1 do data.rgbMem:set(i, rbgColor[8]) end
-  end
  if (words.h4 == 1) then
     drawLEDs(data, lineIdx + 7, 4) -- VIER
   elseif (words.h9 == 1) then
@@ -277,9 +253,6 @@ local generateLEDs = function(rgbMem, words, colorBg, cFg, cM1, cM2, cM3, cM4, i
  swapLine(data,lineIdx)
  ------------------------------------------------
  lineIdx=89
- if (rbgColor[9] ~= nil) then
-    for i=lineIdx,lineIdx+10, 1 do data.rgbMem:set(i, rbgColor[9]) end
-  end
  if (words.h8 == 1) then
     drawLEDs(data, lineIdx + 1, 4) -- ACHT
   elseif (words.h10 == 1) then
@@ -288,9 +261,6 @@ local generateLEDs = function(rgbMem, words, colorBg, cFg, cM1, cM2, cM3, cM4, i
 
  ------------even row (so inverted) ---------------------
  lineIdx=100
- if (rbgColor[10] ~= nil) then
-    for i=lineIdx,lineIdx+10, 1 do data.rgbMem:set(i, rbgColor[10]) end
-  end
  if (words.h6 == 1) then
     drawLEDs(data, lineIdx + 1, 5) -- SECHS
  end

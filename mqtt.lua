@@ -170,13 +170,6 @@ function registerMqtt()
 	        color4 = parseBgColor(data, "color4")
                 print("Updated color4" )
 		--FIXME load here the mqtt2 file
-           else
-             for i=1,10,1 do
-              if (string.match(topic, "row".. tostring(i) .."$")) then
-                rbgColor[i] = parseBgColor(data, "row" .. tostring(i), briPer)
-                return
-              end
-             end
            end 
         end
       end
